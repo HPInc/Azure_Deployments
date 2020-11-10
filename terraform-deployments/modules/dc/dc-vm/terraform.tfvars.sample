@@ -1,0 +1,16 @@
+resource_group_name           = "sample-resource-group"
+location                      = "westus2" // Same as resource group location
+
+// active_directory_netbios_name = "sampletest"
+active_directory_domain_name  = "sampletest.dns.internal" // "${var.active_directory_netbios_name}.dns.internal"
+
+ad_admin_username             = "admin234"
+ad_admin_password             = "StRoNgPaSsWoRd11#"
+
+// From dc-cac-network module output > dc-network-interface-id
+nic_id                        = ""
+
+prefix                        = "sampletest" 
+
+// Add Azure account Subscription ID here.
+subscriptionID                = ""

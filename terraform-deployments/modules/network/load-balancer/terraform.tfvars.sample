@@ -1,0 +1,24 @@
+resource_group_name = "sample-resource-group"
+
+// From workstation-map module output > virtual-network-locations
+locations = [
+    "westus2",
+]
+
+# List of CAC machines to deploy
+cac_configuration = [
+    {
+        cac_token = "cac token from https://cam.teradici.com/app/connectors",
+        location = "westus2",
+    },
+]
+
+// From cac-network module output > cac-network-interface-ids
+cac_network_interface_ids = [
+    ""
+]
+
+// From cac-network module output > cac-network-interface-primary-config-name
+cac_network_interface_primary_config_name = [
+    ""
+]

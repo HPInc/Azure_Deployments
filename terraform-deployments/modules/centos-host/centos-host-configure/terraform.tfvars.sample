@@ -1,0 +1,53 @@
+// From workstation-map module output > linux-workstations
+workstations = {
+	"linux_host_0"       = {
+		"disk_size"      = 128
+		"disk_type"      = "Standard_LRS"
+		"isGFXHost"      = false
+		"location"       = "westus2"
+		"prefix"         = "lin"
+		"vm_size"        = "Standard_B2ms"
+		"workstation_os" = "linux"
+	}
+}
+
+resource_group_name     = "sample-resource-group"
+
+// Enter PCoIP registration code here
+pcoip_registration_code     = ""
+
+// active_directory_netbios_name = "sampletest"
+domain_name                   = "sampletest.dns.internal" // "${var.active_directory_netbios_name}.dns.internal"
+
+ad_service_account_username = "admin234"
+ad_service_account_password = "StRoNgPaSsWoRd11#"
+
+_artifactsLocation          = "https://rishabhstorageaccount.blob.core.windows.net/rishabhstorageaccountcontainer/"
+
+admin_name     = "admin234"
+admin_password = "StRoNgPaSsWoRd11#"
+
+// From dc-cac-network module output > dc-private-ip
+domain_controller_ip = ""
+
+// From centos-host-vm module output > centos-host-vm-ids
+centos-host-vm-ids = [
+    ""
+]
+
+// From centos-host-vm module output > centos-host-vm-names
+centos-host-vm-names = [
+	""
+]
+
+// From centos-host-vm module output > centos-host-vm-public-ips
+centos-host-vm-public-ips = [
+	""
+]
+
+# Leave the following blank, they are only filled when using Azure Key Vault secrets
+application_id              = ""
+aad_client_secret           = ""
+tenant_id                   = ""
+pcoip_secret_id             = ""
+ad_pass_secret_id           = ""

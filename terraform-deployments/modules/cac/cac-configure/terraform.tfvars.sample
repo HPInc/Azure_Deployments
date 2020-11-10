@@ -1,0 +1,47 @@
+# List of CAC machines to deploy
+cac_configuration = [
+    {
+        cac_token = "cac token from https://cam.teradici.com/app/connectors",
+        location = "westus2",
+    },
+]
+
+// Enter PCoIP registration code here
+pcoip_registration_code     = ""
+
+// active_directory_netbios_name = "sampletest"
+domain_name                   = "sampletest.dns.internal" // "${var.active_directory_netbios_name}.dns.internal"
+
+// From dc-cac-network module output > dc-private-ip
+domain_controller_ip        = ""
+
+ad_service_account_username = "admin234"
+ad_service_account_password = "StRoNgPaSsWoRd11#"
+
+cac_admin_user              = "admin234"
+cac_admin_password          = "StRoNgPaSsWoRd11#"
+
+// From cac-network module output > cac-public-ips
+cac_ips                     = [
+	                             "",
+]
+
+// From cac-vm module output > cac-vm-ids
+cac_vm_ids                  = [
+			                    "",  
+]
+
+// From tools/deploy-script-storage-account module output > _artifactsLocation
+_artifactsLocation          = ""
+
+# Leave the following blank, they are only filled when using Azure Key Vault secrets
+application_id              = ""
+aad_client_secret           = ""
+tenant_id                   = ""
+pcoip_secret_id             = ""
+ad_pass_secret_id           = ""
+cac_token_secret_id         = ""
+
+# Optional if applying SSL certificate to the CAC deployment
+// ssl_key                     = "star.agreeyamobilitycanada.ca.key"
+// ssl_cert                    = "star.agreeyamobilitycanada.ca.crt"
