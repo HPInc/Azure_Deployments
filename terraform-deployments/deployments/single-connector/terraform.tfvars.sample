@@ -15,13 +15,13 @@
         vm_size          = "Standard_B2ms",
         disk_type        = "Standard_LRS",
         disk_size        = 128,
-        count            = 2,
+        count            = 1,
         isGFXHost        = false
     },
     {
         prefix           = "ws",
         location         = "centralus",
-        workstation_os   = "linux",
+        workstation_os   = "windows",
         vm_size          = "Standard_B2ms",
         disk_type        = "Standard_LRS",
         disk_size        = 128,
@@ -63,12 +63,12 @@ safe_mode_admin_password      = "StRoNgPaSsWoRd11#"
 # The location on the local PC where the domain users list resides
 # Create a directory on your local PC and set the path here
 # Below is an example path
-ad_domain_users_list_file     = "~/terraform_inputs/domain_users_list.csv"
+ad_domain_users_list_file     = "~/user/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # The location on the local PC used to render scripts used for deployment
 # The terraform configuration copies scripts here before uploading them to the VM to be executed
 # Below is an example path
-az_cli_script_path            = "~/terraform_outputs"
+az_cli_script_path            = "~/user/terraform-deployments/deployments/single-connector"
 
 # CAC VM username and passwords
 cac_admin_username = "admin234"
