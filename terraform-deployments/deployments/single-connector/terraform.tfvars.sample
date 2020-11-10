@@ -8,6 +8,8 @@
  # List of workstations to deploy
  # Add or remove objects as you see fit
  # The example below deploys 2 workstations in westus2. 1 Linux VM and 1 Windows VM.
+ 
+ workstations = [
     {
         prefix           = "gfxws",
         location         = "westus2",
