@@ -22,7 +22,7 @@
     },
     {
         prefix           = "ws",
-        location         = "centralus",
+        location         = "westus2",
         workstation_os   = "windows",
         vm_size          = "Standard_B2ms",
         disk_type        = "Standard_LRS",
