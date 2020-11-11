@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2020 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ # List of workstations to deploy
+ # Add or remove objects as you see fit
+ # The example below deploys 2 workstations in westus2. 1 Linux VM and 1 Windows VM.
+ 
+ workstations = [
+    {
+        prefix           = "gfxws",
+        location         = "westus2",
+        workstation_os   = "linux",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "ws",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    }
+]
+
+# List of CAC VMs to deploy
+# This configuration will deploy one CAC machine per location
+# Be sure to deploy a cac in each workstation location
+cac_configuration = [
+    {
+        cac_token = "cac token from https://cam.teradici.com/app/connectors",
+        location = "westus2",
+    }
+]
+
+# The PCOIP registration code
+pcoip_registration_code       = "XXXXXXXXXXX@AAAA-BBBB-CCCC-DDDD"
+
+# The resource group the deployment will be placed
+resource_group_name           = "my-resource-group"
+
+# Prefix for VM machine names
+prefix                        = "test"
+
+# Domain controller deployment variables
+# _artifactsLocation is the Azure storage account you created and copied the content of the /tools directory too
+#**You can get this by going into tools and deploying the storage account first**
+_artifactsLocation            = "https://<storage account name>.blob.core.windows.net/<storage account container name>/"
+
+# DC active directory property values
+active_directory_netbios_name = "tera"
+ad_admin_username             = "admin234"
+ad_admin_password             = "StRoNgPaSsWoRd11#"
+safe_mode_admin_password      = "StRoNgPaSsWoRd11#"
+
+# The location on the local PC where the domain users list resides
+# Create a directory on your local PC and set the path here
+# Below is an example path
+ad_domain_users_list_file     = "~/user/terraform-deployments/deployments/single-connector/domain_users_list.csv"
+
+# The location on the local PC used to render scripts used for deployment
+# The terraform configuration copies scripts here before uploading them to the VM to be executed
+# Below is an example path
+az_cli_script_path            = "~/user/terraform-deployments/deployments/single-connector"
+
+# CAC VM username and passwords
+cac_admin_username = "admin234"
+cac_admin_password = "StRoNgPaSsWoRd11#"
+
+# Windows VMs usernames and passwords
+windows_admin_username  = "WINadmin"
+windows_admin_password  = "StRoNgPaSsWoRd11#"
+
+# Centos VMs usernames and passwords
+centos_admin_username  = "CENTadmin"
+centos_admin_password  = "StRoNgPaSsWoRd11#"
+
+# Leave the following blank, they are only filled when using Azure Key Vault secrets
+application_id                = ""
+aad_client_secret             = ""
+tenant_id                     = ""
+pcoip_secret_id               = ""
+ad_pass_secret_id             = ""
+safe_admin_pass_secret_id     = ""
+cac_token_secret_id           = ""
+ad_pass_secret_name           = ""
+key_vault_id                  = ""
+
+# Debug flags for accessibility to the virtual machines
+# NOTE THAT THIS IS INSECURE! AND SHOULD ONLY BE USED FOR TESTING ETC
+create_debug_public_ips       = true
+create_debug_rdp_access       = true

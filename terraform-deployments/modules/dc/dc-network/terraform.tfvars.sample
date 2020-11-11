@@ -1,0 +1,3 @@
+resource_group_name = "sample-resource-group"
+location            = "westus2" // Same as resource group location
+prefix              = "sampletest"

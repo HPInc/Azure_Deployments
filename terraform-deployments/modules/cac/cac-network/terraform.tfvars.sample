@@ -1,0 +1,25 @@
+prefix = "sampletest"
+resource_group_name = "sample-resource-group"
+
+// From workstation-map module output > virtual-network-locations
+locations = [
+    "westus2",
+] 
+
+# List of CAC machines to deploy
+cac_configuration = [
+    {
+        cac_token = "cac token from https://cam.teradici.com/app/connectors",
+        location = "westus2",
+    },
+]
+
+// From dc-cac-network module > network-security-group-ids
+network_security_group_ids = [
+	"",
+]
+
+// From dc-cac-network module > virtual-network-names
+azurerm_virtual_network_names = [
+	"",
+]

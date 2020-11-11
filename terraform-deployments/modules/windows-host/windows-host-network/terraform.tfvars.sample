@@ -1,0 +1,30 @@
+// From workstation-map module output > windows-workstations
+workstations = [
+            "windows_host_0" = {
+            prefix           = "win",
+            location         = "westus2",
+            workstation_os   = "windows",
+            vm_size          = "Standard_B2ms",
+            disk_type        = "Standard_LRS",
+            disk_size        = 128,
+            count            = 1,
+            isGFXHost        = false
+            },
+]
+
+resource_group_name = "sample-resource-group"
+
+// From dc-cac-network module output > subnet-workstation-ids
+workstation_subnet_ids = [
+	"",
+]
+
+// From dc-cac-network module output > sunet-workstation-locations
+workstation_subnet_locations = [
+    "",
+]
+
+// From dc-cac-network module output > nat-gateway-ids
+nat_gateway_ids = [
+			"",
+]

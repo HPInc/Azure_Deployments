@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2020 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ output "resource_group_id" {
+     description = "ID of the resource group created"
+     value       = azurerm_resource_group.main.id
+ }

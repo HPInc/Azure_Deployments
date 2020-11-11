@@ -1,0 +1,49 @@
+// From workstation-map module output > windows-workstations
+workstations                = {
+    "windows_host_0" = {
+        prefix           = "win",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+}
+
+resource_group_name         = "sample-resource-group"
+
+// Enter PCoIP registration code here
+pcoip_registration_code     = ""
+
+// active_directory_netbios_name = "sampletest"
+domain_name                   = "sampletest.dns.internal" // "${var.active_directory_netbios_name}.dns.internal"
+
+ad_service_account_username = "admin234"
+ad_service_account_password = "StRoNgPaSsWoRd11#"
+
+// From tools/deploy-script-storage-account module output > _artifactsLocation
+_artifactsLocation          = ""
+
+// From windows-host-vm module output > windows-host-vm-ids
+windows-host-vm-ids         = [
+                                ""
+]
+
+// From windows-host-vm module output > windows-host-vm-names
+windows-host-vm-names       = [
+                                ""
+]
+
+// From windows-host-vm module output > windows-host-vm-public-ips 
+windows-host-vm-public-ips  = [
+                                ""
+]
+
+# Leave the following blank, they are only filled when using Azure Key Vault secrets
+application_id              = ""
+aad_client_secret           = ""
+tenant_id                   = ""
+pcoip_secret_id             = ""
+ad_pass_secret_id           = ""
