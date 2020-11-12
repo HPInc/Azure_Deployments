@@ -42,11 +42,11 @@ To interact directly with remote workstations, an Azure Account must be connecte
 9. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com) using a Microsoft business account.
 10. Create a new deployment and submit the credentials into the Azure form.
 11. Click 'Connectors' on the side bar and create a new connector. 
-12. Input a connector name to generate a token which will be used in terraform.tfvars.
-    - Note: A token must be generated for **each** connector. 
+12. Input a connector name and generate a connector token. Copy this into terraform.tfvars.
+    1. Repeat this step to generate a **unique** token for each connector.
 
 ### Deploying Azure Storage Account
-Before deploying the multi-connector load balancer deployment, an Azure Storage Account must be created that will store scripts to be executed on the VMs. You can reuse the same URI from a different deployment.
+Before deploying the multi-connector load balancer deployment, an Azure Storage Account must be created that will store scripts to be executed on the VMs. Note: You can reuse the same URI from a different deployment such as the single-connector.
 1. Change into ```~/terraform-deployments/tools/deploy-script-storage-account/```
 2. Run ```terraform init``` and then ```terraform apply``` to start the deployment of the Azure Storage Account. 
 3. A URI will be generated that will be used as a value under the _artifactsLocation variable in terraform.tfvars.
@@ -78,10 +78,10 @@ Note that it may take a 5-10 minutes for the workstation to show up in the 'Sele
 Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
 
 1. Open the Teradici PCoIP Client and click on 'NEW CONNECTION'.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
+2. Enter the public IP address of one of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
 3. Input the credentials from the account that was assigned under 'User Entitlements for Workstations' in CAM.
 4. Click on a machine to start a PCoIP session.
-5. To connect to different workstations repeat steps 1-4.
+5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
 ### Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
