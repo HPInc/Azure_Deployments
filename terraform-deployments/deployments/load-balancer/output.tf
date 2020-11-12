@@ -17,10 +17,6 @@ output "domain-controller-public-ip" {
   value = module.dc-cac-network.dc-public-ip
 }
 
-output "locations" {
-  value = module.dc-cac-network.subnet-workstation-locations
-}
-
 output "windows-workstations" {
   value = [for index, item in module.workstation-map.windows-workstations: 
     {
