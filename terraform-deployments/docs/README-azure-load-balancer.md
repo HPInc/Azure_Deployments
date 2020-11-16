@@ -46,8 +46,13 @@ To interact directly with remote workstations, an Azure Account must be connecte
     1. Repeat this step to generate a **unique** token for each connector.
 
 ### Deploying Azure Storage Account
-Before deploying the multi-connector load balancer deployment, an Azure Storage Account must be created that will store scripts to be executed on the VMs. Note: You can reuse the same URI from a different deployment such as the single-connector.
-1. Change into ```~/terraform-deployments/tools/deploy-script-storage-account/```
+Before deploying the multi-connector load balancer deployment, an Azure Storage Account must be created that will store scripts to be executed on the VMs.
+
+**Note**: You can reuse the same URI from a different deployment such as the single-connector.
+
+[![Launch Cloud Shell](https://shell.azure.com/images/launchcloudshell.png "Launch Cloud Shell")](https://shell.azure.com)
+
+1. After cloning this repo, change into ```~/terraform-deployments/tools/deploy-script-storage-account/```
 2. Run ```terraform init``` and then ```terraform apply``` to start the deployment of the Azure Storage Account. 
 3. A URI will be generated that will be used as a value under the _artifactsLocation variable in terraform.tfvars.
 
@@ -57,6 +62,7 @@ terraform.tfvars is the file where users specify variables for a deployment. The
 After saving terraform.tfvars with inputs:
 1. Change directory into ```~/terraform-deployments/deployments/load-balancer```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+    - You can edit files inside ACS by doing ```code terraform.tfvars```.
     - Make sure the .tfvars has atleast two connectors.
     - Make sure the locations of the connectors and work stations are identical.
 3. Run ```terraform init``` to initialize modules inside the deployment.
