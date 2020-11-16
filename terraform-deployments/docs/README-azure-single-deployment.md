@@ -46,7 +46,10 @@ To interact directly with remote workstations, an Azure Account must be connecte
 
 ### Deploying Azure Storage Account
 Before deploying the single-connector deployment, an Azure Storage Account must be created that will store scripts to be executed on the VMs. 
-1. Change into ```~/terraform-deployments/tools/deploy-script-storage-account/```
+
+[![Launch Cloud Shell](https://shell.azure.com/images/launchcloudshell.png "Launch Cloud Shell")](https://shell.azure.com)
+
+1. After cloning this repo, change into ```~/terraform-deployments/tools/deploy-script-storage-account/```
 2. Run ```terraform init``` and then ```terraform apply``` to start the deployment of the Azure Storage Account. 
 3. A URI will be generated that will be used as a value under the _artifactsLocation variable in terraform.tfvars.
 
@@ -56,6 +59,7 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 After saving terraform.tfvars with inputs:
 1. Change directory into ```~/terraform-deployments/deployments/single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+    - You can edit files inside ACS by doing ```code terraform.tfvars```.
     - Make sure the locations of the connectors and work stations are identical.
 3. Run ```terraform init``` to initialize modules inside the deployment.
 4. Run ```terraform apply``` to display resources that will be created by Terraform.
