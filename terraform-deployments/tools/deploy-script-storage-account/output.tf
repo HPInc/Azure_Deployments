@@ -8,3 +8,11 @@
 output "_artifactsLocation" {
   value = "https://${azurerm_storage_account.script.name}.blob.core.windows.net/${azurerm_storage_container.script.name}/"
 }
+
+output "resource_group_name" {
+  value = var.resource_group_name
+}
+
+output "storage_account_name" {
+  value = var.storage_account_name
+}

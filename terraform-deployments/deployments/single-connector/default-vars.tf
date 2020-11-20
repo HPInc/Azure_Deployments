@@ -15,6 +15,26 @@ variable "cac_subnet_name" {
   default     = "cac-subnet"
 }
 
+variable "ad_admin_username" {
+  description = "Username for the Domain Administrator user"
+  default = "cam_admin"
+}
+
+variable "cac_admin_username" {
+  description = "Username of the Cloud Access Connector Administrator"
+  default = "cam_admin"
+}
+
+variable "windows_admin_username" {
+  description = "Name for the Windows Administrator of the Workstation"
+  default = "cam_admin"
+}
+
+variable "centos_admin_username" {
+  description = "Name for the CentOS Administrator of the Workstation"
+  default = "cam_admin"
+}
+
 variable "dc_subnet_name" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
   default     = "dc-subnet"

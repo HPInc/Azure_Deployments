@@ -39,10 +39,6 @@ variable "active_directory_netbios_name" {
   description = "The netbios name of the Active Directory domain, for example `consoto`"
 }
 
-variable "ad_admin_username" {
-  description = "Username for the Domain Administrator user"
-}
-
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
 }
@@ -116,28 +112,13 @@ variable "pcoip_registration_code" {
   type        = string
 }
 
-variable "cac_admin_username" {
-  description = "Username of the Cloud Access Connector Administrator"
-  type        = string
-}
-
 variable "cac_admin_password" {
   description = "Password for the Administrator of the Cloud Access Connector VM"
   type        = string
 }
 
-variable "windows_admin_username" {
-  description = "Name for the Administrator of the Workstation"
-  type        = string
-}
-
 variable "windows_admin_password" {
   description = "Password for the Administrator of the Workstation"
-  type        = string
-}
-
-variable "centos_admin_username" {
-  description = "Name for the Administrator of the Workstation"
   type        = string
 }
 
