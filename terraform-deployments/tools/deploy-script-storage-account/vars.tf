@@ -15,5 +15,5 @@ variable "resource_group_name" {
 }
 
 variable "storage_account_name" {
-  description = "The name of the storage account"
+  description = "The name of the storage account must be 3-24 characters long and only consist of lowercase letters and numbers."
 }
