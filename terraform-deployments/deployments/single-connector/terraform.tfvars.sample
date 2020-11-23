@@ -7,7 +7,7 @@
 
  # List of workstations to deploy
  # Add or remove objects as you see fit
- # The example below deploys 2 workstations in westus2. 1 Linux VM and 1 Windows VM.
+ # The example below deploys 2 standard workstations in westus2. 1 standard CentOS VM and 1 standard Windows VM.
  
  workstations = [
     {
@@ -31,6 +31,53 @@
         isGFXHost        = false
     }
 ]
+ 
+# The example below deploys 1 standard CentOS VM, 1 standard Windows VM, 1 graphics CentOS VM and 1 graphics Windows VM.
+ /*
+ workstations = [
+    {
+        prefix           = "gfxws",
+        location         = "westus2",
+        workstation_os   = "linux",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "ws",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "gfxws",
+        location         = "westus2",
+        workstation_os   = "linux",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = true
+    },
+    {
+        prefix           = "ws",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = true
+    }
+]
+
+*/
 
 # List of CAC VMs to deploy
 # This configuration will deploy one CAC machine per location

@@ -114,7 +114,7 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
     - Make sure the locations of the connectors and work stations are identical.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-5. Run ```terraform apply >> installer.log``` to display resources that will be created by Terraform. ```>> installer.log``` stores a local log of the script output. 
+5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. ```tee -a installer.log``` stores a local log of the script output. 
 6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
 A typical deployment should take around 45 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. Connectors should register themselves with the CAM service and show up in the CAM Admin Console.
