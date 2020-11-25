@@ -6,7 +6,6 @@
  */
 
  # List of workstations to deploy
- # Add or remove objects as you see fit
  # The example below deploys 2 standard workstations in westus2. 1 standard CentOS VM and 1 standard Windows VM.
  
  workstations = [
@@ -79,8 +78,7 @@
 
 */
 
-# List of CAC VMs to deploy
-# This configuration will deploy one CAC machine per location
+# List of cloud access connectors to deploy
 # Be sure to deploy a cac in each workstation location
 cac_configuration = [
     {
@@ -100,7 +98,6 @@ prefix                        = "test"
 
 # Domain controller deployment variables
 # _artifactsLocation is the Azure storage account you created and copied the content of the /tools directory too
-#**You can get this by going into tools and deploying the storage account first**
 _artifactsLocation            = "https://<storage account name>.blob.core.windows.net/<storage account container name>/"
 
 # DC active directory property values
@@ -109,15 +106,12 @@ ad_admin_username             = "admin234"
 ad_admin_password             = "StRoNgPaSsWoRd11#"
 safe_mode_admin_password      = "StRoNgPaSsWoRd11#"
 
-# The location on the local PC where the domain users list resides
-# Create a directory on your local PC and set the path here
-# Below is an example path
-ad_domain_users_list_file     = "~/user/terraform-deployments/deployments/single-connector/domain_users_list.csv"
+# The location on the local PC where the domain users list file (csv) resides
+ad_domain_users_list_file     = "~/Azure_deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # The location on the local PC used to render scripts used for deployment
 # The terraform configuration copies scripts here before uploading them to the VM to be executed
-# Below is an example path
-az_cli_script_path            = "~/user/terraform-deployments/deployments/single-connector"
+az_cli_script_path            = "~/Azure_deployments/terraform-deployments/deployments/single-connector"
 
 # CAC VM username and passwords
 cac_admin_username = "admin234"
