@@ -75,7 +75,9 @@ To interact directly with remote workstations, an Azure Account must be connecte
 10. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com) using a Microsoft business account.
 11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment and submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
 12. Click 'Connectors' on the side bar and create a new connector. 
-13. Input a connector name to [generate](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/) a token. Save this as it will be used in terraform.tfvars. **Note:** This token expires in 2 hours.
+13. Input a connector name to [generate](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/) a token. Save this as it will be used later. 
+    - This token expires in 2 hours. 
+    - The value will be used inside ```terraform.tfvars``` under ```cac_configuration : [{ cac_token: token_here, location: westus2 }]```
 
 ### Deploying Azure Storage Account
 The purpose of deploying an Azure Storage Account is to store scripts on cloud storage so that they can be obtained through a Uniform Resource Identifier (URI). Inside the Windows and CentOS workstations, these scripts are downloaded via the URI and executed to configure PCoIP.
@@ -111,6 +113,7 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
 1. Change directory into: ```~/Azure_deployments/terraform-deployments/deployments/single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - Users can edit files inside ACS by doing ```code terraform.tfvars```.
+    - The resource group name must be unique and must not already exist. The resource group name from the Azure Storage Account section cannot be reused.
     - Make sure the locations of the connectors and work stations are identical.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
@@ -190,6 +193,6 @@ Run ```terraform destroy``` to remove all resources created by Terraform. Anothe
 
 ### Troubleshooting
 - If the console is not changing, try pressing Enter to unfreeze it.
-- If the script fails you can try rerunning the deployment again using ```terraform apply```.
-- If CentOS workstations don't show up on CAM wait 5 minutes and refresh the page. If it still doesn't show up, try using ```terraform apply``` and check again after the completion of the script.
+- If the script fails you can try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
+- If CentOS workstations don't show up on CAM wait 5 minutes and refresh the page. If it still doesn't show up, try using ```terraform apply | tee -a installer.log``` and check again after the completion of the script.
 - If you are trying to run a fresh deployment and have been running into errors, you may need to delete ```terraform.tfstate``` and ```terraform.tfstate.backup```. .tfstate files store the state of your current infrastructure and configuration. 
