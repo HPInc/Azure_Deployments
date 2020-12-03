@@ -34,37 +34,40 @@ then
     chmod +644 "$INST_LOG_FILE"
 fi
 
-log "--> Installing security upgrades"
-dnf -y -q upgrade
-if [ $? -ne 0 ]; then
-    error_exit "Failed upgrade"
-fi
+# log "--> Installing security upgrades"
+# dnf -y -q upgrade
+# if [ $? -ne 0 ]; then
+#     error_exit "Failed upgrade"
+# fi
 
-log "--> Install wget"
-dnf -y -q install wget
+log "--> Installing wget and jq"
+yum -y install wget jq epel-release
 if [ $? -ne 0 ]; then
     error_exit "Failed to install wget"
 fi
 
-dnf -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+log "--> Installing epel-release"
+yum -y install epel-release
+# yum -y update
 if [ $? -ne 0 ]; then
     error_exit "Failed to install epel"
 fi
 
-dnf -y -q install jq
-if [ $? -ne 0 ]; then
-    error_exit "Failed to install jq"
-fi
+# dnf -y -q install jq
+# if [ $? -ne 0 ]; then
+#     error_exit "Failed to install jq"
+# fi
 
 # Install GNOME and set it as the desktop
 log "--> Install Linux GUI ..."
 #dnf -y -q groupinstall workstation
-dnf -y -q upgrade grub2 firewalld
+# yum -y upgrade grub2 firewalld
 if [ $? -ne 0 ]; then
     error_exit "Failed to install grub2 firewalld"
 fi
 
-dnf -y -q groupinstall 'Server with GUI' --setopt=strict=False
+# yum -y groupinstall 'Server with GUI' --setopt=strict=False
+yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 if [ $? -ne 0 ]; then
     error_exit "Failed to install Linux GUI"
 fi
@@ -73,4 +76,5 @@ log "--> Set default to graphical target"
 systemctl set-default graphical.target
 
 # Stage complete
-log "Installation stage completed"
+log "centos-startup-stage1.sh stage complete"
+log "- - - - - - - - - - - - - - - - - - - - - "

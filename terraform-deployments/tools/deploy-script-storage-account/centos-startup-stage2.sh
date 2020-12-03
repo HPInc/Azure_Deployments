@@ -84,21 +84,21 @@ install_pcoip_agent() {
 
         # Install latest epel-release and GraphicsMagick which is required for pcoip-agent install
         log "--> Get epel-release"
-        dnf -y -q install epel-release
+        yum -y install epel-release
         if [ $? -ne 0 ]; then
             log "--> Failed to install epel-release"
             exit 1
         fi
 
         log "--> Get grapicsmagick-c++"
-        dnf -y -q install GraphicsMagick-c++
+        yum -y install GraphicsMagick-c++
         if [ $? -ne 0 ]; then
             log "--> Failed to install grapicsmagick-c++"
             exit 1
         fi
 
         log "--> Install PCoIP standard agent ..."
-        dnf -y -q install pcoip-agent-standard
+        yum -y install pcoip-agent-standard
         if [ $? -ne 0 ]; then
             log "--> Failed to install PCoIP agent."
             exit 1
@@ -142,7 +142,7 @@ join_domain()
         log "--> VM_NAME: $VM_NAME"
 
         # Wait for AD service account to be set up
-        dnf -y -q install openldap-clients
+        yum -y install openldap-clients
         if [ $? -ne 0 ]; then
             log "--> Failed to install openldap-clients"
             exit 1
@@ -165,7 +165,7 @@ join_domain()
 
         # Join domain
         log "--> Install required packages to join domain"
-        dnf -y -q install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python
+        yum -y  install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python
         if [ $? -ne 0 ]; then
             log "--> Failed to install required packages to join domain"
             exit 1
@@ -178,17 +178,17 @@ join_domain()
             return 106
         fi
 
-        log "--> Joining the domain"
+        log "--> Joining the domain '${domain_name}'"
         if [[ -n "$OU" ]]
         then
-            echo "${ad_service_account_password}" | realm join --user="${ad_service_account_username}" --computer-ou="$OU" "${domain_name}" >&2
+            echo "${ad_service_account_password}" | realm join --user="${ad_service_account_username}@${domain_name}" "${domain_name}" --verbose >&2
         else
             echo "${ad_service_account_password}" | realm join --user="${ad_service_account_username}" "${domain_name}" >&2
         fi
         exitCode=$?
         if [[ $exitCode -eq 0 ]]
         then
-            log "--> Joined Domain '${domain_name}' and OU '$OU'"
+            log "--> Joined Domain '${domain_name}'"
         else
             log "--> Failed to join Domain '${domain_name}' and OU '$OU'"
             return 106
@@ -212,6 +212,12 @@ join_domain()
         nsupdate -g "$dns_record_file"
     fi
 }
+
+# exit_and_restart() {
+#     log "--> Rebooting..."
+#     (sleep 1; reboot -p) &
+#     exit
+# }
 
 # ------------------------------------------------------------
 # start from here
@@ -244,5 +250,11 @@ fi
 
 install_pcoip_agent
 
+# log "Updating "
+# yum -y update
+
 # Stage complete
-log "Installation stage completed"
+log "centos-startup-stage2.sh complete"
+log " - - - - - - - - - - - - - - - - - "
+
+# exit_and_restart

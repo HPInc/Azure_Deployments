@@ -24,33 +24,13 @@ resource "null_resource" "az-centos-script-download" {
   }
 }
 
-resource "null_resource" "az-run-centos-utility-script" {
-  # Script execution happens after download
-  depends_on = [
-    var.centos_host_configure_depends_on,
-    null_resource.az-centos-script-download
-  ]
-
-  # Create for each centos os workstation
-  count = length(var.centos-host-vm-ids)
-
-  # Trigger the execution of the deploy script if the vm has changed
-  triggers = {
-    current_instance_id = var.centos-host-vm-ids[count.index]
-  }
-
-  provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunShellScript --name ${var.centos-host-vm-names[count.index]} -g ${var.resource_group_name} --scripts \"sudo dos2unix ${local.centos_utility_script_destination} ; echo ${var.admin_password} | sudo -S chmod +x ${local.centos_utility_script_destination} ; echo ${var.admin_password} | sudo bash ${local.centos_utility_script_destination}\""
-    interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
-  }
-}
-
 # GFX driver install stage 1
 resource "null_resource" "az-run-centos-gfx-stage1-script" {
   # Script execution happens after download
   depends_on = [
     var.centos_host_configure_depends_on,
-    null_resource.az-run-centos-utility-script
+    # null_resource.az-run-centos-utility-script
+    null_resource.az-centos-script-download
   ]
 
   # Create for each window os workstation
@@ -180,7 +160,6 @@ resource "null_resource" "az-run-centos-startup-script-1" {
   depends_on = [
     var.centos_host_configure_depends_on,
     null_resource.az-centos-script-download,
-    null_resource.az-run-centos-utility-script,
     null_resource.az-run-centos-gfx-stage1-script,
     null_resource.az-run-centos-gfx-stage2-script,
     null_resource.az-run-centos-gfx-stage3-script,
@@ -228,7 +207,6 @@ resource "null_resource" "az-run-centos-startup-script-2" {
   # Script execution happens after download
   depends_on = [
     var.centos_host_configure_depends_on,
-    null_resource.az-run-centos-utility-script,
     null_resource.az-run-centos-startup-script-1-restart
   ]
 

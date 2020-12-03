@@ -36,3 +36,21 @@ resource "azurerm_linux_virtual_machine" "centos_host" {
     version   = "latest"
   }
 }
+
+resource "azurerm_virtual_machine_extension" "centos_utility_startup" {
+
+  depends_on = [azurerm_linux_virtual_machine.centos_host]
+
+  for_each             = var.workstations
+  name                 = "centos-host-${each.value.index}"
+  virtual_machine_id   = azurerm_linux_virtual_machine.centos_host[each.key].id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.0"
+
+  settings = <<SETTINGS
+    {
+        "script": "${base64encode(file("${path.module}/centos-utility.sh"))}"
+    }
+  SETTINGS 
+}

@@ -13,6 +13,8 @@ log() {
     echo "[$(date)] ${message}" | tee -a "$INST_LOG_FILE"
 }
 
+log "deployed from local files."
+
 error_exit() {
 	log "$1" 1>&2
 	exit 1
@@ -40,7 +42,7 @@ yum_wait() {
     # There is a bug where sometimes yum will never finish so just kill the process and proceed with dnf installation
     if [ -f /var/run/sshd.pid ] && (ps -p $(cat /var/run/sshd.pid) > /dev/null 2>&1); then
         log "Yum still has a lock so killing the process"
-        #kill $(cat /var/run/sshd.pid)
+        kill $(cat /var/run/sshd.pid)
     fi
 }
 
@@ -55,45 +57,10 @@ fi
 # Wait for yum to complete
 log "Jump through hoops because yum tends to lock its process"
 
-# Wait for yum to complete and kill it if there are problems
-yum_wait
-
-# complete previous yum transactions in an attempt to be nice but only wait 10 mins because this process can lock also
-log "running yum-complete-transaction for up to 10m"
-timeout 10m yum-complete-transaction -q
-
-# Wait for yum to complete and kill it if there are problems
-yum_wait
-
-# install dnf to replace yum based installations
-log "Installing dnf"
-yum -y -q install dnf-automatic
-if [ $? -ne 0 ]; then
-    error_exit "Failed to install dnf"
-fi
-
-# Wait for yum to complete and kill it if there are problems
-yum_wait
-
-log "Starting dnf"
-systemctl enable dnf-automatic.timer
-if [ $? -ne 0 ]; then
-    error_exit "Failed to start dnf"
-fi
-
-systemctl start dnf-automatic.timer
-if [ $? -ne 0 ]; then
-    error_exit "Failed to start dnf"
-fi
-
-systemctl status dnf-automatic.timer
-if [ $? -ne 0 ]; then
-    error_exit "Failed to start dnf"
-fi
-
-log "Updating"
-dnf --enablerepo=\* clean all
-dnf update -y
+log "Installing dos2unix"
+yum install -y dos2unix
 
 # Stage complete
-log "Installation stage completed"
+log "centos-utility.sh complete"
+log " - - - - - - - - - - - - - - "
+exit 0
