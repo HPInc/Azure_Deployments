@@ -61,4 +61,5 @@ log "Starting install of NVidia driver"
 install_nvidia_driver
 
 # Stage complete
-log "Installation stage completed"
+log "centos-gfx-install-stage3.sh complete"
+log "- - - - - - - - - - - - - - - - - - -"

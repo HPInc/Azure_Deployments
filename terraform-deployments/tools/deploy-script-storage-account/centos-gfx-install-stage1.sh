@@ -35,4 +35,5 @@ sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/gr
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 # Stage complete
-log "Installation stage completed"
+log "centos-gfx-install-stage1.sh complete"
+log "- - - - - - - - - - - - - - - - - - -"

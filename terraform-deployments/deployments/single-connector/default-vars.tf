@@ -17,22 +17,22 @@ variable "cac_subnet_name" {
 
 variable "ad_admin_username" {
   description = "Username for the Domain Administrator user"
-  default = "cam_admin"
+  default     = "cam_admin"
 }
 
 variable "cac_admin_username" {
   description = "Username of the Cloud Access Connector Administrator"
-  default = "cam_admin"
+  default     = "cam_admin"
 }
 
 variable "windows_admin_username" {
   description = "Name for the Windows Administrator of the Workstation"
-  default = "cam_admin"
+  default     = "cam_admin"
 }
 
 variable "centos_admin_username" {
   description = "Name for the CentOS Administrator of the Workstation"
-  default = "cam_admin"
+  default     = "cam_admin"
 }
 
 variable "dc_subnet_name" {
@@ -153,3 +153,10 @@ variable "create_debug_rdp_access" {
   type        = bool
   default     = false
 }
+
+/* variable "az_cli_script_path" {
+  description = "The path to place the az cli helper scripts that configure the domain controller"
+  type        = string
+  default     = "${path.module}"
+}
+*/

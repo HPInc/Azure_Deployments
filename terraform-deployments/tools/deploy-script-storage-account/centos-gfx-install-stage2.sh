@@ -61,4 +61,5 @@ log "Starting install of kernel header"
 install_kernel_header
 
 # Stage complete
-log "Installation stage completed"
+log "centos-gfx-install-stage2.sh complete"
+log "- - - - - - - - - - - - - - - - - - -"

@@ -7,24 +7,24 @@
 
 variable "workstations" {
   description = "List of workstation types to create"
-  type        = list(object({
-      prefix           = string # The prefix applied to each VM name
-      location         = string # The region this set will be deployed in
-      workstation_os   = string # The OS type for this VM "windows" or "linux"
-      vm_size          = string # Valid VM size for the region selected
-      disk_type        = string # Valid VM disk type
-      count            = number # The number of VMs of this type to create
-      disk_size        = number # The size of the VM disk in GB
-      isGFXHost        = bool   # High end graphics VM host indicator for the installation of graphics drivers
-    }))
+  type = list(object({
+    prefix         = string # The prefix applied to each VM name
+    location       = string # The region this set will be deployed in
+    workstation_os = string # The OS type for this VM "windows" or "linux"
+    vm_size        = string # Valid VM size for the region selected
+    disk_type      = string # Valid VM disk type
+    count          = number # The number of VMs of this type to create
+    disk_size      = number # The size of the VM disk in GB
+    isGFXHost      = bool   # High end graphics VM host indicator for the installation of graphics drivers
+  }))
 }
 
 variable "cac_configuration" {
   description = "List of cac vrtual machines create"
-  type        = list(object({
-      location         = string
-      cac_token        = string
-    }))
+  type = list(object({
+    location  = string
+    cac_token = string
+  }))
 }
 
 variable "prefix" {
@@ -74,18 +74,13 @@ variable "safe_admin_pass_secret_id" {
 }
 
 variable "safe_mode_admin_password" {
-    description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
-    type        = string
+  description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
+  type        = string
 }
 
 variable "ad_domain_users_list_file" {
-    description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
-    type        = string
-}
-
-variable "az_cli_script_path" {
-    description = "The path to place the az cli helper scripts that configure the domain controller"
-    type        = string
+  description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
+  type        = string
 }
 
 variable "cac_token_secret_id" {

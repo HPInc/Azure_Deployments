@@ -32,15 +32,10 @@ locals {
   centos_gfx_stage3_script_uri         = "${var._artifactsLocation}${local.centos_gfx_stage3_script}"
   centos_gfx_stage3_script_destination = "${local.deploy_temp_dir}/${local.centos_gfx_stage3_script}"
 
-  # Stage 1 setup script
-  centos_stage1_script             = "centos-startup-stage1.sh"
-  centos_stage1_script_uri         = "${var._artifactsLocation}${local.centos_stage1_script}"
-  centos_stage1_script_destination = "${local.deploy_temp_dir}/${local.centos_stage1_script}"
-
-  # Stage 2 setup script
-  centos_stage2_script             = "centos-startup-stage2.sh"
-  centos_stage2_script_uri         = "${var._artifactsLocation}${local.centos_stage2_script}"
-  centos_stage2_script_destination = "${local.deploy_temp_dir}/${local.centos_stage2_script}"
+  # Centos provisioning script
+  centos_provisioning_script             = "centos-provisioning.sh"
+  centos_provisioning_script_uri         = "${var._artifactsLocation}${local.centos_provisioning_script}"
+  centos_provisioning_script_destination = "${local.deploy_temp_dir}/${local.centos_provisioning_script}"
 
   # Figure out what graphics workstations we need to configure
   filtered_gfx_workstations = [for item in var.workstations : item if item.isGFXHost == true]

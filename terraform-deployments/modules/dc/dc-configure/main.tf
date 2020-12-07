@@ -37,3 +37,13 @@ resource "null_resource" "az-setup-admins-domain-controller" {
     command = "az vm run-command invoke --command-id RunPowerShellScript --name ${var.domain_controller_virtual_machine_name} -g ${var.resource_group_name}  --scripts ${local.stage2_script_path_on_vm} --subscription ${data.azurerm_subscription.current.subscription_id}"
   }
 }
+
+resource "null_resource" "az-setup-domain-users" {
+  depends_on = [
+    null_resource.az-setup-admins-domain-controller
+  ]
+
+  provisioner "local-exec" {
+    command = "az vm run-command invoke --command-id RunPowerShellScript --name ${var.domain_controller_virtual_machine_name} -g ${var.resource_group_name}  --scripts ${local.stage3_script_path_on_vm} --subscription ${data.azurerm_subscription.current.subscription_id}"
+  }
+}

@@ -7,7 +7,7 @@
 
 locals {
   WallPaperJPG              = "img0.jpg"
-  PCoIPAgentEXE             = "pcoip-agent-standard_19.11.0.exe"
+  PCoIPAgentEXE             = "pcoip-agent-standard_20.10.1.exe"
   pcoip_agent_deploy_script = "DeployPCoIPAgent.ps1"
 
   WallPaperPath  = "${var._artifactsLocation}${local.WallPaperJPG}${var._artifactsLocationSasToken}"
