@@ -1,6 +1,0 @@
-// From workstation-map output > virtual-network-locations[0]
-location = "westus2" 
-
-// Enter name for resource group
-resource_group_name = "sample-resource-group"
-

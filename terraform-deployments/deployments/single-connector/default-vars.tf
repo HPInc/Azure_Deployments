@@ -153,10 +153,3 @@ variable "create_debug_rdp_access" {
   type        = bool
   default     = false
 }
-
-/* variable "az_cli_script_path" {
-  description = "The path to place the az cli helper scripts that configure the domain controller"
-  type        = string
-  default     = "${path.module}"
-}
-*/

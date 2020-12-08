@@ -18,6 +18,45 @@ error_exit() {
 	exit 1
 }
 
+log "Disable the Nouveau kernel driver ..."
+for driver in vga16fb nouveau nvidiafb rivafb rivatv; do
+    echo "blacklist $driver" >> /etc/modprobe.d/blacklist.conf
+done
+
+sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/grub
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+install_kernel_header()
+{
+    log "Installing kernel headers and development packages"
+	#yum -y update
+    dnf install kernel-devel kernel-headers -y
+    exitCode=$?
+    if [[ $exitCode -ne 0 ]]; then
+        error_exit "--> Failed to install kernel header"
+    fi
+
+    rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	
+	dnf -y -q install dkms
+	exitCode=$?
+    if [[ $exitCode -ne 0 ]]; then
+        error_exit "--> Failed to install dkms"
+    fi
+	
+	dnf -y -q install hyperv-daemons
+	exitCode=$?
+    if [[ $exitCode -ne 0 ]]; then
+        error_exit "--> Failed to install hyper-v daemons"
+    fi
+
+    dnf -y -q install gcc
+    exitCode=$?
+    if [[ $exitCode -ne 0 ]]; then
+        error_exit "--> Failed to install gcc"
+    fi
+}
+
 # Download installation script and run to install NVIDIA driver
 install_nvidia_driver() {
     # the first part to check if GPU is attached
@@ -49,17 +88,12 @@ install_nvidia_driver() {
     fi
 }
 
-# Create log file if needed
-if [[ ! -f "$INST_LOG_FILE" ]]
-then
-    mkdir -p "$INST_LOG_PATH"
-    touch "$INST_LOG_FILE"
-    chmod +644 "$INST_LOG_FILE"
-fi
+log "Starting install of kernel header"
+install_kernel_header
 
 log "Starting install of NVidia driver"
 install_nvidia_driver
 
 # Stage complete
-log "centos-gfx-install-stage3.sh complete"
+log "centos-gfx-provisioning.sh complete"
 log "- - - - - - - - - - - - - - - - - - -"

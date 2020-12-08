@@ -36,7 +36,7 @@ systemctl enable dnf-automatic.timer
 systemctl start dnf-automatic.timer
 
 log "Installing dos2unix"
-dnf install -y dos2unix
+yum install -y dos2unix
 
 if (rpm -q pcoip-agent-standard); then
     exit

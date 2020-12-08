@@ -47,28 +47,12 @@ resource "azurerm_storage_blob" "centos-provisioning-script" {
   source                 = "${path.module}/centos-provisioning.sh"
 }
 
-resource "azurerm_storage_blob" "centos-gfx-script-stage1" {
-  name                   = "centos-gfx-install-stage1.sh"
+resource "azurerm_storage_blob" "centos-gfx-provisioning-script" {
+  name                   = "centos-gfx-provisioning.sh"
   storage_account_name   = azurerm_storage_account.script.name
   storage_container_name = azurerm_storage_container.script.name
   type                   = "Block"
-  source                 = "${path.module}/centos-gfx-install-stage1.sh"
-}
-
-resource "azurerm_storage_blob" "centos-gfx-script-stage2" {
-  name                   = "centos-gfx-install-stage2.sh"
-  storage_account_name   = azurerm_storage_account.script.name
-  storage_container_name = azurerm_storage_container.script.name
-  type                   = "Block"
-  source                 = "${path.module}/centos-gfx-install-stage2.sh"
-}
-
-resource "azurerm_storage_blob" "centos-gfx-script-stage3" {
-  name                   = "centos-gfx-install-stage3.sh"
-  storage_account_name   = azurerm_storage_account.script.name
-  storage_container_name = azurerm_storage_container.script.name
-  type                   = "Block"
-  source                 = "${path.module}/centos-gfx-install-stage3.sh"
+  source                 = "${path.module}/centos-gfx-provisioning.sh"
 }
 
 resource "azurerm_storage_blob" "windows-std-script" {
