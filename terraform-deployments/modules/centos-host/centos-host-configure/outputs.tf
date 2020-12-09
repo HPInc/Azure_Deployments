@@ -10,6 +10,6 @@ output "vm-configured" {
   value = {}
 
   depends_on = [
-    null_resource.az-run-centos-startup-script-2-restart
+    null_resource.az-run-centos-provisioning-restart
   ]
 }

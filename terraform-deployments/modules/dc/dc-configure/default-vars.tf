@@ -13,4 +13,5 @@ variable "dc_configure_depends_on" {
 locals {
   stage1_script_path_on_vm = "C:/Temp/setup.ps1"
   stage2_script_path_on_vm = "C:/Temp/add_admin.ps1"
+  stage3_script_path_on_vm = "C:/Temp/new_domain_users.ps1"
 }

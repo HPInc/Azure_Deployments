@@ -96,22 +96,17 @@ resource_group_name           = "my-resource-group"
 # Prefix for VM machine names
 prefix                        = "test"
 
-# Domain controller deployment variables
 # _artifactsLocation is the Azure storage account you created and copied the content of the /tools directory too
 _artifactsLocation            = "https://<storage account name>.blob.core.windows.net/<storage account container name>/"
 
-# DC active directory property values
+# Domain controller active directory property values
 active_directory_netbios_name = "tera"
 ad_admin_username             = "admin234"
 ad_admin_password             = "StRoNgPaSsWoRd11#"
 safe_mode_admin_password      = "StRoNgPaSsWoRd11#"
 
 # The location on the local PC where the domain users list file (csv) resides
-ad_domain_users_list_file     = "~/Azure_deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
-
-# The location on the local PC used to render scripts used for deployment
-# The terraform configuration copies scripts here before uploading them to the VM to be executed
-az_cli_script_path            = "~/Azure_deployments/terraform-deployments/deployments/single-connector"
+ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # CAC VM username and passwords
 cac_admin_username = "admin234"
