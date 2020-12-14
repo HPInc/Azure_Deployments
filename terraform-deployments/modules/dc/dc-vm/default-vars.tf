@@ -5,11 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-# variable "dc_vm_depends_on" {
-#   description = "Used to configure dependcies for this module"
-#   type    = any
-#   default = null
-# }
+variable "dc_vm_depends_on" {
+  description = "Used to configure dependcies for this module"
+  type        = any
+  default     = null
+}
 
 variable "dc_machine_type" {
   description = "Machine type for Domain Controller"

@@ -9,9 +9,9 @@ data "azurerm_subscription" "current" {
 }
 
 resource "null_resource" "az-configure-domain-controller" {
-  # depends_on = [
-  #   var.dc_configure_depends_on
-  # ]
+  depends_on = [
+    var.dc_configure_depends_on
+  ]
 
   provisioner "local-exec" {
     command = "az vm run-command invoke --command-id RunPowerShellScript --name ${var.domain_controller_virtual_machine_name} -g ${var.resource_group_name}  --scripts ${local.stage1_script_path_on_vm} --subscription ${data.azurerm_subscription.current.subscription_id}"

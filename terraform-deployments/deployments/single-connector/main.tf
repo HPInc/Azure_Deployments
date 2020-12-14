@@ -51,6 +51,8 @@ module "cac-network" {
 module "active-directory-domain-vm" {
   source = "../../modules/dc/dc-vm"
 
+  dc_vm_depends_on = [module.dc-cac-network.all-output]
+
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 
@@ -64,6 +66,12 @@ module "active-directory-domain-vm" {
 
 module "active-directory-domain-service" {
   source = "../../modules/dc/dc-service"
+
+  dc_vm_setup_depends_on = [
+    module.dc-cac-network.all-output,
+    module.active-directory-domain-vm.domain-controller-name,
+    module.active-directory-domain-vm.domain-controller-id
+  ]
 
   # Populate the module properties
   domain_controller_virtual_machine_name      = module.active-directory-domain-vm.domain-controller-name
@@ -85,6 +93,12 @@ module "active-directory-domain-service" {
 
 module "active-directory-domain-configure" {
   source = "../../modules/dc/dc-configure"
+
+  dc_configure_depends_on = [
+    module.dc-cac-network.all-output,
+    module.active-directory-domain-service.uploaded-scripts,
+    module.active-directory-domain-service.uploaded-domain-users-list-count
+  ]
 
   # Populate the module properties
   resource_group_name                    = var.resource_group_name

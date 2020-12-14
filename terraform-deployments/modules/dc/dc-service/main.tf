@@ -6,8 +6,7 @@
  */
 
 resource "null_resource" "upload-scripts" {
-  # depends_on = [
-  #   var.dc_vm_setup_depends_on]
+  depends_on = [var.dc_vm_setup_depends_on]
 
   connection {
     type     = "winrm"

@@ -5,11 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-# variable "dc_vm_setup_depends_on" {
-#   description = "Used to configure dependcies for this module"
-#   type    = any
-#   default = null
-# }
+variable "dc_vm_setup_depends_on" {
+  description = "Used to configure dependcies for this module"
+  type        = any
+  default     = null
+}
 
 variable "active_directory_domain_users_list_file" {
   description = "The active directory users list CSV file used to populate the directory"

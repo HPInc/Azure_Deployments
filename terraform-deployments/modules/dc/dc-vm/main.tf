@@ -6,8 +6,7 @@
  */
 
 resource "azurerm_windows_virtual_machine" "domain-controller" {
-  # depends_on = [
-  #   var.dc_vm_depends_on]
+  depends_on = [var.dc_vm_depends_on]
 
   name                = local.virtual_machine_name
   resource_group_name = var.resource_group_name
