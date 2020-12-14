@@ -32,62 +32,62 @@
 [CmdletBinding(DefaultParameterSetName = "_AllParameterSets")]
 param(
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $TeraRegKey,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $PCoIPAgentURI,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $PCoIPAgentEXE,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $WallPaperURI,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $domain_name,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $ad_service_account_username,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]
     $ad_service_account_password,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $application_id,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $tenant_id,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $aad_client_secret,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $pcoip_secret_id,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $ad_pass_secret_id,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]
     $restart_machine
 )
 
 #Install/Test Configuration
 $AgentDestinationPath = 'C:\Installer\'
-$AgentLocation ='C:\Program Files\Teradici\PCoIP Agent\'
+$AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
 
 $AgentDestination = $AgentDestinationPath + $PCoIPAgentEXE
 $PCoIPAgentURL = $PCoIPAgentUri
@@ -107,42 +107,40 @@ Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask -Verbose
 
 Function Get-AccessToken
 (
-  [string]$application_id,
-  [string]$aad_client_secret,
-  [string]$oath2Uri
-)
-{
-  $body = 'grant_type=client_credentials'
-  $body += '&client_id=' + $application_id
-  $body += '&client_secret=' + [Uri]::EscapeDataString($aad_client_secret)
-  $body += '&resource=' + [Uri]::EscapeDataString("https://vault.azure.net")
+    [string]$application_id,
+    [string]$aad_client_secret,
+    [string]$oath2Uri
+) {
+    $body = 'grant_type=client_credentials'
+    $body += '&client_id=' + $application_id
+    $body += '&client_secret=' + [Uri]::EscapeDataString($aad_client_secret)
+    $body += '&resource=' + [Uri]::EscapeDataString("https://vault.azure.net")
 
-  $response = Invoke-RestMethod -Method POST -Uri $oath2Uri -Headers @{} -Body $body
+    $response = Invoke-RestMethod -Method POST -Uri $oath2Uri -Headers @{} -Body $body
 
-  return $response.access_token
+    return $response.access_token
 }
 
 Function Get-Secret
 (   
-  [string]$application_id,
-  [string]$aad_client_secret,
-  [string]$tenant_id,
-  [string]$secret_identifier
-)
-{
-  $oath2Uri = "https://login.microsoftonline.com/$tenant_id/oauth2/token"
+    [string]$application_id,
+    [string]$aad_client_secret,
+    [string]$tenant_id,
+    [string]$secret_identifier
+) {
+    $oath2Uri = "https://login.microsoftonline.com/$tenant_id/oauth2/token"
   
-  $accessToken = Get-AccessToken $application_id $aad_client_secret $oath2Uri
+    $accessToken = Get-AccessToken $application_id $aad_client_secret $oath2Uri
 
-  $queryUrl = "$secret_identifier" + '?api-version=7.0'       
+    $queryUrl = "$secret_identifier" + '?api-version=7.0'       
   
-  $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+    $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
 
-  $response = Invoke-RestMethod -Method GET -Ur $queryUrl -Headers $headers
+    $response = Invoke-RestMethod -Method GET -Ur $queryUrl -Headers $headers
   
-  $result = $response.value
+    $result = $response.value
 
-  return $result
+    return $result
 }
 
 function Join-Domain 
@@ -150,8 +148,7 @@ function Join-Domain
     [string]$domain_name,
     [string]$ad_service_account_username,
     [string]$ad_service_account_password
-)
-{
+) {
     Write-Output "Passed Variables $domain_name ; $ad_service_account_username ; $ad_service_account_password"
     $obj = Get-WmiObject -Class Win32_ComputerSystem
 
@@ -235,9 +232,9 @@ try {
     
     #Decrypt Teradici Reg Key and AD Service Account Password
     if (!($application_id -eq $null -or $application_id -eq "") -and !($aad_client_secret -eq $null -or $aad_client_secret -eq "") -and !($tenant_id -eq $null -or $tenant_id -eq "")) {
-    Write-Output "Running Get-Secret!"
-    $TeraRegKey = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
-    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_pass_secret_id
+        Write-Output "Running Get-Secret!"
+        $TeraRegKey = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
+        $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_pass_secret_id
     }
 
     #Join Domain Controller
@@ -246,7 +243,7 @@ try {
 
     
     #Set the Agent's destination 
-    If(!(test-path $AgentDestinationPath))  {
+    If (!(test-path $AgentDestinationPath)) {
         New-Item -ItemType Directory -Force -Path $AgentDestinationPath
     }
     Set-Location -Path $AgentDestinationPath
@@ -258,10 +255,10 @@ try {
     
     #Install Agent from Agent Destination 
     Write-Output "Install Teradici with Destination Path: $AgentDestination"
-    $ArgumentList = ' /S /NoPostReboot _?"' + $AgentDestination +'"'
+    $ArgumentList = ' /S /NoPostReboot _?"' + $AgentDestination + '"'
 
     Write-Output "Teradici Argument list at: $ArgumentList"
-    $process =  Start-Process -FilePath $AgentDestination -ArgumentList $ArgumentList -Wait -PassThru;     
+    $process = Start-Process -FilePath $AgentDestination -ArgumentList $ArgumentList -Wait -PassThru;     
     Write-Output "Installed PCoIP Agent with Exit Code:" $process.ExitCode
     
     #Registering Agent with Licence Server
@@ -271,15 +268,15 @@ try {
     Write-Output "Registering Teradici Host returned this result: $Registered"
 
     #Validate Licence 
-    $Validate =& .\pcoip-validate-license.ps1
+    $Validate = & .\pcoip-validate-license.ps1
     Write-Output "Validate Teradici Licence returned: $Validate"       
     
     # Set the Wallpaper
     Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name WallPaper -Value "$workdir\$wallpapername"
     Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name TileWallpaper -Value "0"
-	Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name WallpaperStyle -Value "2" -Force
-    for ($i=0; $i -le 25; $i++) {
-    RUNDLL32.EXE USER32.DLL ,UpdatePerUserSystemParameters
+    Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name WallpaperStyle -Value "2" -Force
+    for ($i = 0; $i -le 25; $i++) {
+        RUNDLL32.EXE USER32.DLL , UpdatePerUserSystemParameters
     }
     Write-Output = "Updated Registry and Forced Update with RUNDLL32.EXE"
     Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop'
@@ -287,11 +284,12 @@ try {
     if ($restart_machine) {
         Write-Output "Restart VM..."   
         Restart-Computer -Force
-    } else {
+    }
+    else {
         Write-Output "Please restart VM for changes to take effect"
     }
 }
-catch [Exception]{
+catch [Exception] {
     Write-Output $_.Exception.Message
     Write-Error $_.Exception.Message
 }

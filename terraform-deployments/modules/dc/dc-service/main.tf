@@ -6,8 +6,8 @@
  */
 
 resource "null_resource" "upload-scripts" {
-  depends_on = [
-    var.dc_vm_setup_depends_on]
+  # depends_on = [
+  #   var.dc_vm_setup_depends_on]
 
   connection {
     type     = "winrm"
@@ -29,7 +29,7 @@ resource "null_resource" "upload-scripts" {
     destination = local.setup_add_admin_file
   }
 
-    provisioner "file" {
+  provisioner "file" {
     content     = data.template_file.new-domain-users-script.rendered
     destination = local.new_domain_users_file
   }

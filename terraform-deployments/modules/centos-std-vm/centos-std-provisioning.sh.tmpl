@@ -1,3 +1,4 @@
+  
 # Copyright (c) 2020 Teradici Corporation
 #
 # This source code is licensed under the MIT license found in the
@@ -5,43 +6,28 @@
 
 #!/bin/bash
 
-while getopts ":a:b:c:d:e:f:g:h:i:j:" opt; do
-  case $opt in
-    a) pcoip_registration_code="$OPTARG"
-    ;;
-    b) ad_service_account_password="$OPTARG"
-    ;;
-    c) ad_service_account_username="$OPTARG"
-    ;;
-    d) domain_name="$OPTARG"
-    ;;
-    e) domain_controller_ip="$OPTARG"
-    ;;
-    f) appID="$OPTARG"
-    ;;
-    g) aadClientSecret="$OPTARG"
-    ;;
-    h) tenantID="$OPTARG"
-    ;;
-    i) pcoip_reg_secret_key="$OPTARG"
-    ;;
-    j) ad_pass_secret_key="$OPTARG"
-    ;;
-    \?) echo "Invalid option -$OPTARG" >&11
-    ;;
-  esac
-done
-
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
 
-METADATA_BASE_URI="http://metadata.google.internal/computeMetadata/v1/instance"
-METADATA_AUTH_URI="$METADATA_BASE_URI/service-accounts/default/token"
-DECRYPT_URI="https://login.microsoftonline.com/${kms_cryptokey_id}/oauth2/v2.0/token"
+pcoip_registration_code=${pcoip_registration_code}
+ad_service_account_password=${ad_service_account_password}
+ad_service_account_username=${ad_service_account_username}
+domain_name=${domain_name}
+domain_controller_ip=${domain_controller_ip}
+appID=${app_id}
+aadClientSecret=${aad_client_secret}
+tenantID=${tenant_id}
+pcoip_reg_secret_key=${pcoip_reg_secret_key}
+ad_pass_secret_key=${ad_pass_secret_id}
 
 log() {
     local message="$1"
-    echo "[$(date)] ${message}" | tee -a "$INST_LOG_FILE"
+    echo "[$(date)] $${message}" | tee -a "$INST_LOG_FILE"
+}
+
+error_exit() {
+	log "$1" 1>&2
+	exit 1
 }
 
 get_access_token() {
@@ -51,8 +37,8 @@ get_access_token() {
     output=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
     log "$output"
     output=$(echo $output | jq '.value')
-    chrlen=${#output}
-    output=${output:1:$chrlen-2}
+    chrlen=$${#output}
+    output=$${output:1:$chrlen-2}
 }
 
 get_credentials() {
@@ -79,7 +65,7 @@ install_pcoip_agent() {
         rpm --import https://downloads.teradici.com/rhel/teradici.pub.gpg
 
         # Get pcoip repo
-        log "--> Get Teradici pcoip agent repo"
+        log "--> Get Teradici PCoIP agent repo"
         wget --retry-connrefused --tries=3 --waitretry=5 -O /etc/yum.repos.d/pcoip.repo https://downloads.teradici.com/rhel/pcoip.repo
 
         log "--> Install PCoIP standard agent ..."
@@ -127,7 +113,7 @@ join_domain()
         log "--> VM_NAME: $VM_NAME"
 
         # Wait for AD service account to be set up
-        dnf -y install openldap-clients
+        yum -y install openldap-clients
         if [ $? -ne 0 ]; then
             log "--> Failed to install openldap-clients"
             exit 1
@@ -150,7 +136,7 @@ join_domain()
 
         # Join domain
         log "--> Install required packages to join domain"
-        dnf -y  install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python
+        yum -y  install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python
         if [ $? -ne 0 ]; then
             log "--> Failed to install required packages to join domain"
             exit 1
@@ -198,17 +184,6 @@ join_domain()
     fi
 }
 
-# exit_and_restart() {
-#     log "--> Rebooting..."
-#     (sleep 1; reboot -p) &
-#     exit
-# }
-
-# ------------------------------------------------------------
-# start from here
-# ------------------------------------------------------------
-
-# Open up firewall for PCoIP Agent. By default eth0 is in firewall zone "public"
 update_firewall() {
     log "--> Adding 'pcoip-agent' service to public firewall zone..."
     firewall-offline-cmd --zone=public --add-service=pcoip-agent
@@ -216,16 +191,34 @@ update_firewall() {
     systemctl start firewalld
 }
 
+exit_and_restart() {
+    log "--> Rebooting..."
+    (sleep 1; reboot -p) &
+    exit
+}
+
 if (rpm -q pcoip-agent-standard); then
     exit
 fi
 
+# Create log file
 if [[ ! -f "$INST_LOG_FILE" ]]
 then
     mkdir -p "$INST_LOG_PATH"
     touch "$INST_LOG_FILE"
     chmod +644 "$INST_LOG_FILE"
 fi
+
+# install dnf to replace yum based installations
+log "Installing dnf"
+yum -y -q install dnf-automatic
+
+log "Starting dnf"
+systemctl enable dnf-automatic.timer
+systemctl start dnf-automatic.timer
+
+log "Installing dos2unix"
+yum install -y dos2unix
 
 log "$(date)"
 
@@ -235,7 +228,7 @@ get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass
 log "$domain_name ;; $domain_controller_ip"
 
 log "--> Get epel-release"
-dnf -y install epel-release
+yum -y install epel-release
 if [ $? -ne 0 ]; then
     log "--> Failed to install epel-release"
     exit 1
@@ -266,4 +259,4 @@ install_pcoip_agent
 log "centos-provisioning.sh complete"
 log " - - - - - - - - - - - - - - - - - "
 
-# exit_and_restart
+exit_and_restart

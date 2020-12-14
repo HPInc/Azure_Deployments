@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-variable "dc_configure_depends_on" {
-  type    = any
-  default = null
-}
+# variable "dc_configure_depends_on" {
+#   type    = any
+#   default = null
+# }
 
 locals {
   stage1_script_path_on_vm = "C:/Temp/setup.ps1"
