@@ -148,7 +148,7 @@ module "cac-configuration" {
 
   # Make sure module creation is dependent on the resource group and a fully setup network
   cac_configure_depends_on = [
-    module.dc-cac-network.all-output,
+    module.active-directory-domain-configure.service-configured,
     module.cac-vm.cac-vm-ids
   ]
 
