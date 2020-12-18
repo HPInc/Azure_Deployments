@@ -42,7 +42,7 @@ resource "azurerm_linux_virtual_machine" "centos-gfx-vm" {
 
   for_each = var.workstations
 
-  name                            = "centos-gfx-${each.value.index}"
+  name                            = "${each.value.prefix}-gcent-${each.value.index}"
   resource_group_name             = var.resource_group_name
   location                        = each.value.location
   admin_username                  = var.admin_name
@@ -70,8 +70,10 @@ resource "azurerm_linux_virtual_machine" "centos-gfx-vm" {
 
 resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
 
+  depends_on = [azurerm_linux_virtual_machine.centos-gfx-vm]
+
   for_each             = var.workstations
-  name                 = "centos-gfx-${each.value.index}"
+  name                 = "${each.value.prefix}-gcent-${each.value.index}"
   virtual_machine_id   = azurerm_linux_virtual_machine.centos-gfx-vm[each.key].id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
@@ -91,7 +93,13 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   pcoip_secret_id             = var.pcoip_secret_id,
   ad_pass_secret_id           = var.ad_pass_secret_id,
   app_id                      = var.application_id,
-  pcoip_reg_secret_key        = var.pcoip_secret_id
+  pcoip_reg_secret_key        = var.pcoip_secret_id,
+  nvidia_driver_url           = var.nvidia_driver_url
+
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown,
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown,
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval,
 })
 )
 }"

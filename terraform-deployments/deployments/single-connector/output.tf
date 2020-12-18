@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "domain-controller-group" {
+output "resource_group" {
   value = azurerm_resource_group.main.name
 }
 
@@ -21,40 +21,41 @@ output "locations" {
   value = module.dc-cac-network.subnet-workstation-locations
 }
 
-output "windows-workstations" {
+output "windows-standard-workstations" {
   value = [for index, item in module.workstation-map.windows-std-workstations :
     {
-      location : item.location,
       name : module.windows-host-vm.windows-host-vm-names[item.index],
-      id : module.windows-host-vm.windows-host-vm-ids[item.index],
-      size : module.windows-host-vm.windows-host-vm-size[item.index],
       public_ip : module.windows-host-vm.windows-host-vm-public-ips[item.index],
       private_ip : module.windows-host-vm.windows-host-vm-private-ips[item.index]
     }
   ]
 }
 
-# output "centos-workstations" {
-#   value = [for index, item in module.workstation-map.centos-workstations :
-#     {
-#       location : item.location,
-#       # name: module.centos-host-vm.centos-host-vm-names[item.index],
-#       id : module.centos-host-vm.centos-host-vm-ids[item.index]
-#       size : module.centos-host-vm.centos-host-vm-size[item.index],
-#       # public_ip: module.centos-host-vm.centos-host-vm-public-ips[item.index],
-#       private_ip : module.centos-host-vm.centos-host-vm-private-ips[item.index]
-#     }
-#   ]
-# }
+output "centos-graphics-workstations" {
+  value = [for index, item in module.workstation-map.centos-gfx-workstations :
+    {
+      name : module.centos-gfx-vm.centos-gfx-vm-names[item.index],
+      public_ip : module.centos-gfx-vm.centos-gfx-vm-public-ips[item.index],
+      private_ip : module.centos-gfx-vm.centos-gfx-vm-private-ips[item.index]
+    }
+  ]
+}
+
+output "centos-standard-workstations" {
+  value = [for index, item in module.workstation-map.centos-std-workstations :
+    {
+      name : module.centos-std-vm.centos-std-vm-names[item.index],
+      public_ip : module.centos-std-vm.centos-std-vm-public-ips[item.index],
+      private_ip : module.centos-std-vm.centos-std-vm-private-ips[item.index]
+    }
+  ]
+}
 
 output "cac-vms" {
   description = "Cac virtual machines"
   value = [for index, item in module.cac-vm.cac-vm-locations :
     {
-      location : item,
       name : module.cac-vm.cac-vm-names[index],
-      id : module.cac-vm.cac-vm-ids[index],
-      size : module.cac-vm.cac-vm-size[index],
       public_ip : module.cac-vm.cac-vm-public-ips[index],
       private_ip : module.cac-vm.cac-vm-private-ips[index]
     }

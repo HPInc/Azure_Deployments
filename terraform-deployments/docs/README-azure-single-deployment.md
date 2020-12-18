@@ -116,6 +116,11 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
     - The resource group name must be unique and must not already exist. The resource group name from the Azure Storage Account section cannot be reused.
     - Make sure the locations of the connectors and work stations are identical.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
+    - To add users successfully, passwords must have atleast 3 of the following requirements:
+      - 1 UPPERCASE letter
+      - 1 lowercase letter
+      - 1 number
+      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. ```tee -a installer.log``` stores a local log of the script output. 
 6. Answer ```yes``` to start provisioning the single-connector infrastructure. 

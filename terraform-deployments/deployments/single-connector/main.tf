@@ -148,7 +148,7 @@ module "cac-configuration" {
 
   # Make sure module creation is dependent on the resource group and a fully setup network
   cac_configure_depends_on = [
-    module.dc-cac-network.all-output,
+    module.active-directory-domain-configure.service-configured,
     module.cac-vm.cac-vm-ids
   ]
 
@@ -290,19 +290,20 @@ module "centos-gfx-vm" {
 
   workstations = module.workstation-map.centos-gfx-workstations
 
-  resource_group_name          = azurerm_resource_group.main.name
-  admin_name                   = var.centos_admin_username
-  admin_password               = var.centos_admin_password
-  pcoip_registration_code      = var.pcoip_registration_code
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username  = var.ad_admin_username
-  ad_service_account_password  = var.ad_admin_password
-  application_id               = var.application_id
-  tenant_id                    = var.tenant_id
-  aad_client_secret            = var.aad_client_secret
-  pcoip_secret_id              = var.pcoip_secret_id
-  ad_pass_secret_id            = var.ad_pass_secret_id
-  domain_controller_ip         = module.dc-cac-network.dc-private-ip
+  resource_group_name         = azurerm_resource_group.main.name
+  admin_name                  = var.centos_admin_username
+  admin_password              = var.centos_admin_password
+  pcoip_registration_code     = var.pcoip_registration_code
+  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username = var.ad_admin_username
+  ad_service_account_password = var.ad_admin_password
+  application_id              = var.application_id
+  tenant_id                   = var.tenant_id
+  aad_client_secret           = var.aad_client_secret
+  pcoip_secret_id             = var.pcoip_secret_id
+  ad_pass_secret_id           = var.ad_pass_secret_id
+  domain_controller_ip        = module.dc-cac-network.dc-private-ip
+
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }

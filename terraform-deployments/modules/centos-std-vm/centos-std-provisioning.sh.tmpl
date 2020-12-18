@@ -85,14 +85,13 @@ install_pcoip_agent() {
 
             if [ $n -ge 10 ]; then
                 log "--> Failed to register PCoIP agent after $n tries."
-                log "--> $pcoip_registration_code"
                 exit 1
             fi
 
             log "--> Failed to register PCoIP agent. Retrying in 10s..."
             sleep 10
         done
-        log "--> Pcoip agent is registered successfully"
+        log "--> PCoIP agent registered successfully."
     fi
 }
 
@@ -257,12 +256,7 @@ fi
 log "--> Set default to graphical target"
 systemctl set-default graphical.target
 
-if [[ -z domain_name && -z domain_controller_ip ]]; then
-    log "--> Not joining domain controller"
-else
-    log "--> Joining domain controller"
-    join_domain
-fi
+join_domain
 
 install_pcoip_agent
 
