@@ -10,11 +10,6 @@ variable "domain_controller_virtual_machine_name" {
   type        = string
 }
 
-# variable "dc_configure_file_path" {
-#   description = "The path where the domain controlller configure helper scripts will be placed"
-#   type        = string
-# }
-
 variable "resource_group_name" {
   description = "The resouce group the domain controller vm resides in"
   type        = string

@@ -12,13 +12,13 @@ resource "azurerm_linux_virtual_machine" "cac" {
 
   count = length(var.cac_configuration)
 
-  name                  = "${var.prefix}-cac-vm-${count.index}"
-  location              = var.cac_configuration[count.index].location
-  resource_group_name   = var.resource_group_name
-  size                  = var.machine_type
-  admin_username        = var.cac_admin_user
-  admin_password        = var.cac_admin_password
-  computer_name         = var.host_name
+  name                            = "${var.prefix}-cac-vm-${count.index}"
+  location                        = var.cac_configuration[count.index].location
+  resource_group_name             = var.resource_group_name
+  size                            = var.machine_type
+  admin_username                  = var.cac_admin_user
+  admin_password                  = var.cac_admin_password
+  computer_name                   = var.host_name
   disable_password_authentication = false
   network_interface_ids = [
     var.nic_ids[count.index]
@@ -37,10 +37,10 @@ resource "azurerm_linux_virtual_machine" "cac" {
   }
 
   os_disk {
-    name                  = "${var.prefix}-cac-vm-osdisk-${count.index}"
-    caching               = "ReadWrite"
-    storage_account_type  = "Standard_LRS"
-    disk_size_gb          = var.disk_size_gb
+    name                 = "${var.prefix}-cac-vm-osdisk-${count.index}"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = var.disk_size_gb
   }
 
   timeouts {
@@ -54,7 +54,7 @@ resource "azurerm_template_deployment" "shutdown_schedule_template" {
     azurerm_linux_virtual_machine.cac
   ]
 
- count = length(var.cac_configuration)
+  count = length(var.cac_configuration)
 
   name                = "${azurerm_linux_virtual_machine.cac[count.index].name}-shutdown-schedule-template"
   resource_group_name = var.resource_group_name

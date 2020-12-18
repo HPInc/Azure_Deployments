@@ -6,10 +6,8 @@
  */
 
 module "workstation-map" {
-  source = "../../modules/workstation-map"
-
-  # Populate the module properties
-  workstations                = var.workstations
+  source       = "../../modules/workstation-map"
+  workstations = var.workstations
 }
 
 resource "azurerm_resource_group" "main" {
@@ -20,68 +18,55 @@ resource "azurerm_resource_group" "main" {
 module "dc-cac-network" {
   source = "../../modules/network/dc-cac"
 
-  # Module is dependent on the resource group
-  dc_cac_network_depends_on = [azurerm_resource_group.main.id]
+  resource_group_name     = azurerm_resource_group.main.name
+  locations               = module.workstation-map.virtual-network-locations
+  vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
 
-  # Populate the module properties
-  resource_group_name           = azurerm_resource_group.main.name
-  locations                     = module.workstation-map.virtual-network-locations
-  vnet_peer_to_peer_links       = module.workstation-map.virtual-network-peer-to-peer-links
-
-  prefix                        = var.prefix
-  vnet_name                     = var.vnet_name
-  dc_subnet_name                = var.dc_subnet_name
-  workstation_subnet_name       = var.workstation_subnet_name
+  prefix                  = var.prefix
+  vnet_name               = var.vnet_name
+  dc_subnet_name          = var.dc_subnet_name
+  workstation_subnet_name = var.workstation_subnet_name
 
   active_directory_netbios_name = var.active_directory_netbios_name
 
   # Debug flags
-  create_debug_rdp_access       = var.create_debug_rdp_access
-  create_debug_public_ips       = var.create_debug_public_ips
+  create_debug_rdp_access = var.create_debug_rdp_access
+  create_debug_public_ips = var.create_debug_public_ips
 }
 
 module "cac-network" {
   source = "../../modules/cac/cac-network"
 
-  # Module is dependent on the resource group
-  cac_network_depends_on = [azurerm_resource_group.main.id]
-
-  # Populate the module properties
-  prefix                        = var.prefix
-  resource_group_name           = azurerm_resource_group.main.name
-  locations                     = module.workstation-map.virtual-network-locations
+  prefix              = var.prefix
+  resource_group_name = azurerm_resource_group.main.name
+  locations           = module.workstation-map.virtual-network-locations
 
   # The number of cac network items is based on the configuration
-  cac_configuration              = var.cac_configuration
+  cac_configuration = var.cac_configuration
 
-  network_security_group_ids     = module.dc-cac-network.network-security-group-ids
-  azurerm_virtual_network_names  = module.dc-cac-network.virtual-network-names
+  network_security_group_ids    = module.dc-cac-network.network-security-group-ids
+  azurerm_virtual_network_names = module.dc-cac-network.virtual-network-names
 }
 
 module "active-directory-domain-vm" {
   source = "../../modules/dc/dc-vm"
 
-  # Module is dependent on the the domain controller network setup
-  dc_vm_depends_on = [
-    module.dc-cac-network.all-output
-  ]
+  dc_vm_depends_on = [module.dc-cac-network.all-output]
 
-  # Populate the module properties
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 
-  active_directory_domain_name  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_admin_username             = var.ad_admin_username
-  ad_admin_password             = var.ad_admin_password
-  dc_machine_type               = var.dc_machine_type
-  nic_id                        = module.dc-cac-network.dc-network-interface-id
-  prefix                        = var.prefix
+  active_directory_domain_name = "${var.active_directory_netbios_name}.dns.internal"
+  ad_admin_username            = var.ad_admin_username
+  ad_admin_password            = var.ad_admin_password
+  dc_machine_type              = var.dc_machine_type
+  nic_id                       = module.dc-cac-network.dc-network-interface-id
+  prefix                       = var.prefix
 }
 
 module "active-directory-domain-service" {
   source = "../../modules/dc/dc-service"
 
-  # Module is dependent on domain controller vm deployment
   dc_vm_setup_depends_on = [
     module.dc-cac-network.all-output,
     module.active-directory-domain-vm.domain-controller-name,
@@ -94,22 +79,21 @@ module "active-directory-domain-service" {
   domain_controller_virtual_machine_public_ip = module.dc-cac-network.dc-public-ip
   active_directory_domain_users_list_file     = var.ad_domain_users_list_file
 
-  active_directory_domain_name  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_admin_username             = var.ad_admin_username
-  ad_admin_password             = var.ad_admin_password
-  ad_pass_secret_name           = var.ad_pass_secret_name
-  key_vault_id                  = var.key_vault_id
-  application_id                = var.application_id
-  aad_client_secret             = var.aad_client_secret
-  tenant_id                     = var.tenant_id
-  safe_admin_pass_secret_id     = var.safe_admin_pass_secret_id
-  safe_mode_admin_password      = var.safe_mode_admin_password
+  active_directory_domain_name = "${var.active_directory_netbios_name}.dns.internal"
+  ad_admin_username            = var.ad_admin_username
+  ad_admin_password            = var.ad_admin_password
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  key_vault_id                 = var.key_vault_id
+  application_id               = var.application_id
+  aad_client_secret            = var.aad_client_secret
+  tenant_id                    = var.tenant_id
+  safe_admin_pass_secret_id    = var.safe_admin_pass_secret_id
+  safe_mode_admin_password     = var.safe_mode_admin_password
 }
 
 module "active-directory-domain-configure" {
   source = "../../modules/dc/dc-configure"
 
-  # Module is dependent on domain controller service installation completion
   dc_configure_depends_on = [
     module.dc-cac-network.all-output,
     module.active-directory-domain-service.uploaded-scripts,
@@ -131,11 +115,11 @@ module "cac-vm" {
   ]
 
   # Populate the module properties
-  resource_group_name           = azurerm_resource_group.main.name
-  location                      = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
 
   # The number of cac VMs is based on the configuration
-  cac_configuration             = var.cac_configuration
+  cac_configuration = var.cac_configuration
 
   prefix                      = var.prefix
   pcoip_registration_code     = var.pcoip_registration_code
@@ -164,12 +148,12 @@ module "cac-configuration" {
 
   # Make sure module creation is dependent on the resource group and a fully setup network
   cac_configure_depends_on = [
-    module.dc-cac-network.all-output,
+    module.active-directory-domain-configure.service-configured,
     module.cac-vm.cac-vm-ids
   ]
 
   # The number of cac VMs is based on the configuration
-  cac_configuration             = var.cac_configuration
+  cac_configuration = var.cac_configuration
 
   # Populate the module properties
   cam_url                     = var.cam_url
@@ -207,7 +191,7 @@ module "windows-host-network" {
   ]
 
   # Populate the module properties
-  workstations                 = module.workstation-map.windows-workstations
+  workstations = module.workstation-map.windows-std-workstations
 
   resource_group_name          = azurerm_resource_group.main.name
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
@@ -228,13 +212,13 @@ module "windows-host-vm" {
   ]
 
   # Populate the module properties
-  workstations                = module.workstation-map.windows-workstations
+  workstations = module.workstation-map.windows-std-workstations
 
-  resource_group_name         = azurerm_resource_group.main.name
-  admin_name                  = var.windows_admin_username
-  admin_password              = var.windows_admin_password
+  resource_group_name = azurerm_resource_group.main.name
+  admin_name          = var.windows_admin_username
+  admin_password      = var.windows_admin_password
 
-  windows_host_nic_ids        = module.windows-host-network.windows-host-nic-ids
+  windows_host_nic_ids = module.windows-host-network.windows-host-nic-ids
 }
 
 module "windows-host-configure" {
@@ -250,7 +234,7 @@ module "windows-host-configure" {
   ]
 
   # Populate the module properties
-  workstations                = module.workstation-map.windows-workstations
+  workstations = module.workstation-map.windows-std-workstations
 
   resource_group_name         = azurerm_resource_group.main.name
   pcoip_registration_code     = var.pcoip_registration_code
@@ -265,69 +249,23 @@ module "windows-host-configure" {
   _artifactsLocation          = var._artifactsLocation
   _artifactsLocationSasToken  = var._artifactsLocationSasToken
 
-  windows-host-vm-ids         = module.windows-host-vm.windows-host-vm-ids
-  windows-host-vm-names       = module.windows-host-vm.windows-host-vm-names
-  windows-host-vm-public-ips  = module.windows-host-vm.windows-host-vm-public-ips
+  windows-host-vm-ids        = module.windows-host-vm.windows-host-vm-ids
+  windows-host-vm-names      = module.windows-host-vm.windows-host-vm-names
+  windows-host-vm-public-ips = module.windows-host-vm.windows-host-vm-public-ips
 }
 
-module "centos-host-network" {
-  source = "../../modules/centos-host/centos-host-network"
+module "centos-std-vm" {
+  source = "../../modules/centos-std-vm"
 
-  # Make sure module creation is dependent on the resource group, a fully set up network, and a cac
-  centos_host_network_depends_on = [
-    module.dc-cac-network.all-output,
-    module.active-directory-domain-configure.service-configured,
+  centos_std_depends_on = [
     module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure
-  ] 
-
-  # Populate the module properties
-  workstations                = module.workstation-map.linux-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
-  nat_gateway_ids              = module.dc-cac-network.nat-gateway-ids
-}
-
-module "centos-host-vm" {
-    source = "../../modules/centos-host/centos-host-vm"
-
-  # Make sure module creation is dependent on the resource group a fully setup network and a cac
-  centos_host_vm_depends_on = [
-    module.dc-cac-network.all-output,
-    module.active-directory-domain-configure.service-configured,
-    module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure,
-    module.centos-host-network.centos-host-private-ips
   ]
 
-  # Populate the module properties
-  workstations                = module.workstation-map.linux-workstations
+  workstations = module.workstation-map.centos-std-workstations
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.centos_admin_username
   admin_password              = var.centos_admin_password
-
-  centos_host_nic_ids         = module.centos-host-network.centos-host-nic-ids
-}
-
-module "centos-host-configure" {
-  source = "../../modules/centos-host/centos-host-configure"
-
-  # Make sure module creation is dependent on the resource group a fully setup network and a cac
-  centos_host_configure_depends_on = [
-    module.dc-cac-network.all-output,
-    module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure,
-    module.centos-host-network.centos-host-private-ips,
-    module.centos-host-vm.centos-host-vm-ids,
-  ]
-
-  # Populate the module properties
-  workstations = module.workstation-map.linux-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username
@@ -337,14 +275,34 @@ module "centos-host-configure" {
   aad_client_secret           = var.aad_client_secret
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
-  _artifactsLocation          = var._artifactsLocation
-  _artifactsLocationSasToken  = var._artifactsLocationSasToken
-
-  admin_name                  = var.centos_admin_username
-  admin_password              = var.centos_admin_password
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
 
-  centos-host-vm-ids          = module.centos-host-vm.centos-host-vm-ids
-  centos-host-vm-names        = module.centos-host-vm.centos-host-vm-names
-  centos-host-vm-public-ips   = module.centos-host-vm.centos-host-vm-public-ips
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+}
+
+module "centos-gfx-vm" {
+  source = "../../modules/centos-gfx-vm"
+
+  centos_gfx_depends_on = [
+    module.cac-vm.cac-vm-ids,
+  ]
+
+  workstations = module.workstation-map.centos-gfx-workstations
+
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.centos_admin_username
+  admin_password               = var.centos_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  tenant_id                    = var.tenant_id
+  aad_client_secret            = var.aad_client_secret
+  pcoip_secret_id              = var.pcoip_secret_id
+  ad_pass_secret_id            = var.ad_pass_secret_id
+  domain_controller_ip         = module.dc-cac-network.dc-private-ip
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }

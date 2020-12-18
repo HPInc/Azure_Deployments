@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-variable "centos_host_vm_depends_on" {
+variable "centos_std_depends_on" {
   description = "Value that internal module components can use as a dependency for externally created recources"
   type        = any
   default     = null

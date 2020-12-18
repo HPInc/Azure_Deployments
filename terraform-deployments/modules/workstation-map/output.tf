@@ -5,12 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "windows-workstations" {
-  value = local.filtered_windows_workstations_map
+output "windows-std-workstations" {
+  value = local.windows_std_workstations_map
 }
 
-output "linux-workstations" {
-  value = local.filtered_linux_workstations_map
+output "centos-workstations" {
+  value = local.centos_workstations_map
+}
+
+output "centos-std-workstations" {
+  value = local.centos_std_workstations_map
+}
+
+output "centos-gfx-workstations" {
+  value = local.centos_gfx_workstations_map
 }
 
 output "virtual-network-locations" {

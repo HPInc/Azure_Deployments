@@ -7,8 +7,8 @@
 
 variable "cac_depends_on" {
   description = "Value that internal module components can use as a dependency for externally created recources"
-  type    = any
-  default = null
+  type        = any
+  default     = null
 }
 
 variable "prefix" {
