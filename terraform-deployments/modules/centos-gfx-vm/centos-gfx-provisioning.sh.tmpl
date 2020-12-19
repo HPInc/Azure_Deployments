@@ -70,7 +70,6 @@ remove_nouveau() {
         grub2-mkconfig -o /boot/grub2/grub.cfg
 }
 
-
 install_kernel_header() {
     log "--> Installing kernel headers and development packages..."
     yum install kernel-devel kernel-headers -y
