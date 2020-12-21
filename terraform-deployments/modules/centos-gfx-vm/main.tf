@@ -95,11 +95,6 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   app_id                      = var.application_id,
   pcoip_reg_secret_key        = var.pcoip_secret_id,
   nvidia_driver_url           = var.nvidia_driver_url
-
-
-  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown,
-  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown,
-  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval,
 })
 )
 }"

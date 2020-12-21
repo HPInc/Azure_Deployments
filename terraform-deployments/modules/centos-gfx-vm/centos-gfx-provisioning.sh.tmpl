@@ -21,7 +21,6 @@ ad_pass_secret_key=${ad_pass_secret_id}
 
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
-INST_ERR_LOG_FILE="/var/log/teradici/agent/error.log"
 
 log() {
     local message="$1"
@@ -55,19 +54,19 @@ get_credentials() {
 }
 
 exit_and_restart() {
-     log "--> Rebooting..."
-     (sleep 1; reboot -p) &
-     exit
+    log "--> Rebooting..."
+    (sleep 1; reboot -p) &
+    exit
 }
 
 remove_nouveau() {
-        log "--> Disabling the Nouveau kernel driver..."
-        for driver in vga16fb nouveau nvidiafb rivafb rivatv; do
-            echo "blacklist $driver" >> /etc/modprobe.d/blacklist.conf
-        done
+    log "--> Disabling the Nouveau kernel driver..."
+    for driver in vga16fb nouveau nvidiafb rivafb rivatv; do
+        echo "blacklist $driver" >> /etc/modprobe.d/blacklist.conf
+    done
 
-        sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/grub
-        grub2-mkconfig -o /boot/grub2/grub.cfg
+    sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/grub
+    grub2-mkconfig -o /boot/grub2/grub.cfg
 }
 
 install_kernel_header() {
@@ -85,9 +84,6 @@ install_kernel_header() {
         log "--> ERROR: Failed to install gcc."
         exit 1
     fi
-
-    # Synchronizes installed packages to the latest available versions. 
-    # yum -y distro-sync
 }
 
 # Download installation script and run to install NVIDIA driver
@@ -353,20 +349,11 @@ else
     RE_ENTER=1
 fi
 
-if [[ ! -f "$INST_ERR_LOG_FILE" ]]
-then
-    mkdir -p "$(dirname $INST_ERR_LOG_FILE)"
-    touch "$INST_ERR_LOG_FILE"
-    chmod +644 "$INST_ERR_LOG_FILE"
-else
-    RE_ENTER=1
-fi
-
 # Print all executed commands to the terminal
 set -x
 
 # Redirect stdout and stderr to the log file
-exec &>>$INST_ERR_LOG_FILE
+exec &>>$INST_LOG_FILE
 
 get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
 
@@ -407,12 +394,14 @@ else
 
     install_gpu_driver
 
-    # enable_persistence_mode
+    enable_persistence_mode
 
     install_pcoip_agent
 
     log "--> Installation is complete!"
 
+    update_firewall
+    
     sed -i '$ d' /etc/rc.local
 
     exit_and_restart

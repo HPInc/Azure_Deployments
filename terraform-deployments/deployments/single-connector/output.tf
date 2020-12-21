@@ -24,9 +24,9 @@ output "locations" {
 output "windows-standard-workstations" {
   value = [for index, item in module.workstation-map.windows-std-workstations :
     {
-      name : module.windows-host-vm.windows-host-vm-names[item.index],
-      public_ip : module.windows-host-vm.windows-host-vm-public-ips[item.index],
-      private_ip : module.windows-host-vm.windows-host-vm-private-ips[item.index]
+      name : module.windows-std-vm.windows-std-vm-names[item.index],
+      public_ip : module.windows-std-vm.windows-std-vm-public-ips[item.index],
+      private_ip : module.windows-std-vm.windows-std-vm-private-ips[item.index]
     }
   ]
 }

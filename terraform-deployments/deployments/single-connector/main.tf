@@ -179,64 +179,18 @@ module "cac-configuration" {
   _artifactsLocation          = var._artifactsLocation
 }
 
-module "windows-host-network" {
-  source = "../../modules/windows-host/windows-host-network"
+module "windows-std-vm" {
+  source = "../../modules/windows-std-vm"
 
-  # Make sure module creation is dependent on the resource group a fully setup network and a cac
-  windows_host_network_depends_on = [
-    module.dc-cac-network.all-output,
-    module.active-directory-domain-configure.service-configured,
-    module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure
-  ]
-
-  # Populate the module properties
-  workstations = module.workstation-map.windows-std-workstations
-
-  resource_group_name          = azurerm_resource_group.main.name
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
-  nat_gateway_ids              = module.dc-cac-network.nat-gateway-ids
-}
-
-module "windows-host-vm" {
-  source = "../../modules/windows-host/windows-host-vm"
-
-  # Make sure module creation is dependent on the resource group a fully setup network and a cac
   windows_host_vm_depends_on = [
-    module.dc-cac-network.all-output,
-    module.active-directory-domain-configure.service-configured,
     module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure,
-    module.windows-host-network.windows-host-private-ips
   ]
 
-  # Populate the module properties
-  workstations = module.workstation-map.windows-std-workstations
-
-  resource_group_name = azurerm_resource_group.main.name
-  admin_name          = var.windows_admin_username
-  admin_password      = var.windows_admin_password
-
-  windows_host_nic_ids = module.windows-host-network.windows-host-nic-ids
-}
-
-module "windows-host-configure" {
-  source = "../../modules/windows-host/windows-host-configure"
-
-  # Make sure module creation is dependent on the resource group a fully setup network and a cac
-  windows_host_configure_depends_on = [
-    module.dc-cac-network.all-output,
-    module.cac-vm.cac-vm-ids,
-    module.cac-configuration.cac-vm-configure,
-    module.windows-host-network.windows-host-private-ips,
-    module.windows-host-vm.windows-host-vm-ids
-  ]
-
-  # Populate the module properties
   workstations = module.workstation-map.windows-std-workstations
 
   resource_group_name         = azurerm_resource_group.main.name
+  admin_name                  = var.windows_admin_username
+  admin_password              = var.windows_admin_password
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username
@@ -249,9 +203,8 @@ module "windows-host-configure" {
   _artifactsLocation          = var._artifactsLocation
   _artifactsLocationSasToken  = var._artifactsLocationSasToken
 
-  windows-host-vm-ids        = module.windows-host-vm.windows-host-vm-ids
-  windows-host-vm-names      = module.windows-host-vm.windows-host-vm-names
-  windows-host-vm-public-ips = module.windows-host-vm.windows-host-vm-public-ips
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }
 
 module "centos-std-vm" {

@@ -227,11 +227,6 @@ log "Starting dnf"
 systemctl enable dnf-automatic.timer
 systemctl start dnf-automatic.timer
 
-log "Installing dos2unix"
-yum install -y dos2unix
-
-log "$(date)"
-
 log "Passed Variables: $2, $1, $3, $4, $5"
 get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
 
@@ -244,8 +239,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# log "Updating packages.."
-# dnf -y update
+log "Updating packages.."
+yum update -y --exclude=WALinuxAgent
 
 log "--> Install Linux GUI ..."
 yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
@@ -261,7 +256,6 @@ join_domain
 install_pcoip_agent
 
 # Stage complete
-log "centos-provisioning.sh complete"
-log " - - - - - - - - - - - - - - - - - "
+log "--> Installaion complete!"
 
 exit_and_restart
