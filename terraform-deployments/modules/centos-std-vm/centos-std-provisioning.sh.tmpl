@@ -219,6 +219,9 @@ then
     chmod +644 "$INST_LOG_FILE"
 fi
 
+# Redirect stdout and stderr to the log file
+exec &>>$INST_LOG_FILE
+
 # install dnf to replace yum based installations
 log "Installing dnf"
 yum -y -q install dnf-automatic
@@ -239,8 +242,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-log "Updating packages.."
-yum update -y --exclude=WALinuxAgent
+# log "Updating packages.."
+# yum update -y --exclude=WALinuxAgent
 
 log "--> Install Linux GUI ..."
 yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
