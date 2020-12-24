@@ -85,14 +85,13 @@ install_pcoip_agent() {
 
             if [ $n -ge 10 ]; then
                 log "--> Failed to register PCoIP agent after $n tries."
-                log "--> $pcoip_registration_code"
                 exit 1
             fi
 
             log "--> Failed to register PCoIP agent. Retrying in 10s..."
             sleep 10
         done
-        log "--> Pcoip agent is registered successfully"
+        log "--> PCoIP agent registered successfully."
     fi
 }
 
@@ -220,6 +219,9 @@ then
     chmod +644 "$INST_LOG_FILE"
 fi
 
+# Redirect stdout and stderr to the log file
+exec &>>$INST_LOG_FILE
+
 # install dnf to replace yum based installations
 log "Installing dnf"
 yum -y -q install dnf-automatic
@@ -227,11 +229,6 @@ yum -y -q install dnf-automatic
 log "Starting dnf"
 systemctl enable dnf-automatic.timer
 systemctl start dnf-automatic.timer
-
-log "Installing dos2unix"
-yum install -y dos2unix
-
-log "$(date)"
 
 log "Passed Variables: $2, $1, $3, $4, $5"
 get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
@@ -246,7 +243,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # log "Updating packages.."
-# dnf -y update
+# yum update -y --exclude=WALinuxAgent
 
 log "--> Install Linux GUI ..."
 yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
@@ -257,17 +254,11 @@ fi
 log "--> Set default to graphical target"
 systemctl set-default graphical.target
 
-if [[ -z domain_name && -z domain_controller_ip ]]; then
-    log "--> Not joining domain controller"
-else
-    log "--> Joining domain controller"
-    join_domain
-fi
+join_domain
 
 install_pcoip_agent
 
 # Stage complete
-log "centos-provisioning.sh complete"
-log " - - - - - - - - - - - - - - - - - "
+log "--> Installaion complete!"
 
 exit_and_restart

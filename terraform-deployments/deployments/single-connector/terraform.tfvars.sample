@@ -58,7 +58,7 @@
         prefix           = "gfxws",
         location         = "westus2",
         workstation_os   = "linux",
-        vm_size          = "Standard_B2ms",
+        vm_size          = "Standard_NV6",
         disk_type        = "Standard_LRS",
         disk_size        = 128,
         count            = 1,

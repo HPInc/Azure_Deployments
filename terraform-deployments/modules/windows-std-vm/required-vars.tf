@@ -5,46 +5,33 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/*
+ * Copyright (c) 2020 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 variable "workstations" {
   description = "List of workstation types to create"
-  type        = map(object({
-      index            = number # The index of this object in the map
-      prefix           = string # The prefix applied to each VM name
-      location         = string # The region this set will be deployed in
-      workstation_os   = string # The OS type for this VM "windows" or "linux"
-      vm_size          = string # Valid VM size for the region selected
-      disk_type        = string # Valid VM disk type
-      disk_size        = number # The size of the VM disk in GB
-      isGFXHost        = bool   # High end graphics VM host indicator for the installation of graphics drivers
-    }))
+  type = map(object({
+    index          = number # The index of this object in the map
+    prefix         = string # The prefix applied to each VM name
+    location       = string # The region this set will be deployed in
+    workstation_os = string # The OS type for this VM "windows" or "linux"
+    vm_size        = string # Valid VM size for the region selected
+    disk_type      = string # Valid VM disk type
+    disk_size      = number # The size of the VM disk in GB
+    isGFXHost      = bool   # High end graphics VM host indicator for the installation of graphics drivers
+  }))
 }
 
 variable "resource_group_name" {
   description = "The name of the resource group"
 }
 
-variable "windows-host-vm-ids" {
-  description = "List of VMs to configure"
-  type        = list(string)
-}
-
-variable "windows-host-vm-public-ips" {
-  description = "List of public ips of the VMs to configure"
-  type        = list(string)
-}
-
-variable "windows-host-vm-names" {
-  description = "List of names of the VMs to configure"
-  type        = list(string)
-}
-
 variable "_artifactsLocation" {
   description = "URL to retrieve startup scripts with a trailing /"
-  type        = string
-}
-
-variable "_artifactsLocationSasToken" {
-  description = "Sas Token of the URL is optional, only if required for security reasons"
   type        = string
 }
 
@@ -90,5 +77,30 @@ variable "ad_pass_secret_id" {
 
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code from Teradici"
+  type        = string
+}
+
+variable "admin_name" {
+  description = "Name for the Administrator of the Workstation"
+  type        = string
+}
+
+variable "admin_password" {
+  description = "Password for the Administrator of the Workstation"
+  type        = string
+}
+
+variable "workstation_subnet_ids" {
+  description = "List of workstation subnets for each location"
+  type        = list(string)
+}
+
+variable "workstation_subnet_locations" {
+  description = "List of workstation locations"
+  type        = list(string)
+}
+
+variable "_artifactsLocationSasToken" {
+  description = "Sas Token of the URL is optional, only if required for security reasons"
   type        = string
 }

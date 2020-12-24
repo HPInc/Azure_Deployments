@@ -115,7 +115,13 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
     - Users can edit files inside ACS by doing ```code terraform.tfvars```.
     - The resource group name must be unique and must not already exist. The resource group name from the Azure Storage Account section cannot be reused.
     - Make sure the locations of the connectors and work stations are identical.
+    - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
+    - To add users successfully, passwords must have atleast 3 of the following requirements:
+      - 1 UPPERCASE letter
+      - 1 lowercase letter
+      - 1 number
+      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. ```tee -a installer.log``` stores a local log of the script output. 
 6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
@@ -124,42 +130,42 @@ A typical deployment should take around 45 minutes. When finished, the scripts w
 
 Example output:
 ```
-Apply complete! Resources: 57 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 55 added, 0 changed, 0 destroyed.
 
 Outputs:
 
 cac-vms = [
   {
-    "id" = "/subscriptions/1234/resourceGroups/My-RG/providers/Microsoft.Compute/virtualMachines/tera-cac-vm-0"
-    "location" = "westus2"
-    "name" = "tera-cac-vm-0"
+    "name" = "ter3-cac-vm-0"
     "private_ip" = "10.0.3.4"
-    "public_ip" = "12.34.567.890"
-    "size" = "Standard_D2s_v3"
+    "public_ip" = "52.109.24.176"
   },
 ]
-domain-controller-group = My-RG
-domain-controller-private-ip = 10.0.1.4
-domain-controller-public-ip = 12.34.567.892
-linux-workstations = [
+centos-graphics-workstations = [
   {
-    "id" = "/subscriptions/1234/resourceGroups/My-RG/providers/Microsoft.Compute/virtualMachines/centos-host-0"
-    "location" = "westus2"
-    "name" = "centos-host-0"
-    "private_ip" = "10.0.4.4"
-    "public_ip" = "12.34.56.800"
+    "name" = "ter0-gcent-0"
+    "private_ip" = "10.0.4.5"
+    "public_ip" = "52.109.24.180"
+  },
 ]
+centos-standard-workstations = [
+  {
+    "name" = "ter0-scent-0"
+    "private_ip" = "10.0.4.6"
+    "public_ip" = "52.109.26.105"
+  },
+]
+domain-controller-private-ip = "10.0.1.4"
+domain-controller-public-ip = "52.109.24.161"
 locations = [
   "westus2",
 ]
-windows-workstations = [
+resource_group = "mj122003"
+windows-standard-workstations = [
   {
-    "id" = "/subscriptions/1234/resourceGroups/My-RG/providers/Microsoft.Compute/virtualMachines/windows-host-0"
-    "location" = "westus2"
-    "name" = "windows-host-0"
-    "private_ip" = "10.0.4.5"
-    "public_ip" = "12.34.567.835"
-    "size" = "Standard_B2ms"
+    "name" = "ter0-swin-0"
+    "private_ip" = "10.0.4.4"
+    "public_ip" = "52.109.25.74"
   },
 ]
 ```

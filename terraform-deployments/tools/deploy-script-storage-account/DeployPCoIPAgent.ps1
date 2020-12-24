@@ -281,15 +281,20 @@ try {
     Write-Output = "Updated Registry and Forced Update with RUNDLL32.EXE"
     Get-ItemProperty -Path 'HKCU:\Control Panel\Desktop'
     
-    if ($restart_machine) {
-        Write-Output "Restart VM..."   
-        Restart-Computer -Force
-    }
-    else {
-        Write-Output "Please restart VM for changes to take effect"
-    }
+    # if ($restart_machine) {
+    #     Write-Output "Restart VM..."   
+    #     Restart-Computer -Force
+    # }
+    # else {
+    #     Write-Output "Please restart VM for changes to take effect"
+    # }
+
+    Restart-Computer -Force
+
 }
 catch [Exception] {
     Write-Output $_.Exception.Message
     Write-Error $_.Exception.Message
 }
+
+Restart-Computer -Force

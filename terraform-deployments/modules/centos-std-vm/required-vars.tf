@@ -34,31 +34,6 @@ variable "admin_password" {
   type        = string
 }
 
-# variable "centos_host_nic_ids" {
-#   description = "List of network card ids we will use to create the VMs"
-#   type        = list(string)
-# }
-
-/*variable "centos-host-vm-ids" {
-  description = "List of VMs to configure"
-  type        = list(string)
-}
-
-variable "centos-host-vm-public-ips" {
-  description = "List of public ips of the VMs to configure"
-  type        = list(string)
-}
-
-variable "centos-host-vm-names" {
-  description = "List of names of the VMs to configure"
-  type        = list(string)
-}*/
-
-# variable "_artifactsLocation" {
-#   description = "URL to retrieve startup scripts with a trailing /"
-#   type        = string
-# }
-
 variable "domain_name" {
   description = "Name of the domain to join"
   type        = string

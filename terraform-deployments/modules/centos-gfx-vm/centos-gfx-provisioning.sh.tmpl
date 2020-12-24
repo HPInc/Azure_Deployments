@@ -5,8 +5,6 @@
 
 #!/bin/bash
 
-# exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-
 PCOIP_AGENT_REPO_PUBKEY_URL="https://downloads.teradici.com/rhel/teradici.pub.gpg"
 PCOIP_AGENT_REPO_URL="https://downloads.teradici.com/rhel/pcoip.repo"
 
@@ -23,7 +21,6 @@ ad_pass_secret_key=${ad_pass_secret_id}
 
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
-INST_ERR_LOG_FILE="/var/log/teradici/agent/error.log"
 
 log() {
     local message="$1"
@@ -56,18 +53,21 @@ get_credentials() {
     fi
 }
 
-remove_nouveau() {
-        log "--> Disabling the Nouveau kernel driver..."
-        for driver in vga16fb nouveau nvidiafb rivafb rivatv; do
-            echo "blacklist $driver" >> /etc/modprobe.d/blacklist.conf
-        done
-
-        log "--> Here 0"
-        sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/grub
-        grub2-mkconfig -o /boot/grub2/grub.cfg
-        log "--> Here 1"
+exit_and_restart() {
+    log "--> Rebooting..."
+    (sleep 1; reboot -p) &
+    exit
 }
 
+remove_nouveau() {
+    log "--> Disabling the Nouveau kernel driver..."
+    for driver in vga16fb nouveau nvidiafb rivafb rivatv; do
+        echo "blacklist $driver" >> /etc/modprobe.d/blacklist.conf
+    done
+
+    sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 rdblacklist=nouveau"/' /etc/default/grub
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+}
 
 install_kernel_header() {
     log "--> Installing kernel headers and development packages..."
@@ -96,14 +96,14 @@ install_gpu_driver() {
     then
         log "--> Installing GPU driver..."
 
-        local nvidia_driver_filename=$(basename $${nvidia_driver_url})
+        local nvidia_driver_filename=$(basename ${nvidia_driver_url})
         local gpu_installer="/tmp/$nvidia_driver_filename"
 
         log "--> Killing X server before installing driver..."
         service gdm stop
 
         log "--> Downloading GPU driver $nvidia_driver_filename to $gpu_installer..."
-        wget --retry-connrefused --tries=3 --waitretry=5 -O "$gpu_installer" $${nvidia_driver_url}
+        wget --retry-connrefused --tries=3 --waitretry=5 -O "$gpu_installer" ${nvidia_driver_url}
         chmod u+x "$gpu_installer"
 
         log "--> Running GPU driver installer..."
@@ -114,9 +114,10 @@ install_gpu_driver() {
         # --sanity Perform basic sanity tests on an existing NVIDIA driver installation.
         # --uninstall Uninstall the currently installed NVIDIA driver.
         # using dkms cause kernel rebuild and installation failure
-        if "$gpu_installer" -s -Z -X
+        if "$gpu_installer" -s -Z -X --kernel-source-path "/usr/src/kernels/$(uname -r)"
         then
             log "--> GPU driver installed successfully."
+            dracut -fv
         else
             log "--> ERROR: Failed to install GPU driver."
             exit 1
@@ -278,21 +279,32 @@ join_domain()
             return 106
         fi
 
-        log "--> Joining the domain '${domain_name}'"
-        if [[ -n "$OU" ]]
-        then
+        log "--> Joining the domain '${domain_name}'..."
+        local retries=10
+
+        set +x
+        while true
+        do
             echo "${ad_service_account_password}" | realm join --user="${ad_service_account_username}@${domain_name}" "${domain_name}" --verbose >&2
-        else
-            echo "${ad_service_account_password}" | realm join --user="${ad_service_account_username}" "${domain_name}" >&2
-        fi
-        exitCode=$?
-        if [[ $exitCode -eq 0 ]]
-        then
-            log "--> Joined Domain '${domain_name}'"
-        else
-            log "--> Failed to join Domain '${domain_name}' and OU '$OU'"
-            return 106
-        fi
+            
+            local rc=$?
+            if [[ $rc -eq 0 ]]
+            then
+                log "--> Successfully joined domain '${domain_name}'."
+                break
+            fi
+
+            if [ $retries -eq 0 ]
+            then
+                log "--> ERROR: Failed to join domain '${domain_name}'."
+                return 106
+            fi
+
+            log "--> ERROR: Failed to join domain '${domain_name}'. $retries retries remaining..."
+            retries=$((retries-1))
+            sleep 60
+        done
+        set -x
 
         log "--> Configuring settings"
         sed -i '$ a\dyndns_update = True\ndyndns_ttl = 3600\ndyndns_refresh_interval = 43200\ndyndns_update_ptr = True\nldap_user_principal = nosuchattribute' /etc/sssd/sssd.conf
@@ -311,12 +323,6 @@ join_domain()
         echo "send" >> "$dns_record_file"
         nsupdate -g "$dns_record_file"
     fi
-}
-
-exit_and_restart() {
-    log "--> Rebooting..."
-    (sleep 1; reboot -p) &
-    exit
 }
 
 # Open up firewall for PCoIP Agent. By default eth0 is in firewall zone "public"
@@ -343,75 +349,60 @@ else
     RE_ENTER=1
 fi
 
-if [[ ! -f "$INST_ERR_LOG_FILE" ]]
-then
-    mkdir -p "$(dirname $INST_ERR_LOG_FILE)"
-    touch "$INST_ERR_LOG_FILE"
-    chmod +644 "$INST_ERR_LOG_FILE"
-else
-    RE_ENTER=1
-fi
-
-
-log "$(date)"
-
 # Print all executed commands to the terminal
 set -x
 
 # Redirect stdout and stderr to the log file
-exec &>>$INST_ERR_LOG_FILE
+exec &>>$INST_LOG_FILE
 
 get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
 
-log $(pwd)
+if [[ $RE_ENTER -eq 0 ]]
+then
+    log "Installing epel-release.."
+    yum -y install epel-release
 
-#if [[ $RE_ENTER -eq 0 ]]
-#then
-    # EPEL needed for GraphicsMagick-c++, required by PCoIP Agent
+    #log "Installing jq"
+    #yum install -y jq
 
-log "Installing epel-release.."
-yum -y install epel-release
+    yum install -y wget
 
-log "Installing jq"
-yum install -y jq
+    log "--> Install Linux GUI ..."
+    yum -y groupinstall "Server with GUI"
+    if [ $? -ne 0 ]; then
+        log "Failed to install Linux GUI"
+    fi
 
-log "--> Install Linux GUI ..."
-yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
-if [ $? -ne 0 ]; then
-    log "Failed to install Linux GUI"
+    log "--> Setting default to graphical target..."
+    systemctl set-default graphical.target
+
+    join_domain
+
+    echo '/var/lib/waagent/custom-script/download/0/script.sh' >> /etc/rc.local
+
+    chmod +x /etc/rc.local
+
+    remove_nouveau
+
+    install_kernel_header
+
+    yum update -y --exclude=WALinuxAgent
+    
+    exit_and_restart
+
+else
+
+    install_gpu_driver
+
+    enable_persistence_mode
+
+    install_pcoip_agent
+
+    log "--> Installation is complete!"
+
+    update_firewall
+    
+    sed -i '$ d' /etc/rc.local
+
+    exit_and_restart
 fi
-
-log "--> Setting default to graphical target..."
-systemctl set-default graphical.target
-
-join_domain
-
-remove_nouveau
-
-#   exit_and_restart
-#else
-
-install_kernel_header
-
-install_gpu_driver
-
-enable_persistence_mode
-
-install_pcoip_agent
-
-# update_firewall
-
-log "--> Installation is complete!"
-
-exit_and_restart
-#fi
-
-# log "Starting install of kernel header"
-# install_kernel_header
-
-# log "Starting install of NVidia driver"
-# install_nvidia_driver
-
-# # Stage complete
-# log "centos-gfx-provisioning.sh complete"
-# log "- - - - - - - - - - - - - - - - - - -"
