@@ -34,7 +34,6 @@ variable "host_name" {
 variable "machine_type" {
   description = "Machine type for the Cloud Access Connector"
   default     = "Standard_B2ms"
-  # default     = "Standard_DS2_v3"
 }
 
 variable "disk_size_gb" {

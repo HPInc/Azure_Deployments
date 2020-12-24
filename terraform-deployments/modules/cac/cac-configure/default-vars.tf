@@ -29,7 +29,6 @@ variable "ssl_cert" {
 
 variable "cac_installer_url" {
   description = "Location of the Cloud Access Connector installer"
-  default     = "https://teradici.bintray.com/cloud-access-connector/cloud-access-connector-0.1.1.tar.gz"
 }
 
 variable "cam_url" {

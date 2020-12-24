@@ -9,6 +9,10 @@ output "windows-std-workstations" {
   value = local.windows_std_workstations_map
 }
 
+output "windows-gfx-workstations" {
+  value = local.windows_gfx_workstations_map
+}
+
 output "centos-workstations" {
   value = local.centos_workstations_map
 }

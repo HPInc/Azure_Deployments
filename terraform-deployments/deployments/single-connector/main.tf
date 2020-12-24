@@ -160,12 +160,12 @@ module "cac-configuration" {
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
+  cac_installer_url = "https://dl.teradici.com/${var.cac_installer_token}/cloud-access-connector/raw/names/cloud-access-connector-linux-tgz/versions/latest/cloud-access-connector_latest_Linux.tar.gz"
   domain_group                = var.domain_group
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   cac_admin_user              = var.cac_admin_username
   cac_admin_password          = var.cac_admin_password
-  cac_installer_url           = var.cac_installer_url
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
   cac_ips                     = module.cac-network.cac-public-ips
@@ -187,6 +187,35 @@ module "windows-std-vm" {
   ]
 
   workstations = module.workstation-map.windows-std-workstations
+
+  resource_group_name         = azurerm_resource_group.main.name
+  admin_name                  = var.windows_admin_username
+  admin_password              = var.windows_admin_password
+  pcoip_registration_code     = var.pcoip_registration_code
+  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username = var.ad_admin_username
+  ad_service_account_password = var.ad_admin_password
+  application_id              = var.application_id
+  tenant_id                   = var.tenant_id
+  aad_client_secret           = var.aad_client_secret
+  pcoip_secret_id             = var.pcoip_secret_id
+  ad_pass_secret_id           = var.ad_pass_secret_id
+  _artifactsLocation          = var._artifactsLocation
+  _artifactsLocationSasToken  = var._artifactsLocationSasToken
+
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+}
+
+
+module "windows-gfx-vm" {
+  source = "../../modules/windows-gfx-vm"
+
+  windows_host_vm_depends_on = [
+    module.cac-vm.cac-vm-ids,
+  ]
+
+  workstations = module.workstation-map.windows-gfx-workstations
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.windows_admin_username

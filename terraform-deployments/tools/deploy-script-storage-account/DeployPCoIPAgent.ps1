@@ -88,6 +88,7 @@ param(
 #Install/Test Configuration
 $AgentDestinationPath = 'C:\Installer\'
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
+$LOG_FILE = "C:\Teradici\provisioning.log"
 
 $AgentDestination = $AgentDestinationPath + $PCoIPAgentEXE
 $PCoIPAgentURL = $PCoIPAgentUri
@@ -142,6 +143,16 @@ Function Get-Secret
 
     return $result
 }
+
+if (Test-Path $LOG_FILE) {
+    Start-Transcript -Path $LOG_FILE -Append -IncludeInvocationHeader
+    "--> $LOG_FILE exists. Assuming this provisioning script has run, exiting..."
+    exit 0
+}
+
+Start-Transcript -path $LOG_FILE -append
+
+"--> Script running as user '$(whoami)'."
 
 function Join-Domain 
 (

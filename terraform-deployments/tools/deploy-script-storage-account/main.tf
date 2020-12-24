@@ -32,12 +32,20 @@ resource "azurerm_storage_container" "script" {
 #   source                 = "${path.module}/sysprep.ps1"
 # }
 
-resource "azurerm_storage_blob" "windows-std-script" {
+resource "azurerm_storage_blob" "windows-std-provisioning-script" {
   name                   = "DeployPCoIPAgent.ps1"
   storage_account_name   = azurerm_storage_account.script.name
   storage_container_name = azurerm_storage_container.script.name
   type                   = "Block"
   source                 = "${path.module}/DeployPCoIPAgent.ps1"
+}
+
+resource "azurerm_storage_blob" "windows-gfx-provisioning-script" {
+  name                   = "windows-gfx-provisioning.ps1"
+  storage_account_name   = azurerm_storage_account.script.name
+  storage_container_name = azurerm_storage_container.script.name
+  type                   = "Block"
+  source                 = "${path.module}/windows-gfx-provisioning.ps1"
 }
 
 resource "azurerm_storage_blob" "pcoip-agent" {
