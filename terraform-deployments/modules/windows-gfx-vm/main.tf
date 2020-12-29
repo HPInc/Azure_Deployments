@@ -78,7 +78,7 @@ resource "null_resource" "windows-gfx-script-download" {
   }
 }
 
-resource "null_resource" "windows-gfx-script-run-deploy-1" {
+resource "null_resource" "windows-gfx-driver-installation" {
 
   depends_on = [null_resource.windows-gfx-script-download]
 
@@ -90,9 +90,9 @@ resource "null_resource" "windows-gfx-script-run-deploy-1" {
   }
 }
 
-resource "null_resource" "windows-gfx-script-run-deploy-2" {
+resource "null_resource" "windows-gfx-pcoip-installation" {
 
-  depends_on = [null_resource.windows-gfx-script-run-deploy-1]
+  depends_on = [null_resource.windows-gfx-driver-installation]
 
   for_each = var.workstations
 
@@ -102,9 +102,9 @@ resource "null_resource" "windows-gfx-script-run-deploy-2" {
   }
 }
 
-resource "null_resource" "windows-gfx-script-run-deploy-3" {
+resource "null_resource" "windows-gfx-restart" {
 
-  depends_on = [null_resource.windows-gfx-script-run-deploy-2]
+  depends_on = [null_resource.windows-gfx-pcoip-installation]
 
   for_each = var.workstations
 

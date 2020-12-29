@@ -8,7 +8,7 @@ param(
 
     [Parameter(Mandatory = $true)]
     [string]
-    $TeraRegKey,
+    $pcoip_registration_code,
 
     [Parameter(Mandatory = $true)]
     [string]
@@ -235,7 +235,7 @@ function PCoIP-Agent-Register {
 
     do {
         $Retry = $false
-        & .\pcoip-register-host.ps1 -RegistrationCode $TeraRegKey
+        & .\pcoip-register-host.ps1 -RegistrationCode $pcoip_registration_code
         # The script already produces error message
 
         if ( $LastExitCode -ne 0 ) {
@@ -329,7 +329,7 @@ Start-Transcript -path $LOG_FILE -append
 #Decrypt Teradici Reg Key and AD Service Account Password
 if (!($application_id -eq $null -or $application_id -eq "") -and !($aad_client_secret -eq $null -or $aad_client_secret -eq "") -and !($tenant_id -eq $null -or $tenant_id -eq "")) {
     Write-Output "Running Get-Secret!"
-    $TeraRegKey = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
+    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
     $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_pass_secret_id
 }
 
