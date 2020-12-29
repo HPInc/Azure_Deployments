@@ -88,6 +88,9 @@ cac_configuration = [
     }
 ]
 
+# Token used to download the cloud access connector installer.
+cac_installer_token = ""
+
 # The PCOIP registration code
 pcoip_registration_code       = "XXXXXXXXXXX@AAAA-BBBB-CCCC-DDDD"
 
