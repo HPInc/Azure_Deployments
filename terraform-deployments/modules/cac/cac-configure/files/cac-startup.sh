@@ -192,7 +192,7 @@ if [ -z "${ssl_key}" ]; then
     log "### Not installing ssl certificate ###"
     while true
     do
-        ./cloud-access-connector install \
+        ./usr/sbin/cloud-access-connector install \
             -t $CAC_TOKEN \
             --accept-policies \
             --insecure \

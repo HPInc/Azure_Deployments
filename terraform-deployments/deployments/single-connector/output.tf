@@ -31,6 +31,16 @@ output "windows-standard-workstations" {
   ]
 }
 
+output "windows-graphics-workstations" {
+  value = [for index, item in module.workstation-map.windows-gfx-workstations :
+    {
+      name : module.windows-gfx-vm.windows-gfx-vm-names[item.index],
+      public_ip : module.windows-gfx-vm.windows-gfx-vm-public-ips[item.index],
+      private_ip : module.windows-gfx-vm.windows-gfx-vm-private-ips[item.index]
+    }
+  ]
+}
+
 output "centos-graphics-workstations" {
   value = [for index, item in module.workstation-map.centos-gfx-workstations :
     {

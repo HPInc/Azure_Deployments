@@ -24,34 +24,18 @@ resource "azurerm_storage_container" "script" {
   container_access_type = "blob"
 }
 
-# resource "azurerm_storage_blob" "sysprep-script" {
-#   name                   = "sysprep.ps1"
-#   storage_account_name   = azurerm_storage_account.script.name
-#   storage_container_name = azurerm_storage_container.script.name
-#   type                   = "Block"
-#   source                 = "${path.module}/sysprep.ps1"
-# }
-
-resource "azurerm_storage_blob" "windows-std-script" {
-  name                   = "DeployPCoIPAgent.ps1"
+resource "azurerm_storage_blob" "windows-std-provisioning-script" {
+  name                   = "windows-std-provisioning.ps1"
   storage_account_name   = azurerm_storage_account.script.name
   storage_container_name = azurerm_storage_container.script.name
   type                   = "Block"
-  source                 = "${path.module}/DeployPCoIPAgent.ps1"
+  source                 = "${path.module}/windows-std-provisioning.ps1"
 }
 
-resource "azurerm_storage_blob" "pcoip-agent" {
-  name                   = "pcoip-agent-standard_20.10.1.exe"
+resource "azurerm_storage_blob" "windows-gfx-provisioning-script" {
+  name                   = "windows-gfx-provisioning.ps1"
   storage_account_name   = azurerm_storage_account.script.name
   storage_container_name = azurerm_storage_container.script.name
   type                   = "Block"
-  source                 = "${path.module}/pcoip-agent-standard_20.10.1.exe"
-}
-
-resource "azurerm_storage_blob" "background-img" {
-  name                   = "img0.jpg"
-  storage_account_name   = azurerm_storage_account.script.name
-  storage_container_name = azurerm_storage_container.script.name
-  type                   = "Block"
-  source                 = "${path.module}/img0.jpg"
+  source                 = "${path.module}/windows-gfx-provisioning.ps1"
 }

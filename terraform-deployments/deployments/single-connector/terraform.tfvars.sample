@@ -7,6 +7,7 @@
 
  # List of workstations to deploy
  # The example below deploys 2 standard workstations in westus2. 1 standard CentOS VM and 1 standard Windows VM.
+ # For prefixes, the max amount of characters is 5 to avoid the cropping of workstation names.
  
  workstations = [
     {
@@ -68,7 +69,7 @@
         prefix           = "ws",
         location         = "westus2",
         workstation_os   = "windows",
-        vm_size          = "Standard_B2ms",
+        vm_size          = "Standard_NV6",
         disk_type        = "Standard_LRS",
         disk_size        = 128,
         count            = 1,
@@ -87,6 +88,9 @@ cac_configuration = [
     }
 ]
 
+# Token used to download the cloud access connector installer.
+cac_installer_token = ""
+
 # The PCOIP registration code
 pcoip_registration_code       = "XXXXXXXXXXX@AAAA-BBBB-CCCC-DDDD"
 
@@ -102,23 +106,23 @@ _artifactsLocation            = "https://<storage account name>.blob.core.window
 # Domain controller active directory property values
 active_directory_netbios_name = "tera"
 ad_admin_username             = "admin234"
-ad_admin_password             = "StRoNgPaSsWoRd11#"
-safe_mode_admin_password      = "StRoNgPaSsWoRd11#"
+ad_admin_password             = "Password!234"
+safe_mode_admin_password      = "Password!234"
 
 # The location on the local PC where the domain users list file (csv) resides
 ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # CAC VM username and passwords
 cac_admin_username = "admin234"
-cac_admin_password = "StRoNgPaSsWoRd11#"
+cac_admin_password = "Password!234"
 
 # Windows VMs usernames and passwords
 windows_admin_username  = "WINadmin"
-windows_admin_password  = "StRoNgPaSsWoRd11#"
+windows_admin_password  = "Password!234"
 
 # Centos VMs usernames and passwords
 centos_admin_username  = "CENTadmin"
-centos_admin_password  = "StRoNgPaSsWoRd11#"
+centos_admin_password  = "Password!234"
 
 # Leave the following blank, they are only filled when using Azure Key Vault secrets
 application_id                = ""
