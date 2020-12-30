@@ -160,7 +160,7 @@ module "cac-configuration" {
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
-  cac_installer_url = "https://dl.teradici.com/${var.cac_installer_token}/cloud-access-connector/raw/names/cloud-access-connector-linux-tgz/versions/latest/cloud-access-connector_latest_Linux.tar.gz"
+  cac_installer_token         = var.cac_installer_token
   domain_group                = var.domain_group
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
