@@ -80,6 +80,7 @@ variable "safe_admin_pass_secret_id" {
 variable "safe_mode_admin_password" {
   description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
   type        = string
+  default     = ""
 }
 
 variable "ad_domain_users_list_file" {
@@ -109,6 +110,7 @@ variable "_artifactsLocation" {
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
   type        = string
+  default     = ""
 }
 
 variable "cac_admin_password" {

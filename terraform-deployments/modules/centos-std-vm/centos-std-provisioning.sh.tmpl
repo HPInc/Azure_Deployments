@@ -8,6 +8,7 @@
 
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
+ERR_LOG_FILE="/var/log/teradici/agent/error.log"
 
 pcoip_registration_code=${pcoip_registration_code}
 ad_service_account_password=${ad_service_account_password}
@@ -33,26 +34,28 @@ error_exit() {
 get_access_token() {
     accessToken=`curl -X POST -d "grant_type=client_credentials&client_id=$1&client_secret=$2&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$3/oauth2/token`
     token=$(echo $accessToken | jq ".access_token" -r)
-    log "$token"
+    log "Access Token: $token"
     output=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
-    log "$output"
+    # log "Output: $output"
     output=$(echo $output | jq '.value')
-    chrlen=$${#output}
-    output=$${output:1:$chrlen-2}
+    output=$(echo $output | sed 's/"//g')
+    log "Output: $output"
+    echo "Output: $output"
 }
 
+
 get_credentials() {
-    # Check if we need to get secret from Azure Key Vault
-    if [[ -z "$1" || -z "$2" || -z "$3" || -z "$4" || -z "$5" ]]; then
-       log "Not getting secrets from Azure Key Vault: $2, $1, $3, $4, $5"
+    # Check if we need to get secrets from Azure Key Vault
+    if [[ -z "$1" && -z "$2" && -z "$3" && -z "$4" && -z "$5" ]]; then
+        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
-       log "Using following passed data to decrypt: $2, $1, $3, $4, $5"
-       get_access_token $2 $1 $3 $4
-       pcoip_registration_code=$output
-       log "REG: $pcoip_registration_code"
-       get_access_token $2 $1 $3 $5
-       ad_service_account_password=$output
-       log "AD PASS: $ad_service_account_password"
+        log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5"
+        get_access_token $2 $1 $3 $4
+        pcoip_registration_code=$output
+        log "Registration Code: $pcoip_registration_code"
+        get_access_token $2 $1 $3 $5
+        ad_service_account_password=$output
+        log "Active Directory Password: $ad_service_account_password"
     fi
 }
 
@@ -219,8 +222,16 @@ then
     chmod +644 "$INST_LOG_FILE"
 fi
 
+# Create log file
+if [[ ! -f "$ERR_LOG_FILE" ]]
+then
+    mkdir -p "$ERR_LOG_PATH"
+    touch "$ERR_LOG_FILE"
+    chmod +644 "$ERR_LOG_FILE"
+fi
+
 # Redirect stdout and stderr to the log file
-exec &>>$INST_LOG_FILE
+exec &>>$ERR_LOG_FILE
 
 # install dnf to replace yum based installations
 log "Installing dnf"
@@ -230,17 +241,21 @@ log "Starting dnf"
 systemctl enable dnf-automatic.timer
 systemctl start dnf-automatic.timer
 
-log "Passed Variables: $2, $1, $3, $4, $5"
-get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
-
-log "$domain_name ;; $domain_controller_ip"
-
 log "--> Get epel-release"
 yum -y install epel-release
 if [ $? -ne 0 ]; then
     log "--> Failed to install epel-release"
     exit 1
 fi
+
+log "--> Installing jq"
+yum install -y jq
+if [ $? -ne 0 ]; then
+    log "Failed to install jq"
+fi
+
+get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
+log "$domain_name ;; $domain_controller_ip"
 
 # log "Updating packages.."
 # yum update -y --exclude=WALinuxAgent
