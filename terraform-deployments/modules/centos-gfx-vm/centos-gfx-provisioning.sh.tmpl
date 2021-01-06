@@ -21,6 +21,7 @@ ad_pass_secret_key=${ad_pass_secret_id}
 
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
+ERR_LOG_FILE="/var/log/teradici/agent/error.log"
 
 log() {
     local message="$1"
@@ -30,26 +31,19 @@ log() {
 get_access_token() {
     accessToken=`curl -X POST -d "grant_type=client_credentials&client_id=$1&client_secret=$2&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$3/oauth2/token`
     token=$(echo $accessToken | jq ".access_token" -r)
-    log "$token"
-    output=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
-    log "$output"
-    output=$(echo $output | jq '.value')
-    chrlen=$${#output}
-    output=$${output:1:$chrlen-2}
+    json_map=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
+    value=$(echo $json_map | jq -r '.value')
+    echo "$value"
 }
 
 get_credentials() {
-    # Check if we need to get secret from Azure Key Vault
-    if [[ -z "$1" || -z "$2" || -z "$3" || -z "$4" || -z "$5" ]]; then
-       log "Not getting secrets from Azure Key Vault: $2, $1, $3, $4, $5"
+    # Check if we need to get secrets from Azure Key Vault
+    if [[ -z "$1" && -z "$2" && -z "$3" && -z "$4" && -z "$5" ]]; then
+        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
-       log "Using following passed data to decrypt: $2, $1, $3, $4, $5"
-       get_access_token $2 $1 $3 $4
-       pcoip_registration_code=$output
-       log "REG: $pcoip_registration_code"
-       get_access_token $2 $1 $3 $5
-       ad_service_account_password=$output
-       log "AD PASS: $ad_service_account_password"
+        log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5"
+        pcoip_registration_code=$(get_access_token $2 $1 $3 $4)
+        ad_service_account_password=$(get_access_token $2 $1 $3 $5)
     fi
 }
 
@@ -202,8 +196,9 @@ install_pcoip_agent() {
         log "--> PCoIP agent installed successfully."
 
         set +x
-        if [[ "${pcoip_registration_code}" ]]; then
+        if [[ "$${pcoip_registration_code}" ]]; then
             log "--> Registering PCoIP agent license..."
+
             n=0
             while true; do
                 /usr/sbin/pcoip-register-host --registration-code="$pcoip_registration_code" && break
@@ -345,6 +340,11 @@ then
     mkdir -p "$(dirname $INST_LOG_FILE)"
     touch "$INST_LOG_FILE"
     chmod +644 "$INST_LOG_FILE"
+
+    mkdir -p "$(dirname $ERR_LOG_FILE)"
+    touch "$ERR_LOG_FILE"
+    chmod +644 "$ERR_LOG_FILE"
+
 else
     RE_ENTER=1
 fi
@@ -353,19 +353,22 @@ fi
 set -x
 
 # Redirect stdout and stderr to the log file
-exec &>>$INST_LOG_FILE
-
-get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
+exec &>>$ERR_LOG_FILE
 
 if [[ $RE_ENTER -eq 0 ]]
 then
     log "Installing epel-release.."
     yum -y install epel-release
 
-    #log "Installing jq"
-    #yum install -y jq
+    log "Installing jq"
+    yum install -y jq
+    if [ $? -ne 0 ]; then
+        log "Failed to install jq"
+    fi
 
     yum install -y wget
+    
+    get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
 
     log "--> Install Linux GUI ..."
     yum -y groupinstall "Server with GUI"
@@ -395,6 +398,8 @@ else
     install_gpu_driver
 
     enable_persistence_mode
+
+    get_credentials $aadClientSecret $appID $tenantID $pcoip_reg_secret_key $ad_pass_secret_key
 
     install_pcoip_agent
 

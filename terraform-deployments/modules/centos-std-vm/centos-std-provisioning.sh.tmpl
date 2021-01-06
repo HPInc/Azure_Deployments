@@ -9,6 +9,8 @@
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
 ERR_LOG_FILE="/var/log/teradici/agent/error.log"
+PCOIP_AGENT_REPO_PUBKEY_URL="https://downloads.teradici.com/rhel/teradici.pub.gpg"
+PCOIP_AGENT_REPO_URL="https://downloads.teradici.com/rhel/pcoip.repo"
 
 pcoip_registration_code=${pcoip_registration_code}
 ad_service_account_password=${ad_service_account_password}
@@ -62,14 +64,14 @@ get_credentials() {
 install_pcoip_agent() {
     if ! (rpm -q pcoip-agent-standard)
     then
-        log "--> Start to install pcoip agent ..."
+        log "--> Installing PCoIP agent..."
         # Get the Teradici pubkey
-        log "--> Get Teradici pubkey"
-        rpm --import https://downloads.teradici.com/rhel/teradici.pub.gpg
+        log "--> Getting Teradici pubkey..."
+        rpm --import $PCOIP_AGENT_REPO_PUBKEY_URL
 
         # Get pcoip repo
         log "--> Get Teradici PCoIP agent repo"
-        wget --retry-connrefused --tries=3 --waitretry=5 -O /etc/yum.repos.d/pcoip.repo https://downloads.teradici.com/rhel/pcoip.repo
+        wget --retry-connrefused --tries=3 --waitretry=5 -O /etc/yum.repos.d/pcoip.repo $PCOIP_AGENT_REPO_URL
 
         log "--> Install PCoIP standard agent ..."
         dnf -y install pcoip-agent-standard
@@ -79,7 +81,7 @@ install_pcoip_agent() {
         fi
         log "--> PCoIP agent installed successfully."
 
-        log "--> Register pcoip agent license ..."
+        log "--> Registering PCoIP agent license..."
         n=0
         while true; do
             /usr/sbin/pcoip-register-host --registration-code="$pcoip_registration_code" && break

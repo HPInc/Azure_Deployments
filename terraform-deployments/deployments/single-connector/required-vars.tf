@@ -45,6 +45,7 @@ variable "active_directory_netbios_name" {
 
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
+  default     = ""
 }
 
 variable "ad_pass_secret_name" {
