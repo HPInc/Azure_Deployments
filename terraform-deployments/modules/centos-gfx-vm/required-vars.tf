@@ -91,3 +91,11 @@ variable "workstation_subnet_ids" {
 variable "workstation_subnet_locations" {
   description = "Workstation subnet locations"
 }
+
+variable "key_vault_id" {
+  description = "Key vault ID for ad admin password"
+}
+
+variable "ad_pass_secret_name" {
+  description = "Name of ad admin password"
+}

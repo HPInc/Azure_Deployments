@@ -5,6 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  ad_admin_password = var.key_vault_id == "" ? var.ad_admin_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
+}
+
 module "active-directory-domain-network" {
   source = "../dc-network"
 
@@ -34,7 +44,7 @@ module "active-directory-domain-vm" {
 
   active_directory_domain_name  = "${var.active_directory_netbios_name}.dns.internal"
   ad_admin_username             = var.ad_admin_username
-  ad_admin_password             = var.ad_admin_password
+  ad_admin_password             = local.ad_admin_password
   dc_machine_type               = var.dc_machine_type
   nic_id                        = module.active-directory-domain-network.network-interface-id
   prefix                        = var.prefix
@@ -57,7 +67,7 @@ module "active-directory-domain-service" {
 
   active_directory_domain_name  = "${var.active_directory_netbios_name}.dns.internal"
   ad_admin_username             = var.ad_admin_username
-  ad_admin_password             = var.ad_admin_password
+  ad_admin_password             = local.ad_admin_password
   ad_pass_secret_name           = var.ad_pass_secret_name
   key_vault_id                  = var.key_vault_id
   application_id                = var.application_id

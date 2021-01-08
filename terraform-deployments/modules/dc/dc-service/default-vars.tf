@@ -31,7 +31,7 @@ variable "key_vault_id" {
 }
 
 locals {
-  use_secret_or_not      = var.ad_admin_password != "" ? { ad_admin_password = var.ad_admin_password } : { ad_admin_password = tostring(data.azurerm_key_vault_secret.ad-pass[0].value) }
+  ad_admin_password = var.key_vault_id == "" ? var.ad_admin_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
   new_domain_users       = var.active_directory_domain_users_list_file == "" ? 0 : 1
   setup_file             = "C:/Temp/setup.ps1"
   setup_add_admin_file   = "C:/Temp/add_admin.ps1"
