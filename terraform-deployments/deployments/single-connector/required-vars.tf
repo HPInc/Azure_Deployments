@@ -111,7 +111,7 @@ variable "_artifactsLocation" {
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
   type        = string
-  default     = ""
+  default     = "void"
 }
 
 variable "cac_admin_password" {

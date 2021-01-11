@@ -5,10 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-locals {
-  windows_std_provisioning_script = "windows-std-provisioning.ps1"
-}
-
 # Debug public ip remove if not needed
 resource "azurerm_public_ip" "windows-std-nic-public-ip" {
   for_each = var.workstations
@@ -73,7 +69,7 @@ resource "null_resource" "az-windows-host-configure-download" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${local.deploy_script_file} -OutFile ${local.deploy_temp_dir}/${local.pcoip_agent_deploy_script} -Verbose\""
+    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${local.deploy_script_file} -OutFile ${local.deploy_temp_dir}/${local.windows_std_provisioning_script} -Verbose\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }
@@ -85,7 +81,7 @@ resource "null_resource" "az-windows-host-configure-run-deploy" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.pcoip_agent_deploy_script} ${local.pcoip_agent_deploy_script_params}\""
+    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_std_provisioning_script} ${local.windows_std_provisioning_script_params}\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }

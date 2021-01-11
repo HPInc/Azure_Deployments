@@ -55,22 +55,22 @@ $global:restart = $false
 
 # Retry function, defaults to trying for 5 minutes with 10 seconds intervals
 function Retry([scriptblock]$Action, $Interval = 10, $Attempts = 30) {
-  $Current_Attempt = 0
+    $Current_Attempt = 0
 
-  while ($true) {
-    $Current_Attempt++
-    $rc = $Action.Invoke()
+    while ($true) {
+        $Current_Attempt++
+        $rc = $Action.Invoke()
 
-    if ($?) { return $rc }
+        if ($?) { return $rc }
 
-    if ($Current_Attempt -ge $Attempts) {
-        Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
-        Throw
+        if ($Current_Attempt -ge $Attempts) {
+            Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
+            Throw
+        }
+
+        Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
+        Start-Sleep -Seconds $Interval
     }
-
-    Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
-    Start-Sleep -Seconds $Interval
-  }
 }
 
 Function Get-AccessToken
@@ -130,13 +130,14 @@ function PCoIP-Agent-Install {
     if (![string]::IsNullOrEmpty($PCOIP_AGENT_FILENAME)) {
         "--> Using user-specified PCoIP standard agent filename..."
         $agent_filename = $PCOIP_AGENT_FILENAME
-    } else {
+    }
+    else {
         "--> Using default latest PCoIP standard agent..."
         $agent_latest = $PCOIP_AGENT_LOCATION_URL + "latest-standard-agent.json"
         $wc = New-Object System.Net.WebClient
 
         "--> Checking for the latest PCoIP standard agent version from $agent_latest..."
-        $string = Retry -Action {$wc.DownloadString($agent_latest)}
+        $string = Retry -Action { $wc.DownloadString($agent_latest) }
 
         $agent_filename = $string | ConvertFrom-Json | Select-Object -ExpandProperty "filename"
     }
@@ -145,7 +146,7 @@ function PCoIP-Agent-Install {
     $wc = New-Object System.Net.WebClient
 
     "--> Downloading PCoIP standard agent from $pcoipAgentInstallerUrl..."
-    Retry -Action {$wc.DownloadFile($pcoipAgentInstallerUrl, $destFile)}
+    Retry -Action { $wc.DownloadFile($pcoipAgentInstallerUrl, $destFile) }
     "--> Teradici PCoIP standard agent downloaded: $agent_filename"
 
     "--> Installing Teradici PCoIP standard agent..."
@@ -293,13 +294,15 @@ Join-Domain $domain_name $ad_service_account_username $ad_service_account_passwo
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     "--> Running as Administrator..."
-} else {
+}
+else {
     "--> Not running as Administrator..."
 }
 
 if ($global:restart) {
-"--> Restart required. Restarting..."
-Restart-Computer -Force
-} else {
+    "--> Restart required. Restarting..."
+    Restart-Computer -Force
+}
+else {
     "--> No restart required."
 }

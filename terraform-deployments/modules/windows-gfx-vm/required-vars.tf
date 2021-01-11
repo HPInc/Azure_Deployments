@@ -97,3 +97,11 @@ variable "_artifactsLocationSasToken" {
   description = "Sas Token of the URL is optional, only if required for security reasons"
   type        = string
 }
+
+variable "key_vault_id" {
+  description = "Key vault ID for ad admin password"
+}
+
+variable "ad_pass_secret_name" {
+  description = "Name of ad admin password"
+}

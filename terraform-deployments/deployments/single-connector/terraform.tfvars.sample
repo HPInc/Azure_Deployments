@@ -105,7 +105,7 @@ _artifactsLocation            = "https://<storage account name>.blob.core.window
 
 # Domain controller active directory property values
 active_directory_netbios_name = "tera"
-ad_admin_username             = "admin234"
+ad_admin_username             = "cam_admin"
 ad_admin_password             = "Password!234"
 safe_mode_admin_password      = "Password!234"
 
@@ -113,7 +113,7 @@ safe_mode_admin_password      = "Password!234"
 ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # CAC VM username and passwords
-cac_admin_username = "admin234"
+cac_admin_username = "cam_admin"
 cac_admin_password = "Password!234"
 
 # Windows VMs usernames and passwords

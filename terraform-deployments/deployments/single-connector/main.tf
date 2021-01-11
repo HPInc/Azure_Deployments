@@ -200,8 +200,10 @@ module "windows-std-vm" {
   application_id              = var.application_id
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
+  key_vault_id                = var.key_vault_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   _artifactsLocation          = var._artifactsLocation
   _artifactsLocationSasToken  = var._artifactsLocationSasToken
 
@@ -229,8 +231,10 @@ module "windows-gfx-vm" {
   application_id              = var.application_id
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
+  key_vault_id                = var.key_vault_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   _artifactsLocation          = var._artifactsLocation
   _artifactsLocationSasToken  = var._artifactsLocationSasToken
 
