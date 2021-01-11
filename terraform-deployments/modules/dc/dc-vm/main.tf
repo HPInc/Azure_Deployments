@@ -13,7 +13,7 @@ resource "azurerm_windows_virtual_machine" "domain-controller" {
   location            = var.location
   size                = var.dc_machine_type
   admin_username      = var.ad_admin_username
-  admin_password      = local.use_secret_or_not.ad_admin_password
+  admin_password      = local.ad_admin_password
   custom_data         = local.custom_data
 
   network_interface_ids = [

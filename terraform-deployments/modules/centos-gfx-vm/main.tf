@@ -7,6 +7,13 @@
 
 locals {
   centos_gfx_provisioning_script = "centos-gfx-provisioning.sh"
+  ad_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 # Debug public ip remove if not needed
@@ -83,7 +90,7 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   {
   "script": "${base64encode(templatefile("${path.module}/${local.centos_gfx_provisioning_script}.tmpl", {
   pcoip_registration_code     = var.pcoip_registration_code,
-  ad_service_account_password = var.ad_service_account_password,
+  ad_service_account_password = local.ad_admin_password,
   ad_service_account_username = var.ad_service_account_username,
   domain_name                 = var.domain_name,
   domain_controller_ip        = var.domain_controller_ip,

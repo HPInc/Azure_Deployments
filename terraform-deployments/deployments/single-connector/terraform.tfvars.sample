@@ -124,18 +124,18 @@ windows_admin_password  = "Password!234"
 centos_admin_username  = "CENTadmin"
 centos_admin_password  = "Password!234"
 
-# Leave the following blank, they are only filled when using Azure Key Vault secrets
-application_id                = ""
-aad_client_secret             = ""
-tenant_id                     = ""
-pcoip_secret_id               = ""
-ad_pass_secret_id             = ""
-safe_admin_pass_secret_id     = ""
-cac_token_secret_id           = ""
-ad_pass_secret_name           = ""
-key_vault_id                  = ""
-
 # Debug flags for accessibility to the virtual machines
 # NOTE THAT THIS IS INSECURE! AND SHOULD ONLY BE USED FOR TESTING ETC
 create_debug_public_ips       = true
 create_debug_rdp_access       = true
+
+# Leave the following blank, they are only filled when using Azure Key Vault secrets
+application_id                = ""
+aad_client_secret             = ""
+tenant_id                     = ""
+key_vault_id                  = ""
+ad_pass_secret_name           = ""
+ad_pass_secret_id             = ""
+safe_admin_pass_secret_id     = ""
+pcoip_secret_id               = ""
+cac_token_secret_id           = ""

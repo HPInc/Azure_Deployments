@@ -11,7 +11,7 @@ resource "null_resource" "upload-scripts" {
   connection {
     type     = "winrm"
     user     = var.ad_admin_username
-    password = local.use_secret_or_not.ad_admin_password
+    password = local.ad_admin_password
     host     = var.domain_controller_virtual_machine_public_ip
     port     = "5986"
     https    = true
@@ -42,7 +42,7 @@ resource "null_resource" "upload-domain-users-list" {
   connection {
     type     = "winrm"
     user     = var.ad_admin_username
-    password = local.use_secret_or_not.ad_admin_password
+    password = local.ad_admin_password
     host     = var.domain_controller_virtual_machine_public_ip
     port     = "5986"
     https    = true

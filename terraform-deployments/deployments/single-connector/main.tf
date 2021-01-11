@@ -59,6 +59,8 @@ module "active-directory-domain-vm" {
   active_directory_domain_name = "${var.active_directory_netbios_name}.dns.internal"
   ad_admin_username            = var.ad_admin_username
   ad_admin_password            = var.ad_admin_password
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  key_vault_id                 = var.key_vault_id
   dc_machine_type              = var.dc_machine_type
   nic_id                       = module.dc-cac-network.dc-network-interface-id
   prefix                       = var.prefix
@@ -255,8 +257,10 @@ module "centos-std-vm" {
   application_id              = var.application_id
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
+  key_vault_id                = var.key_vault_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
 
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
@@ -282,8 +286,10 @@ module "centos-gfx-vm" {
   application_id              = var.application_id
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
+  key_vault_id                = var.key_vault_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
 
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids

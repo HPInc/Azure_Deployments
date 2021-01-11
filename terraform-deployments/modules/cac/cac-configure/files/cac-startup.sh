@@ -39,7 +39,7 @@ get_access_token() {
     token=$(echo $accessToken | jq ".access_token" -r)
     log "Access Token: $token"
     output=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
-    log "Output: $output"
+    # log "Output: $output"
     output=$(echo $output | jq '.value')
     output=$(echo $output | sed 's/"//g')
     log "Output: $output"
