@@ -27,10 +27,6 @@ variable "cac_configuration" {
   }))
 }
 
-variable "cac_installer_token" {
-  description = "Token used to download cloud access connector installer."
-}
-
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
 }

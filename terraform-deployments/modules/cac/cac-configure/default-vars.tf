@@ -27,12 +27,9 @@ variable "ssl_cert" {
   default     = ""
 }
 
-# variable "cac_installer_url" {
-#   description = "Location of the Cloud Access Connector installer"
-# }
-
-variable "cac_installer_token" {
+variable "cac_installer_url" {
   description = "Location of the Cloud Access Connector installer"
+  default     = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cloud-access-connector/raw/names/cloud-access-connector-linux-tgz/versions/latest/cloud-access-connector_latest_Linux.tar.gz"
 }
 
 variable "cam_url" {
@@ -42,5 +39,4 @@ variable "cam_url" {
 
 locals {
   startup_cac_filename = "cac-startup.sh"
-  cac_installer_url    = "https://dl.teradici.com/${var.cac_installer_token}/cloud-access-connector/raw/names/cloud-access-connector-linux-tgz/versions/latest/cloud-access-connector_latest_Linux.tar.gz"
 }
