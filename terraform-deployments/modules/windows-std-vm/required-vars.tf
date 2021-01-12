@@ -30,11 +30,6 @@ variable "resource_group_name" {
   description = "The name of the resource group"
 }
 
-variable "_artifactsLocation" {
-  description = "URL to retrieve startup scripts with a trailing /"
-  type        = string
-}
-
 variable "domain_name" {
   description = "Name of the domain to join"
   type        = string
@@ -100,7 +95,14 @@ variable "workstation_subnet_locations" {
   type        = list(string)
 }
 
-variable "_artifactsLocationSasToken" {
-  description = "Sas Token of the URL is optional, only if required for security reasons"
-  type        = string
+variable "key_vault_id" {
+  description = "Key vault ID for ad admin password"
+}
+
+variable "ad_pass_secret_name" {
+  description = "Name of ad admin password"
+}
+
+variable "storage_account_name" {
+  description = "Name of storage account that holds Windows provisioning scripts"
 }

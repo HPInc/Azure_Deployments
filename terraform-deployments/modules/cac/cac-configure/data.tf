@@ -7,7 +7,7 @@ data "template_file" "cac_startup_template" {
 
   template = "${path.module}/files/cac-startup.sh"
   vars = {
-    cac_installer_url           = local.cac_installer_url
+    cac_installer_url           = var.cac_installer_url
     domain_controller_ip        = var.domain_controller_ip
     ad_service_account_username = var.ad_service_account_username
     ad_service_account_password = var.ad_service_account_password

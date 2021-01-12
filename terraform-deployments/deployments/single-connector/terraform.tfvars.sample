@@ -88,9 +88,6 @@ cac_configuration = [
     }
 ]
 
-# Token used to download the cloud access connector installer.
-cac_installer_token = ""
-
 # The PCOIP registration code
 pcoip_registration_code       = "XXXXXXXXXXX@AAAA-BBBB-CCCC-DDDD"
 
@@ -100,12 +97,9 @@ resource_group_name           = "my-resource-group"
 # Prefix for VM machine names
 prefix                        = "test"
 
-# _artifactsLocation is the Azure storage account you created and copied the content of the /tools directory too
-_artifactsLocation            = "https://<storage account name>.blob.core.windows.net/<storage account container name>/"
-
 # Domain controller active directory property values
 active_directory_netbios_name = "tera"
-ad_admin_username             = "admin234"
+ad_admin_username             = "cam_admin"
 ad_admin_password             = "Password!234"
 safe_mode_admin_password      = "Password!234"
 
@@ -113,7 +107,7 @@ safe_mode_admin_password      = "Password!234"
 ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # CAC VM username and passwords
-cac_admin_username = "admin234"
+cac_admin_username = "cam_admin"
 cac_admin_password = "Password!234"
 
 # Windows VMs usernames and passwords

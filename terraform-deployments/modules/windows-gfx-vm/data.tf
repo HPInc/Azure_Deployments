@@ -5,19 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-locals {
-  pcoip_agent_deploy_script = "windows-gfx-provisioning.ps1"
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
+}
 
-  nvidia_driver_url = "https://go.microsoft.com/fwlink/?linkid=874181"
+locals {
+  windows_gfx_provisioning_script        = "windows-gfx-provisioning.ps1"
+  windows_gfx_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${local.nvidia_driver_url} ${local.nvidia_driver_filename} ${var.application_id} ${var.tenant_id} ${var.aad_client_secret} ${var.pcoip_secret_id} ${var.ad_pass_secret_id}"
+
+  nvidia_driver_url      = "https://go.microsoft.com/fwlink/?linkid=874181"
   nvidia_driver_filename = "452.57_grid_win10_server2016_server2019_64bit_international.exe"
 
-  pcoip_agent_deploy_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${var.ad_service_account_password} ${local.nvidia_driver_url} ${local.nvidia_driver_filename} ${var.application_id} ${var.tenant_id} ${var.aad_client_secret} ${var.pcoip_secret_id} ${var.ad_pass_secret_id}"
-  deploy_script_uri                = "${var._artifactsLocation}${local.pcoip_agent_deploy_script}"
+  deploy_script_file_destination = "C:/Temp/${local.windows_gfx_provisioning_script}"
+  deploy_temp_dir                = "C:/Temp"
 
-  deploy_script_file             = "${var._artifactsLocation}${local.pcoip_agent_deploy_script}"
-  deploy_script_file_destination = "C:/Temp/${local.pcoip_agent_deploy_script}"
-
-  deploy_temp_dir = "C:/Temp"
-
-  is_windows = substr(pathexpand("~"), 0, 1) == "/" ? false : true
+  ad_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+  is_windows        = substr(pathexpand("~"), 0, 1) == "/" ? false : true
 }

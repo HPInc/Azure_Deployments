@@ -27,10 +27,6 @@ variable "cac_configuration" {
   }))
 }
 
-variable "cac_installer_token" {
-  description = "Token used to download cloud access connector installer."
-}
-
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
 }
@@ -106,12 +102,13 @@ variable "ad_pass_secret_id" {
 
 variable "_artifactsLocation" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
+  default     = ""
 }
 
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
   type        = string
-  default     = ""
+  default     = "void"
 }
 
 variable "cac_admin_password" {

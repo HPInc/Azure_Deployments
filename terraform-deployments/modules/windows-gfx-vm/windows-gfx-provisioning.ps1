@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Teradici Corporation
+  # Copyright (c) 2020 Teradici Corporation
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -24,6 +24,14 @@ param(
 
     [Parameter(Mandatory = $false)]
     [string]
+    $NVIDIA_DRIVER_URL,
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $NVIDIA_DRIVER_FILENAME,
+
+    [Parameter(Mandatory = $false)]
+    [string]
     $application_id,
 
     [Parameter(Mandatory = $false)]
@@ -45,6 +53,7 @@ param(
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
 $LOG_FILE = "C:\Teradici\provisioning.log"
+$NVIDIA_DIR = "C:\Program Files\NVIDIA Corporation\NVSMI"
 $PCOIP_AGENT_FILENAME = ""
 $PCOIP_AGENT_LOCATION_URL = "https://downloads.teradici.com/win/stable/"
 
@@ -55,22 +64,22 @@ $global:restart = $false
 
 # Retry function, defaults to trying for 5 minutes with 10 seconds intervals
 function Retry([scriptblock]$Action, $Interval = 10, $Attempts = 30) {
-    $Current_Attempt = 0
+  $Current_Attempt = 0
 
-    while ($true) {
-        $Current_Attempt++
-        $rc = $Action.Invoke()
+  while ($true) {
+    $Current_Attempt++
+    $rc = $Action.Invoke()
 
-        if ($?) { return $rc }
+    if ($?) { return $rc }
 
-        if ($Current_Attempt -ge $Attempts) {
-            Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
-            Throw
-        }
-
-        Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
-        Start-Sleep -Seconds $Interval
+    if ($Current_Attempt -ge $Attempts) {
+        Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
+        Throw
     }
+
+    Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
+    Start-Sleep -Seconds $Interval
+  }
 }
 
 Function Get-AccessToken
@@ -111,6 +120,51 @@ Function Get-Secret
     return $result
 }
 
+function Nvidia-is-Installed {
+    if (!(test-path $NVIDIA_DIR)) {
+        return $false
+    }
+
+    cd $NVIDIA_DIR
+    & .\nvidia-smi.exe
+    return $?
+    return $false
+}
+
+function Nvidia-Install {
+    "################################################################"
+    "Installing NVIDIA driver..."
+    "################################################################"
+
+    if (Nvidia-is-Installed) {
+        "--> NVIDIA driver is already installed. Skipping..."
+        return
+    }
+
+    mkdir 'C:\Nvidia'
+    $driverDirectory = "C:\Nvidia"
+
+    # $nvidiaInstallerUrl = $NVIDIA_DRIVER_URL + $NVIDIA_DRIVER_FILENAME
+    $destFile = $driverDirectory + "\" + $NVIDIA_DRIVER_FILENAME
+    $wc = New-Object System.Net.WebClient
+
+    "--> Downloading NVIDIA GRID driver from $NVIDIA_DRIVER_URL..."
+    Retry -Action {$wc.DownloadFile($NVIDIA_DRIVER_URL, $destFile)}
+    "--> NVIDIA GRID driver downloaded."
+
+    "--> Installing NVIDIA GRID Driver..."
+    $ret = Start-Process -FilePath $destFile -ArgumentList "/s /noeula /noreboot" -PassThru -Wait
+
+    if (!(Nvidia-is-Installed)) {
+        "--> ERROR: Failed to install NVIDIA GRID driver."
+        exit 1
+    }
+
+    "--> NVIDIA GRID driver installed successfully."
+    # $global:restart = $true
+    Restart-Computer -Force
+}
+
 function PCoIP-Agent-is-Installed {
     Get-Service "PCoIPAgent"
     return $?
@@ -118,26 +172,25 @@ function PCoIP-Agent-is-Installed {
 
 function PCoIP-Agent-Install {
     "################################################################"
-    "Installing PCoIP standard agent..."
+    "Installing PCoIP graphics agent..."
     "################################################################"
 
     if (PCoIP-Agent-is-Installed) {
-        "--> PCoIP standard agent is already installed. Skipping..."
+        "--> PCoIP graphics agent is already installed. Skipping..."
         return
     }
 
     $agentInstallerDLDirectory = "C:\Teradici"
     if (![string]::IsNullOrEmpty($PCOIP_AGENT_FILENAME)) {
-        "--> Using user-specified PCoIP standard agent filename..."
+        "--> Using user-specified PCoIP graphics agent filename..."
         $agent_filename = $PCOIP_AGENT_FILENAME
-    }
-    else {
-        "--> Using default latest PCoIP standard agent..."
-        $agent_latest = $PCOIP_AGENT_LOCATION_URL + "latest-standard-agent.json"
+    } else {
+        "--> Using default latest PCoIP graphics agent..."
+        $agent_latest = $PCOIP_AGENT_LOCATION_URL + "latest-graphics-agent.json"
         $wc = New-Object System.Net.WebClient
 
-        "--> Checking for the latest PCoIP standard agent version from $agent_latest..."
-        $string = Retry -Action { $wc.DownloadString($agent_latest) }
+        "--> Checking for the latest PCoIP graphics agent version from $agent_latest..."
+        $string = Retry -Action {$wc.DownloadString($agent_latest)}
 
         $agent_filename = $string | ConvertFrom-Json | Select-Object -ExpandProperty "filename"
     }
@@ -145,19 +198,19 @@ function PCoIP-Agent-Install {
     $destFile = $agentInstallerDLDirectory + '\' + $agent_filename
     $wc = New-Object System.Net.WebClient
 
-    "--> Downloading PCoIP standard agent from $pcoipAgentInstallerUrl..."
-    Retry -Action { $wc.DownloadFile($pcoipAgentInstallerUrl, $destFile) }
-    "--> Teradici PCoIP standard agent downloaded: $agent_filename"
+    "--> Downloading PCoIP graphics agent from $pcoipAgentInstallerUrl..."
+    Retry -Action {$wc.DownloadFile($pcoipAgentInstallerUrl, $destFile)}
+    "--> Teradici PCoIP graphics agent downloaded: $agent_filename"
 
-    "--> Installing Teradici PCoIP standard agent..."
+    "--> Installing Teradici PCoIP graphics agent..."
     Start-Process -FilePath $destFile -ArgumentList "/S /nopostreboot _?$destFile" -PassThru -Wait
 
     if (!(PCoIP-Agent-is-Installed)) {
-        "--> ERROR: Failed to install PCoIP standard agent."
+        "--> ERROR: Failed to install PCoIP graphics agent."
         exit 1
     }
 
-    "--> Teradici PCoIP standard agent installed successfully."
+    "--> Teradici PCoIP graphics agent installed successfully."
     $global:restart = $true
 }
 
@@ -282,6 +335,8 @@ if (!($application_id -eq $null -or $application_id -eq "") -and !($aad_client_s
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
+Nvidia-Install
+
 PCoIP-Agent-Install
 
 PCoIP-Agent-Register
@@ -294,15 +349,13 @@ Join-Domain $domain_name $ad_service_account_username $ad_service_account_passwo
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     "--> Running as Administrator..."
-}
-else {
+} else {
     "--> Not running as Administrator..."
 }
 
 if ($global:restart) {
-    "--> Restart required. Restarting..."
-    Restart-Computer -Force
-}
-else {
+"--> Restart required. Restarting..."
+Restart-Computer -Force
+} else {
     "--> No restart required."
 }
