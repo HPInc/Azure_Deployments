@@ -97,9 +97,6 @@ resource_group_name           = "my-resource-group"
 # Prefix for VM machine names
 prefix                        = "test"
 
-# _artifactsLocation is the Azure storage account you created and copied the content of the /tools directory too
-_artifactsLocation            = "https://<storage account name>.blob.core.windows.net/<storage account container name>/"
-
 # Domain controller active directory property values
 active_directory_netbios_name = "tera"
 ad_admin_username             = "cam_admin"
