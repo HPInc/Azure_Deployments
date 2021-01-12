@@ -15,6 +15,25 @@ resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
 }
 
+resource "random_id" "blob-name" {
+  byte_length = 3
+}
+
+resource "azurerm_storage_account" "windows-script-storage" {
+  name                     = "winscripts${random_id.blob-name.hex}"
+  resource_group_name      = azurerm_resource_group.main.name
+  location                 = azurerm_resource_group.main.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  allow_blob_public_access = true
+}
+
+resource "azurerm_storage_container" "windows-script-blob" {
+  name                  = azurerm_storage_account.windows-script-storage.name
+  storage_account_name  = azurerm_storage_account.windows-script-storage.name
+  container_access_type = "blob"
+}
+
 module "dc-cac-network" {
   source = "../../modules/network/dc-cac"
 
@@ -203,8 +222,7 @@ module "windows-std-vm" {
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
-  _artifactsLocation          = var._artifactsLocation
-  _artifactsLocationSasToken  = var._artifactsLocationSasToken
+  storage_account_name        = azurerm_storage_account.windows-script-storage.name
 
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
@@ -234,8 +252,7 @@ module "windows-gfx-vm" {
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
-  _artifactsLocation          = var._artifactsLocation
-  _artifactsLocationSasToken  = var._artifactsLocationSasToken
+  storage_account_name        = azurerm_storage_account.windows-script-storage.name
 
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations

@@ -18,8 +18,6 @@ locals {
   nvidia_driver_url      = "https://go.microsoft.com/fwlink/?linkid=874181"
   nvidia_driver_filename = "452.57_grid_win10_server2016_server2019_64bit_international.exe"
 
-  deploy_script_uri              = "${var._artifactsLocation}${local.windows_gfx_provisioning_script}"
-  deploy_script_file             = "${var._artifactsLocation}${local.windows_gfx_provisioning_script}"
   deploy_script_file_destination = "C:/Temp/${local.windows_gfx_provisioning_script}"
   deploy_temp_dir                = "C:/Temp"
 

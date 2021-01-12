@@ -33,6 +33,14 @@ resource "azurerm_network_interface" "windows-gfx-nic" {
   }
 }
 
+resource "azurerm_storage_blob" "windows-gfx-script" {
+  name                   = local.windows_gfx_provisioning_script
+  storage_account_name   = var.storage_account_name
+  storage_container_name = var.storage_account_name
+  type                   = "Block"
+  source                 = "${path.module}/${local.windows_gfx_provisioning_script}"
+}
+
 resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
 
   for_each = var.workstations
@@ -69,7 +77,7 @@ resource "null_resource" "windows-gfx-script-download" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-gwin-${each.value.index} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${local.deploy_script_file} -OutFile ${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} -Verbose\""
+    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-gwin-${each.value.index} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-gfx-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} -Verbose\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }

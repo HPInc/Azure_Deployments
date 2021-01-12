@@ -12,13 +12,11 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 locals {
-  windows_std_provisioning_script = "windows-std-provisioning.ps1"
+  windows_std_provisioning_script        = "windows-std-provisioning.ps1"
   windows_std_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${var.application_id} ${var.tenant_id} ${var.aad_client_secret} ${var.pcoip_secret_id} ${var.ad_pass_secret_id}"
-  deploy_script_uri                = "${var._artifactsLocation}${local.windows_std_provisioning_script}"
 
-  deploy_script_file             = "${var._artifactsLocation}${local.windows_std_provisioning_script}"
   deploy_script_file_destination = "C:/Temp/${local.windows_std_provisioning_script}"
-  deploy_temp_dir = "C:/Temp"
+  deploy_temp_dir                = "C:/Temp"
 
   ad_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
 

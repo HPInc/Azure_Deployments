@@ -102,6 +102,7 @@ variable "ad_pass_secret_id" {
 
 variable "_artifactsLocation" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
+  default     = ""
 }
 
 variable "pcoip_registration_code" {
