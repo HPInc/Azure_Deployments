@@ -160,8 +160,7 @@ module "cac-vm" {
   tenant_id                   = var.tenant_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
-  # cac_token_secret_id         = var.cac_token_secret_id
-  _artifactsLocation = var._artifactsLocation
+  _artifactsLocation          = var._artifactsLocation
 }
 
 module "cac-configuration" {
@@ -195,8 +194,7 @@ module "cac-configuration" {
   tenant_id                   = var.tenant_id
   pcoip_secret_id             = var.pcoip_secret_id
   ad_pass_secret_id           = var.ad_pass_secret_id
-  # cac_token_secret_id         = var.cac_token_secret_id
-  _artifactsLocation = var._artifactsLocation
+  _artifactsLocation          = var._artifactsLocation
 }
 
 module "windows-std-vm" {

@@ -85,11 +85,6 @@ variable "ad_domain_users_list_file" {
   type        = string
 }
 
-# variable "cac_token_secret_id" {
-#   description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-#   type        = string
-# }
-
 variable "pcoip_secret_id" {
   description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
   type        = string
