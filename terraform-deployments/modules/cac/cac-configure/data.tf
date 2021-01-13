@@ -23,7 +23,6 @@ data "template_file" "cac_startup_template" {
     tenant_id                   = var.tenant_id
     pcoip_secret_key            = var.pcoip_secret_id
     ad_pass_secret_key          = var.ad_pass_secret_id
-    cac_token_secret_key        = var.cac_token_secret_id
     _artifactsLocation          = var._artifactsLocation
   }
 }

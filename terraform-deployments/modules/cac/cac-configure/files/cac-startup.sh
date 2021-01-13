@@ -70,7 +70,7 @@ sudo apt-get install -y wget
 
 sudo apt-get install -y jq
 
-get_credentials ${aad_client_secret} ${application_id} ${tenant_id} ${pcoip_secret_key} ${ad_pass_secret_key} ${cac_token_secret_key}
+get_credentials ${aad_client_secret} ${application_id} ${tenant_id} ${pcoip_secret_key} ${ad_pass_secret_key} ${cac_token}
 
 # Network tuning
 PCOIP_NETWORK_CONF_FILE="/etc/sysctl.d/01-pcoip-cac-network.conf"
@@ -96,7 +96,7 @@ log "Downloading the CAC Installer..."
 
 # download CAC installer
 sudo curl -L ${cac_installer_url} -o $INSTALL_DIR/cloud-access-connector.tar.gz
-sudo tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz
+sudo tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz --no-same-owner
 
 
 # Wait for service account to be added

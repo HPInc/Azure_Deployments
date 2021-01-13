@@ -45,7 +45,6 @@ resource "null_resource" "upload-scripts" {
       tenant_id                   = var.tenant_id
       pcoip_secret_key            = var.pcoip_secret_id
       ad_pass_secret_key          = var.ad_pass_secret_id
-      cac_token_secret_key        = var.cac_token_secret_id
       _artifactsLocation          = var._artifactsLocation
     })
     destination = "/home/${var.cac_admin_user}/cac-startup.sh"
