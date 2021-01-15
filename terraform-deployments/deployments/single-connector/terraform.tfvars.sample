@@ -88,20 +88,11 @@ cac_configuration = [
     }
 ]
 
-# The PCOIP registration code
-pcoip_registration_code       = "XXXXXXXXXXX@AAAA-BBBB-CCCC-DDDD"
-
 # The resource group the deployment will be placed
 resource_group_name           = "my-resource-group"
 
 # Prefix for VM machine names
 prefix                        = "test"
-
-# Domain controller active directory property values
-active_directory_netbios_name = "tera"
-ad_admin_username             = "cam_admin"
-ad_admin_password             = "Password!234"
-safe_mode_admin_password      = "Password!234"
 
 # The location on the local PC where the domain users list file (csv) resides
 ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
@@ -123,12 +114,18 @@ centos_admin_password  = "Password!234"
 create_debug_public_ips       = true
 create_debug_rdp_access       = true
 
-# Leave the following blank, they are only filled when using Azure Key Vault secrets
+# Domain controller active directory property values
+active_directory_netbios_name = "tera"
+ad_admin_username             = "cam_admin"
+
+# (Optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
+ad_admin_password             = ""
+safe_mode_admin_password      = ""
+pcoip_registration_code       = ""
+
+# Only fill these when using Azure Key Vault secrets.
 application_id                = ""
 aad_client_secret             = ""
 tenant_id                     = ""
 key_vault_id                  = ""
 ad_pass_secret_name           = ""
-ad_pass_secret_id             = ""
-safe_admin_pass_secret_id     = ""
-pcoip_secret_id               = ""
