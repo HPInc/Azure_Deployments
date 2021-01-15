@@ -60,16 +60,6 @@ variable "aad_client_secret" {
   type        = string
 }
 
-variable "pcoip_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
-variable "ad_pass_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code from Teradici"
   type        = string

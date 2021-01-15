@@ -36,7 +36,3 @@ variable "cam_url" {
   type    = string
   default = "https://cam.teradici.com"
 }
-
-locals {
-  startup_cac_filename = "cac-startup.sh"
-}

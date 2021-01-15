@@ -7,7 +7,7 @@
 
 locals {
   centos_std_provisioning_script = "centos-std-provisioning.sh"
-  ad_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+  ad_admin_password              = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -97,10 +97,7 @@ resource "azurerm_virtual_machine_extension" "centos-std-provisioning" {
   application_id              = var.application_id,
   aad_client_secret           = var.aad_client_secret,
   tenant_id                   = var.tenant_id,
-  pcoip_secret_id             = var.pcoip_secret_id,
-  ad_pass_secret_id           = var.ad_pass_secret_id,
   app_id                      = var.application_id,
-  pcoip_reg_secret_key        = var.pcoip_secret_id
 })
 )
 }"

@@ -108,7 +108,6 @@ module "active-directory-domain-service" {
   application_id               = var.application_id
   aad_client_secret            = var.aad_client_secret
   tenant_id                    = var.tenant_id
-  safe_admin_pass_secret_id    = var.safe_admin_pass_secret_id
   safe_mode_admin_password     = var.safe_mode_admin_password
 }
 
@@ -158,8 +157,6 @@ module "cac-vm" {
   application_id              = var.application_id
   aad_client_secret           = var.aad_client_secret
   tenant_id                   = var.tenant_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   _artifactsLocation          = var._artifactsLocation
 }
 
@@ -191,9 +188,9 @@ module "cac-configuration" {
   cac_vm_ids                  = module.cac-vm.cac-vm-ids
   application_id              = var.application_id
   aad_client_secret           = var.aad_client_secret
+  key_vault_id                = var.key_vault_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   tenant_id                   = var.tenant_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   _artifactsLocation          = var._artifactsLocation
 }
 
@@ -217,8 +214,6 @@ module "windows-std-vm" {
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
   key_vault_id                = var.key_vault_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   storage_account_name        = azurerm_storage_account.windows-script-storage.name
 
@@ -247,8 +242,6 @@ module "windows-gfx-vm" {
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
   key_vault_id                = var.key_vault_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   storage_account_name        = azurerm_storage_account.windows-script-storage.name
 
@@ -276,8 +269,6 @@ module "centos-std-vm" {
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
   key_vault_id                = var.key_vault_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
 
@@ -305,8 +296,6 @@ module "centos-gfx-vm" {
   tenant_id                   = var.tenant_id
   aad_client_secret           = var.aad_client_secret
   key_vault_id                = var.key_vault_id
-  pcoip_secret_id             = var.pcoip_secret_id
-  ad_pass_secret_id           = var.ad_pass_secret_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
 

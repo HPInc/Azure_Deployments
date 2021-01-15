@@ -5,6 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  startup_cac_filename = "cac-startup.sh"
+  ad_admin_password    = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
+}
+
 resource "null_resource" "upload-scripts" {
   depends_on = [
     var.cac_configure_depends_on
@@ -32,7 +43,7 @@ resource "null_resource" "upload-scripts" {
       cac_installer_url           = var.cac_installer_url
       domain_controller_ip        = var.domain_controller_ip
       ad_service_account_username = var.ad_service_account_username
-      ad_service_account_password = var.ad_service_account_password
+      ad_service_account_password = local.ad_admin_password
       domain_name                 = var.domain_name
       cam_url                     = var.cam_url
       cac_token                   = var.cac_configuration[count.index].cac_token
@@ -43,8 +54,6 @@ resource "null_resource" "upload-scripts" {
       application_id              = var.application_id
       aad_client_secret           = var.aad_client_secret
       tenant_id                   = var.tenant_id
-      pcoip_secret_key            = var.pcoip_secret_id
-      ad_pass_secret_key          = var.ad_pass_secret_id
       _artifactsLocation          = var._artifactsLocation
     })
     destination = "/home/${var.cac_admin_user}/cac-startup.sh"

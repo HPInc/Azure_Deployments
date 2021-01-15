@@ -32,15 +32,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [string]
-    $aad_client_secret,
-
-    [Parameter(Mandatory = $false)]
-    [string]
-    $pcoip_secret_id,
-
-    [Parameter(Mandatory = $false)]
-    [string]
-    $ad_pass_secret_id
+    $aad_client_secret
 )
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
@@ -274,10 +266,10 @@ Start-Transcript -path $LOG_FILE -append
 "--> Script running as user '$(whoami)'."
 
 #Decrypt Teradici Reg Key and AD Service Account Password
-if (!($application_id -eq $null -or $application_id -eq "") -and !($aad_client_secret -eq $null -or $aad_client_secret -eq "") -and !($tenant_id -eq $null -or $tenant_id -eq "")) {
+if (!($aad_client_secret -eq $null -or $aad_client_secret -eq "")) {
     Write-Output "Running Get-Secret!"
-    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
-    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_pass_secret_id
+    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
+    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
 }
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12

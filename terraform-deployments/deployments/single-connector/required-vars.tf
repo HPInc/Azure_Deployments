@@ -69,11 +69,6 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "safe_admin_pass_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
 variable "safe_mode_admin_password" {
   description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
   type        = string
@@ -82,16 +77,6 @@ variable "safe_mode_admin_password" {
 
 variable "ad_domain_users_list_file" {
   description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
-  type        = string
-}
-
-variable "pcoip_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
-variable "ad_pass_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
   type        = string
 }
 

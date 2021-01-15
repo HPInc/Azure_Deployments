@@ -51,8 +51,3 @@ variable "tenant_id" {
   description = "The directory (tenant) ID of your app registration in AAD"
   type        = string
 }
-
-variable "safe_admin_pass_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
