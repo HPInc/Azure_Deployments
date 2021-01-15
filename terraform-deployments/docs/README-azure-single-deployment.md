@@ -86,7 +86,7 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
 1. Change directory into: ```/terraform-deployments/deployments/single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - Users can edit files inside ACS by doing ```code terraform.tfvars```.
-    - The resource group name must be unique and must not already exist. The resource group name from the Azure Storage Account section cannot be reused.
+    - The resource group name must be unique and must not already exist.
     - Make sure the locations of the connectors and work stations are identical.
     - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
@@ -158,10 +158,9 @@ A security method to help protect your AD safe mode admin password, AD admin pas
 
 Configuring the Azure Key Vault:
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
-    1. Select the same resource group as your storage account from [section 4](#4-deploying-azure-storage-account) or create a new one.
-    2. Select the desired region of the deployment.
-    3. Click next to go to the Access policy page.
-    4. Click **+ Add Access Policy**.
+    1. Select the desired region of the deployment.
+    2. Click next to go to the Access policy page.
+    3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
         3. Find the application from [section 3](#3-connect-azure-to-cloud-access-manager) and click **Select**. The ID underneath should match the Client ID/Application ID you saved from earlier.
@@ -173,11 +172,7 @@ Configuring the Azure Key Vault:
     3. Input the secret value.
     4. Click **Create**.
     5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
-4. Comment or remove the lines that contain the following variables:
-    - ```pcoip_registration_code```
-    - ```safe_mode_admin_password```
-    - ```ad_admin_password```
-5. Fill in the blank fields at the bottom of .tfvars. There are tips for finding variables underneath this completed example.
+5. Fill in the following variables from this completed example. There are tips underneath that can aid in finding the values.
 ```
 ...
 
@@ -188,15 +183,17 @@ cac_configuration : [
     }
   ]
 
-# Leave the following blank, they are only filled when using Azure Key Vault secrets
+# (Optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
+ad_admin_password             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/a7db90e0d2282413197c48ed71a8d07e"
+safe_mode_admin_password      = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/298d71a77432d7eb10e488e01cad02d9"
+pcoip_registration_code       = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/2182b148d709eddc7a009a2ee1d84773"
+
+# Only fill these when using Azure Key Vault secrets.
 application_id                = "xt18a0bc-e0fg-908h-77934-0c0v31a0d30c"
 aad_client_secret             = "A341G_4AB6cde1BQdgafBu~mEi~Q.hJ2D."
 tenant_id                     = "981a1bcd-345g-5j9k-7q21-dc351a90fg89"
 key_vault_id                  = "/subscriptions/870d5262-66bv-4dk9-8cjo-78p7pfla4e53/resourceGroups/My-Resource-Group/providers/Microsoft.KeyVault/vaults/mykeyvault"
 ad_pass_secret_name           = "adPasswordID"
-ad_pass_secret_id             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/a7db90e0d2282413197c48ed71a8d07e"
-safe_admin_pass_secret_id     = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/298d71a77432d7eb10e488e01cad02d9"
-pcoip_secret_id               = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/2182b148d709eddc7a009a2ee1d84773"
 ```
 - Tips for finding these variables:
     1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
