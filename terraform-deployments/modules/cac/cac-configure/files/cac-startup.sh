@@ -9,14 +9,15 @@ AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
 CAC_TOKEN=${cac_token}
 PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
 INSTALL_DIR="/root"
-INSTALL_LOG="/root/cac-install.log"
-sudo touch $INSTALL_LOG
-sudo chmod +644 "$INSTALL_LOG"
-sudo cd $INSTALL_DIR
+CAC_INSTALL_LOG="/var/log/teradici/cac-install.log"
+
+mkdir -p "$(dirname $CAC_INSTALL_LOG)"
+touch "$CAC_INSTALL_LOG"
+chmod +644 "$CAC_INSTALL_LOG"
 
 log() {
     local message="$1"
-    echo "[$(date)] $${message}" | tee -a "$INSTALL_LOG"
+    echo "[$(date)] $${message}" | tee -a "$CAC_INSTALL_LOG"
 }
 
 exit_and_restart()
@@ -44,7 +45,7 @@ get_access_token() {
 
 get_credentials() {
     # Check if we need to get secrets from Azure Key Vault
-    if [[ -z ${aad_client_secret} ]]; then
+    if [[ -z "${aad_client_secret}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
         log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5, $6"
@@ -192,7 +193,7 @@ if [ -z "${ssl_key}" ]; then
             --domain-group "${domain_group}" \
             --reg-code $PCOIP_REGISTRATION_CODE \
             --sync-interval 5 \
-            2>&1 | tee -a $INSTALL_LOG
+            2>&1 | tee -a $CAC_INSTALL_LOG
 
         RC=$?
         if [ $RC -eq 0 ]
@@ -228,7 +229,7 @@ else
             --domain-group "${domain_group}" \
             --reg-code $PCOIP_REGISTRATION_CODE \
             --sync-interval 5 \
-            2>&1 | tee -a $INSTALL_LOG
+            2>&1 | tee -a $CAC_INSTALL_LOG
 
         RC=$?
         if [ $RC -eq 0 ]

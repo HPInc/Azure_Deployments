@@ -118,7 +118,7 @@ create_debug_rdp_access       = true
 active_directory_netbios_name = "tera"
 ad_admin_username             = "cam_admin"
 
-# (Optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
+# (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
 ad_admin_password             = ""
 safe_mode_admin_password      = ""
 pcoip_registration_code       = ""
