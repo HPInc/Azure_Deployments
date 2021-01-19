@@ -15,14 +15,13 @@ data "template_file" "setup-script" {
   template = file("${path.module}/files/setup.ps1")
 
   vars = {
-    account_name              = var.ad_admin_username
-    domain_name               = var.active_directory_domain_name
-    safe_mode_admin_password  = var.safe_mode_admin_password
-    application_id            = var.application_id
-    aad_client_secret         = var.aad_client_secret
-    tenant_id                 = var.tenant_id
-    safe_admin_pass_secret_id = var.safe_admin_pass_secret_id
-    virtual_machine_name      = var.domain_controller_virtual_machine_name
+    account_name             = var.ad_admin_username
+    domain_name              = var.active_directory_domain_name
+    safe_mode_admin_password = var.safe_mode_admin_password
+    application_id           = var.application_id
+    aad_client_secret        = var.aad_client_secret
+    tenant_id                = var.tenant_id
+    virtual_machine_name     = var.domain_controller_virtual_machine_name
   }
 }
 

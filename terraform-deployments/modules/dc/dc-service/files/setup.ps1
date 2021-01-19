@@ -23,8 +23,7 @@ Function Get-AccessToken
   [string]$application_id,
   [string]$aad_client_secret,
   [string]$oath2Uri
-)
-{
+) {
   $body = 'grant_type=client_credentials'
   $body += '&client_id=' + $application_id
   $body += '&client_secret=' + [Uri]::EscapeDataString($aad_client_secret)
@@ -41,8 +40,7 @@ Function Get-Secret
   [string]$aad_client_secret,
   [string]$tenant_id,
   [string]$secret_identifier
-)
-{
+) {
   $oath2Uri = "https://login.microsoftonline.com/$tenant_id/oauth2/token"
   
   $accessToken = Get-AccessToken $application_id $aad_client_secret $oath2Uri
@@ -60,11 +58,12 @@ Function Get-Secret
 
 Start-Transcript -path $LOG_FILE -append
 
-if ([string]::IsNullOrWhiteSpace("${application_id}") -or [string]::IsNullOrWhiteSpace("${aad_client_secret}") -or [string]::IsNullOrWhiteSpace("${tenant_id}")) {
-    Write-Output "Not calling Get-Secret"
-} else {
-    Write-Output "Calling Get-Secret"
-    $DATA."safe_mode_admin_password" = Get-Secret "${application_id}" "${aad_client_secret}" "${tenant_id}"  "${safe_admin_pass_secret_id}"
+if ([string]::IsNullOrWhiteSpace("${aad_client_secret}")) {
+  Write-Output "Not calling Get-Secret"
+}
+else {
+  Write-Output "Calling Get-Secret"
+  $DATA."safe_mode_admin_password" = Get-Secret "${application_id}" "${aad_client_secret}" "${tenant_id}"  "${safe_mode_admin_password}"
 }
 
 $DomainName = "${domain_name}"
@@ -84,24 +83,24 @@ Write-Output "================================================================"
 $Count = 3
 
 Do {
-Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
-if ($? -eq $true) {break}
-else {$Count--; Write-Output "Install-WindowsFeature failed. Remaining tries left $Count"}
+  Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
+  if ($? -eq $true) { break }
+  else { $Count--; Write-Output "Install-WindowsFeature failed. Remaining tries left $Count" }
 } While ($Count -gt 0)
 
 Write-Output "================================================================"
 Write-Output "Install a new forest..."
 Write-Output "================================================================"
 Install-ADDSForest -CreateDnsDelegation:$false `
-    -SafeModeAdministratorPassword (ConvertTo-SecureString $DATA."safe_mode_admin_password" -AsPlainText -Force) `
-    -DatabasePath $DatabasePath `
-    -SysvolPath $SysvolPath `
-    -DomainName $DomainName `
-    -DomainMode $DomainMode `
-    -ForestMode $ForestMode `
-    -InstallDNS:$true `
-    -NoRebootOnCompletion:$true `
-    -Force:$true
+  -SafeModeAdministratorPassword (ConvertTo-SecureString $DATA."safe_mode_admin_password" -AsPlainText -Force) `
+  -DatabasePath $DatabasePath `
+  -SysvolPath $SysvolPath `
+  -DomainName $DomainName `
+  -DomainMode $DomainMode `
+  -ForestMode $ForestMode `
+  -InstallDNS:$true `
+  -NoRebootOnCompletion:$true `
+  -Force:$true
 
 Write-Output "================================================================"
 Write-Output "Configuring LDAPS..."
@@ -110,13 +109,13 @@ $DnsName = "${virtual_machine_name}.$DomainName"
 Write-Output "Using DNS Name $DnsName"
 $certStoreLoc = 'HKLM:\Software\Microsoft\Cryptography\Services\NTDS\SystemCertificates\My\Certificates';
 $params = @{
-  DnsName = "dns.internal Root Cert"
-  NotAfter = (Get-Date).AddYears(5)
+  DnsName           = "dns.internal Root Cert"
+  NotAfter          = (Get-Date).AddYears(5)
   CertStoreLocation = 'Cert:\LocalMachine\My'
-  KeyUsage = 'CertSign','CRLSign' #fixes invalid certificate error
+  KeyUsage          = 'CertSign', 'CRLSign' #fixes invalid certificate error
 }
 $rootCA = New-SelfSignedCertificate @params
-$thumbprint=($rootCA.Thumbprint | Out-String).Trim()
+$thumbprint = ($rootCA.Thumbprint | Out-String).Trim()
 if (!(Test-Path $certStoreLoc)) {
   New-Item $certStoreLoc -Force
 }
@@ -131,13 +130,13 @@ $CertStore.add($rootCA)
 $CertStore.close()
 
 $params = @{
-  DnsName = "$DnsName"
-  NotAfter = (Get-Date).AddYears(5)
+  DnsName           = "$DnsName"
+  NotAfter          = (Get-Date).AddYears(5)
   CertStoreLocation = 'Cert:\LocalMachine\My'
-  Signer = $rootCA
+  Signer            = $rootCA
 }
 $myCert = New-SelfSignedCertificate @params
-$thumbprint=($myCert.Thumbprint | Out-String).Trim()
+$thumbprint = ($myCert.Thumbprint | Out-String).Trim()
 Write-Output "$thumbprint"
 Copy-Item -Path "HKLM:\Software\Microsoft\SystemCertificates\My\Certificates\$thumbprint" -Destination $certStoreLoc
 

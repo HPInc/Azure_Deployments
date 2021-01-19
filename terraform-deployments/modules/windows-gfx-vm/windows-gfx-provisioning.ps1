@@ -1,4 +1,4 @@
-  # Copyright (c) 2020 Teradici Corporation
+# Copyright (c) 2020 Teradici Corporation
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -40,15 +40,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [string]
-    $aad_client_secret,
-
-    [Parameter(Mandatory = $false)]
-    [string]
-    $pcoip_secret_id,
-
-    [Parameter(Mandatory = $false)]
-    [string]
-    $ad_pass_secret_id
+    $aad_client_secret
 )
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
@@ -64,22 +56,22 @@ $global:restart = $false
 
 # Retry function, defaults to trying for 5 minutes with 10 seconds intervals
 function Retry([scriptblock]$Action, $Interval = 10, $Attempts = 30) {
-  $Current_Attempt = 0
+    $Current_Attempt = 0
 
-  while ($true) {
-    $Current_Attempt++
-    $rc = $Action.Invoke()
+    while ($true) {
+        $Current_Attempt++
+        $rc = $Action.Invoke()
 
-    if ($?) { return $rc }
+        if ($?) { return $rc }
 
-    if ($Current_Attempt -ge $Attempts) {
-        Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
-        Throw
+        if ($Current_Attempt -ge $Attempts) {
+            Write-Error "--> ERROR: Failed after $Current_Attempt attempt(s)." -InformationAction Continue
+            Throw
+        }
+
+        Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
+        Start-Sleep -Seconds $Interval
     }
-
-    Write-Information "--> Attempt $Current_Attempt failed. Retrying in $Interval seconds..." -InformationAction Continue
-    Start-Sleep -Seconds $Interval
-  }
 }
 
 Function Get-AccessToken
@@ -149,7 +141,7 @@ function Nvidia-Install {
     $wc = New-Object System.Net.WebClient
 
     "--> Downloading NVIDIA GRID driver from $NVIDIA_DRIVER_URL..."
-    Retry -Action {$wc.DownloadFile($NVIDIA_DRIVER_URL, $destFile)}
+    Retry -Action { $wc.DownloadFile($NVIDIA_DRIVER_URL, $destFile) }
     "--> NVIDIA GRID driver downloaded."
 
     "--> Installing NVIDIA GRID Driver..."
@@ -184,13 +176,14 @@ function PCoIP-Agent-Install {
     if (![string]::IsNullOrEmpty($PCOIP_AGENT_FILENAME)) {
         "--> Using user-specified PCoIP graphics agent filename..."
         $agent_filename = $PCOIP_AGENT_FILENAME
-    } else {
+    }
+    else {
         "--> Using default latest PCoIP graphics agent..."
         $agent_latest = $PCOIP_AGENT_LOCATION_URL + "latest-graphics-agent.json"
         $wc = New-Object System.Net.WebClient
 
         "--> Checking for the latest PCoIP graphics agent version from $agent_latest..."
-        $string = Retry -Action {$wc.DownloadString($agent_latest)}
+        $string = Retry -Action { $wc.DownloadString($agent_latest) }
 
         $agent_filename = $string | ConvertFrom-Json | Select-Object -ExpandProperty "filename"
     }
@@ -199,7 +192,7 @@ function PCoIP-Agent-Install {
     $wc = New-Object System.Net.WebClient
 
     "--> Downloading PCoIP graphics agent from $pcoipAgentInstallerUrl..."
-    Retry -Action {$wc.DownloadFile($pcoipAgentInstallerUrl, $destFile)}
+    Retry -Action { $wc.DownloadFile($pcoipAgentInstallerUrl, $destFile) }
     "--> Teradici PCoIP graphics agent downloaded: $agent_filename"
 
     "--> Installing Teradici PCoIP graphics agent..."
@@ -327,10 +320,10 @@ Start-Transcript -path $LOG_FILE -append
 "--> Script running as user '$(whoami)'."
 
 #Decrypt Teradici Reg Key and AD Service Account Password
-if (!($application_id -eq $null -or $application_id -eq "") -and !($aad_client_secret -eq $null -or $aad_client_secret -eq "") -and !($tenant_id -eq $null -or $tenant_id -eq "")) {
+if (!($aad_client_secret -eq $null -or $aad_client_secret -eq "")) {
     Write-Output "Running Get-Secret!"
-    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_secret_id
-    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_pass_secret_id
+    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
+    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
 }
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
@@ -349,13 +342,15 @@ Join-Domain $domain_name $ad_service_account_username $ad_service_account_passwo
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     "--> Running as Administrator..."
-} else {
+}
+else {
     "--> Not running as Administrator..."
 }
 
 if ($global:restart) {
-"--> Restart required. Restarting..."
-Restart-Computer -Force
-} else {
+    "--> Restart required. Restarting..."
+    Restart-Computer -Force
+}
+else {
     "--> No restart required."
 }

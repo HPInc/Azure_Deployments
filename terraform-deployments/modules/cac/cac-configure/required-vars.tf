@@ -7,10 +7,10 @@
 
 variable "cac_configuration" {
   description = "List of cac vrtual machines create"
-  type        = list(object({
-      location         = string
-      cac_token        = string
-    }))
+  type = list(object({
+    location  = string
+    cac_token = string
+  }))
 }
 
 variable "ad_service_account_username" {
@@ -68,21 +68,6 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "pcoip_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
-variable "ad_pass_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
-variable "cac_token_secret_id" {
-  description = "The secret identifier in your azure key vault, follow this format https://<keyvault-name>.vault.azure.net/secrets/<secret-name>/<secret-version>"
-  type        = string
-}
-
 variable "_artifactsLocation" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
   type        = string
@@ -91,4 +76,12 @@ variable "_artifactsLocation" {
 variable "cac_vm_ids" {
   description = "The id of the cac vm"
   type        = list(string)
+}
+
+variable "key_vault_id" {
+  description = "Key vault ID for ad admin password"
+}
+
+variable "ad_pass_secret_name" {
+  description = "Name of ad admin password"
 }

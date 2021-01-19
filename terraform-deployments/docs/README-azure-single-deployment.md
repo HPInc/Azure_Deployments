@@ -6,14 +6,13 @@
 1. [Single-Connector Architecture](#1-single-connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Connect Azure to Cloud Access Manager](#3-connect-azure-to-cloud-access-manager)
-4. [Deploying Azure Storage Account](#4-deploying-azure-storage-account)
-5. [Deploying the Single-Connector via Terraform](#5-deploying-the-single-connector-via-terraform)
-6. [Storing Secrets on Azure Key Vault](#6-optional-storing-secrets-on-azure-key-vault)
-7. [Adding Workstations in Cloud Access Manager](#7-adding-workstations-in-cloud-access-manager)
-8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
-9. [Changing the deployment](#9-changing-the-deployment)
-10. [Deleting the deployment](#10-deleting-the-deployment)
-11. [Troubleshooting](#11-troubleshooting)
+4. [Deploying the Single-Connector via Terraform](#4-deploying-the-single-connector-via-terraform)
+5. [Storing Secrets on Azure Key Vault](#5-optional-storing-secrets-on-azure-key-vault)
+6. [Adding Workstations in Cloud Access Manager](#6-adding-workstations-in-cloud-access-manager)
+7. [Starting a PCoIP Session](#7-starting-a-pcoip-session)
+8. [Changing the deployment](#8-changing-the-deployment)
+9. [Deleting the deployment](#9-deleting-the-deployment)
+10. [Troubleshooting](#10-troubleshooting)
 
 ### 1. Single-Connector Architecture
 
@@ -80,40 +79,14 @@ To interact directly with remote workstations, an Azure Account must be connecte
     - This token expires in 2 hours. 
     - The value will be used inside ```terraform.tfvars``` under ```cac_configuration : [{ cac_token: token_here, location: westus2 }]```
 
-### 4. Deploying Azure Storage Account
-The purpose of deploying an Azure Storage Account is to store scripts on cloud storage so that they can be obtained through a Uniform Resource Identifier (URI). Inside the Windows and CentOS workstations, these scripts are downloaded via the URI and executed to configure PCoIP.
-
-To complete the ```terraform.tfvars``` file in the next section, an Azure Storage Account must be created.
-
-[![Launch Cloud Shell](https://shell.azure.com/images/launchcloudshell.png "Launch Cloud Shell")](https://shell.azure.com)
-
-1. Clone this GitHub repository using: ```git clone https://github.com/teradici/Azure_deployments```.
-2. Next, change directory: ```cd ~/Azure_deployments/terraform-deployments/tools/deploy-script-storage-account```
-3. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-4. Run ```terraform apply``` to start the creation of the Azure Storage Account. 
-    1. Users will be asked for a name for a new resource group for this storage. **Note**: This resource group name is unique and seperate from what is in .tfvars.
-    2. Users will then be asked for a name for the storage account itself. **Note**: Only lowercase letters and numbers are accepted. 
-5. Answer ```yes``` to start the creation of the Azure Storage Account. 
-6. A storage URI will be generated. Save this, it will be used in the next section as a value for the _artifactsLocation variable in terraform.tfvars.
-
-Example output:
-``` 
-Apply complete! Resources: 5 added, 0 changed, 0 destroyed.
-
-Outputs:
-
-_artifactsLocation = https://mystorage.blob.core.windows.net/mystoragecontainer/
-resource_group_name = My-Resource-Group
-```
-
-### 5. Deploying the Single-Connector via Terraform
+### 4. Deploying the Single-Connector via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. Uncommented lines show required variables, while commented lines show optional variables with their default or sample values. A complete list of available variables are described in the variable definition files ```default-vars.tf``` and ```required-vars.tf``` of the deployment.
 
 Before the deployment of the single-connector, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
 1. Change directory into: ```/terraform-deployments/deployments/single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - Users can edit files inside ACS by doing ```code terraform.tfvars```.
-    - The resource group name must be unique and must not already exist. The resource group name from the Azure Storage Account section cannot be reused.
+    - The resource group name must be unique and must not already exist.
     - Make sure the locations of the connectors and work stations are identical.
     - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
@@ -168,9 +141,16 @@ windows-standard-workstations = [
     "public_ip" = "52.109.25.74"
   },
 ]
+windows-graphics-workstations = [
+  {
+    "name" = "ter0-gwin-0"
+    "private_ip" = "10.0.4.7"
+    "public_ip" = "52.109.25.77"
+  },
+]
 ```
 
-### 6. (Optional) Storing Secrets on Azure Key Vault
+### 5. (Optional) Storing Secrets on Azure Key Vault
 
 Note: This is an optional feature. If you do not want to use secrets, you can just enter the plaintext code for your safe mode admin password, PCoIP registration key, and connector token in the terraform.tfvars file.
 
@@ -178,10 +158,9 @@ A security method to help protect your AD safe mode admin password, AD admin pas
 
 Configuring the Azure Key Vault:
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
-    1. Select the same resource group as your storage account from [section 4](#4-deploying-azure-storage-account) or create a new one.
-    2. Select the desired region of the deployment.
-    3. Click next to go to the Access policy page.
-    4. Click **+ Add Access Policy**.
+    1. Select the desired region of the deployment.
+    2. Click next to go to the Access policy page.
+    3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
         3. Find the application from [section 3](#3-connect-azure-to-cloud-access-manager) and click **Select**. The ID underneath should match the Client ID/Application ID you saved from earlier.
@@ -193,23 +172,28 @@ Configuring the Azure Key Vault:
     3. Input the secret value.
     4. Click **Create**.
     5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
-4. Comment or remove the lines that contain the following variables:
-    - ```pcoip_registration_code```
-    - ```safe_mode_admin_password```
-    - ```ad_admin_password```
-    - **Note**: for ```cac_token``` leave it blank like so: ```[{ cac_token: "", location: westus2 }]```
-5. Fill in the blank fields at the bottom of .tfvars. There are tips for finding variables underneath this completed example.
+5. Fill in the following variables from this completed example. There are tips underneath that can aid in finding the values.
 ```
-# Leave the following blank, they are only filled when using Azure Key Vault secrets
+...
+
+cac_configuration : [
+    { 
+      cac_token: "https://mykeyvault.vault.azure.net/secrets/cacToken/e9d0204710d83e4d1e8b71a2d2a9c778", 
+      location: "westus2" 
+    }
+  ]
+
+# (Optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
+ad_admin_password             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/a7db90e0d2282413197c48ed71a8d07e"
+safe_mode_admin_password      = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/298d71a77432d7eb10e488e01cad02d9"
+pcoip_registration_code       = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/2182b148d709eddc7a009a2ee1d84773"
+
+# Only fill these when using Azure Key Vault secrets.
 application_id                = "xt18a0bc-e0fg-908h-77934-0c0v31a0d30c"
 aad_client_secret             = "A341G_4AB6cde1BQdgafBu~mEi~Q.hJ2D."
 tenant_id                     = "981a1bcd-345g-5j9k-7q21-dc351a90fg89"
 key_vault_id                  = "/subscriptions/870d5262-66bv-4dk9-8cjo-78p7pfla4e53/resourceGroups/My-Resource-Group/providers/Microsoft.KeyVault/vaults/mykeyvault"
 ad_pass_secret_name           = "adPasswordID"
-ad_pass_secret_id             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/a7db90e0d2282413197c48ed71a8d07e"
-safe_admin_pass_secret_id     = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/298d71a77432d7eb10e488e01cad02d9"
-pcoip_secret_id               = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/2182b148d709eddc7a009a2ee1d84773"
-cac_token_secret_id           = "https://mykeyvault.vault.azure.net/secrets/cacToken/e9d0204710d83e4d1e8b71a2d2a9c778"
 ```
 - Tips for finding these variables:
     1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
@@ -217,7 +201,7 @@ cac_token_secret_id           = "https://mykeyvault.vault.azure.net/secrets/cacT
     2. ```key_vault_id```: Go to your key vault and click on **Properties** inside the opened blade. Copy the **Resource ID**.
     3. ```ad_pass_secret_name```: This is the name you used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_pass_secret_id```.
     
-### 7. Adding Workstations in Cloud Access Manager
+### 6. Adding Workstations in Cloud Access Manager
 To connect to workstations, they have to be added through the Cloud Access Manager. 
 1. Go to the CAM Admin Console and ensure you have your deployment selected. 
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
@@ -227,7 +211,7 @@ To connect to workstations, they have to be added through the Cloud Access Manag
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
-### 8. Starting a PCoIP Session
+### 7. Starting a PCoIP Session
 Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
@@ -236,15 +220,15 @@ Once the workstations have been added to be managed by CAM and assigned to Activ
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations repeat steps 1-4.
 
-### 9. Changing the deployment
+### 8. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
 Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAM Admin Console. Create a new connector to obtain a new token.
 
-### 10. Deleting the deployment
+### 9. Deleting the deployment
 Run ```terraform destroy``` to remove all resources created by Terraform. Another alternative is to delete the resource group from Resource groups page in Azure. 
 
-### 11. Troubleshooting
+### 10. Troubleshooting
 - If the console is not changing, try pressing Enter to unfreeze it.
 - If the script fails you can try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
 - If CentOS workstations don't show up on CAM wait 5 minutes and refresh the page. If it still doesn't show up, try using ```terraform apply | tee -a installer.log``` and check again after the completion of the script.

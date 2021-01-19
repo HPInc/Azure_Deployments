@@ -9,14 +9,15 @@ AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
 CAC_TOKEN=${cac_token}
 PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
 INSTALL_DIR="/root"
-INSTALL_LOG="/root/cac-install.log"
-sudo touch $INSTALL_LOG
-sudo chmod +644 "$INSTALL_LOG"
-sudo cd $INSTALL_DIR
+CAC_INSTALL_LOG="/var/log/teradici/cac-install.log"
+
+mkdir -p "$(dirname $CAC_INSTALL_LOG)"
+touch "$CAC_INSTALL_LOG"
+chmod +644 "$CAC_INSTALL_LOG"
 
 log() {
     local message="$1"
-    echo "[$(date)] $${message}" | tee -a "$INSTALL_LOG"
+    echo "[$(date)] $${message}" | tee -a "$CAC_INSTALL_LOG"
 }
 
 exit_and_restart()
@@ -37,30 +38,20 @@ fi
 get_access_token() {
     accessToken=`curl -X POST -d "grant_type=client_credentials&client_id=$1&client_secret=$2&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$3/oauth2/token`
     token=$(echo $accessToken | jq ".access_token" -r)
-    log "Access Token: $token"
-    output=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
-    # log "Output: $output"
-    output=$(echo $output | jq '.value')
-    output=$(echo $output | sed 's/"//g')
-    log "Output: $output"
-    echo "Output: $output"
+    json_map=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
+    value=$(echo $json_map | jq -r '.value')
+    echo "$value"
 }
 
 get_credentials() {
     # Check if we need to get secrets from Azure Key Vault
-    if [[ -z "$1" && -z "$2" && -z "$3" && -z "$4" && -z "$5" ]]; then
+    if [[ -z "${aad_client_secret}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
         log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5, $6"
-        get_access_token $2 $1 $3 $4
-        PCOIP_REGISTRATION_CODE=$output
-        log "Registration Code: $PCOIP_REGISTRATION_CODE"
-        get_access_token $2 $1 $3 $5
-        AD_SERVICE_ACCOUNT_PASSWORD=$output
-        log "Active Directory Password: $AD_SERVICE_ACCOUNT_PASSWORD"
-        get_access_token $2 $1 $3 $6
-        CAC_TOKEN=$output
-        log "Cloud Access Token: $CAC_TOKEN"
+        PCOIP_REGISTRATION_CODE=$(get_access_token $2 $1 $3 $4)
+        AD_SERVICE_ACCOUNT_PASSWORD=$(get_access_token $2 $1 $3 $5)
+        CAC_TOKEN=$(get_access_token $2 $1 $3 $6)
     fi
 }
 
@@ -70,7 +61,7 @@ sudo apt-get install -y wget
 
 sudo apt-get install -y jq
 
-get_credentials ${aad_client_secret} ${application_id} ${tenant_id} ${pcoip_secret_key} ${ad_pass_secret_key} ${cac_token_secret_key}
+get_credentials ${aad_client_secret} ${application_id} ${tenant_id} $PCOIP_REGISTRATION_CODE $AD_SERVICE_ACCOUNT_PASSWORD $CAC_TOKEN
 
 # Network tuning
 PCOIP_NETWORK_CONF_FILE="/etc/sysctl.d/01-pcoip-cac-network.conf"
@@ -96,7 +87,7 @@ log "Downloading the CAC Installer..."
 
 # download CAC installer
 sudo curl -L ${cac_installer_url} -o $INSTALL_DIR/cloud-access-connector.tar.gz
-sudo tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz
+sudo tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz --no-same-owner
 
 
 # Wait for service account to be added
@@ -202,7 +193,7 @@ if [ -z "${ssl_key}" ]; then
             --domain-group "${domain_group}" \
             --reg-code $PCOIP_REGISTRATION_CODE \
             --sync-interval 5 \
-            2>&1 | tee -a $INSTALL_LOG
+            2>&1 | tee -a $CAC_INSTALL_LOG
 
         RC=$?
         if [ $RC -eq 0 ]
@@ -238,7 +229,7 @@ else
             --domain-group "${domain_group}" \
             --reg-code $PCOIP_REGISTRATION_CODE \
             --sync-interval 5 \
-            2>&1 | tee -a $INSTALL_LOG
+            2>&1 | tee -a $CAC_INSTALL_LOG
 
         RC=$?
         if [ $RC -eq 0 ]
