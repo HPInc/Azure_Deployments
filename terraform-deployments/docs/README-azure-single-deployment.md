@@ -1,13 +1,13 @@
 # Single-Connector Deployment
 
-**Learning Objective**: The objective of this script is to automate the deployment of the single-connector architecture. This document is a guide on how to deploy a single-connector deployment on Azure from **Azure Cloud Shell** (ACS). 
+**Learning Objective**: The objective of this script is to automate the deployment of the single-connector architecture. This document is a guide on how to deploy a single-connector deployment on Azure from **Azure Cloud Shell** (ACS). For deployments on AWS or Google Cloud Platform visit https://github.com/teradici/cloud_deployment_scripts.
 
 ## Table of Contents
 1. [Single-Connector Architecture](#1-single-connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Connect Azure to Cloud Access Manager](#3-connect-azure-to-cloud-access-manager)
-4. [Deploying the Single-Connector via Terraform](#4-deploying-the-single-connector-via-terraform)
-5. [Storing Secrets on Azure Key Vault](#5-optional-storing-secrets-on-azure-key-vault)
+4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
+5. [Deploying the Single-Connector via Terraform](#5-deploying-the-single-connector-via-terraform)
 6. [Adding Workstations in Cloud Access Manager](#6-adding-workstations-in-cloud-access-manager)
 7. [Starting a PCoIP Session](#7-starting-a-pcoip-session)
 8. [Changing the deployment](#8-changing-the-deployment)
@@ -44,7 +44,7 @@ The following diagram shows a single-connector deployment instance with multiple
 ![single-connector diagram](single-connector-azure.PNG)
 
 ### 2. Requirements
-- Access to a subscription on Azure.
+- Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
 - a Cloud Access Manager Deployment Service Account. CAM can be accessed [here](https://cam.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
@@ -56,101 +56,32 @@ The following diagram shows a single-connector deployment instance with multiple
 ### 3. Connect Azure to Cloud Access Manager
 To interact directly with remote workstations, an Azure Account must be connected to the Cloud Access Manager.
 1. Login to the [Azure portal](http://portal.azure.com/)
-2. Click Azure Active Directory in the left sidebar and click app registrations inside the opened blade.
+2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
     - More information on how to create an App Registration can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret).
 4. Copy the following information from the application overview: 
     - Client ID
     - Tenant ID
     - Object ID
-5. Under the same app, click Certificates & secrets.
+5. Under the same app, click **Certificates & secrets**.
 6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
 7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
-8. Copy the Subscription ID and click on Access control (IAM) on the blade. 
-9. Click **Add**, select **Add role assignment** and follow these steps to add roles:
-    1. Under **Role** select **Reader**.
-    2. Leave **Assign access to** as default.
-    3. Under **Select** search for the application name from step 4 and click save.
-    4. Repeat these steps for the role **Virtual Machine Contributor**.
-10. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com) using a Microsoft business account.
-11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment and submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
-12. Click **Connectors** on the side bar and create a new connector. 
-13. Input a connector name to [generate](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/) a token. Save this as it will be used later. 
+8. Copy the **Subscription ID** and click on **Access control (IAM)** on the blade. 
+9. Click **+ Add**, click **Add role assignments** and follow these steps to add roles:
+    1. Under **Role**, click the dropdown and select the role **Reader**.
+    2. Leave **Assign access to** as **User, group, or service principal**
+    3. Under **Select** search for the application name from step 4 and click **Save**.
+    4. Repeat steps i - iii for the role **Virtual Machine Contributor**.
+10. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com).
+11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the Cloud Acess Manager console.
+12. Click on **Cloud Service Accounts** and then **Azure**.
+13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
+14. Click **Connectors** on the side bar and create a new connector. 
+15. Input a connector name to [generate](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/) a token. Save this as it will be used later. 
     - This token expires in 2 hours. 
-    - The value will be used inside ```terraform.tfvars``` under ```cac_configuration : [{ cac_token: token_here, location: westus2 }]```
+    - The value will be used inside ```terraform.tfvars``` like so: ```cac_configuration : [{ cac_token: token_here, location: westus2 }]```
 
-### 4. Deploying the Single-Connector via Terraform
-terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. Uncommented lines show required variables, while commented lines show optional variables with their default or sample values. A complete list of available variables are described in the variable definition files ```default-vars.tf``` and ```required-vars.tf``` of the deployment.
-
-Before the deployment of the single-connector, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
-1. Change directory into: ```/terraform-deployments/deployments/single-connector```.
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
-    - Users can edit files inside ACS by doing ```code terraform.tfvars```.
-    - The resource group name must be unique and must not already exist.
-    - Make sure the locations of the connectors and work stations are identical.
-    - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
-3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
-    - To add users successfully, passwords must have atleast 3 of the following requirements:
-      - 1 UPPERCASE letter
-      - 1 lowercase letter
-      - 1 number
-      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
-4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. ```tee -a installer.log``` stores a local log of the script output. 
-6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
-
-A typical deployment should take around 45 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. Connectors should register themselves with the CAM service and show up in the CAM Admin Console.
-
-Example output:
-```
-Apply complete! Resources: 55 added, 0 changed, 0 destroyed.
-
-Outputs:
-
-cac-vms = [
-  {
-    "name" = "ter3-cac-vm-0"
-    "private_ip" = "10.0.3.4"
-    "public_ip" = "52.109.24.176"
-  },
-]
-centos-graphics-workstations = [
-  {
-    "name" = "ter0-gcent-0"
-    "private_ip" = "10.0.4.5"
-    "public_ip" = "52.109.24.180"
-  },
-]
-centos-standard-workstations = [
-  {
-    "name" = "ter0-scent-0"
-    "private_ip" = "10.0.4.6"
-    "public_ip" = "52.109.26.105"
-  },
-]
-domain-controller-private-ip = "10.0.1.4"
-domain-controller-public-ip = "52.109.24.161"
-locations = [
-  "westus2",
-]
-resource_group = "mj122003"
-windows-standard-workstations = [
-  {
-    "name" = "ter0-swin-0"
-    "private_ip" = "10.0.4.4"
-    "public_ip" = "52.109.25.74"
-  },
-]
-windows-graphics-workstations = [
-  {
-    "name" = "ter0-gwin-0"
-    "private_ip" = "10.0.4.7"
-    "public_ip" = "52.109.25.77"
-  },
-]
-```
-
-### 5. (Optional) Storing Secrets on Azure Key Vault
+### 4. (Optional) Storing Secrets on Azure Key Vault
 
 Note: This is an optional feature. If you do not want to use secrets, you can just enter the plaintext code for your safe mode admin password, PCoIP registration key, and connector token in the terraform.tfvars file.
 
@@ -200,14 +131,88 @@ ad_pass_secret_name           = "adPasswordID"
     2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cloud-access-manager). If you no longer have this, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
     2. ```key_vault_id```: Go to your key vault and click on **Properties** inside the opened blade. Copy the **Resource ID**.
     3. ```ad_pass_secret_name```: This is the name you used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_pass_secret_id```.
+
+### 5. Deploying the Single-Connector via Terraform
+terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
+
+Before the deployment of the single-connector, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
+1. Change directory into: ```/terraform-deployments/deployments/single-connector```.
+2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+    - Users can edit files inside ACS by doing ```code terraform.tfvars```.
+    - The resource group name must be unique and must not already exist.
+    - Make sure the locations of the connectors and work stations are identical.
+    - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
+3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
+    - To add users successfully, passwords must have atleast 3 of the following requirements:
+      - 1 UPPERCASE letter
+      - 1 lowercase letter
+      - 1 number
+      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
+4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
+5. Run ```terraform apply``` to display resources that will be created by Terraform. 
+    - **Note:** Users can also do ```terraform apply | tee -a installer.log``` which stores a local log of the script output. ACS may timeout and this can help diagnose any problems during script execution. 
+6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
+
+A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. Connectors should register themselves with the CAM service and show up in the CAM Admin Console.
+
+Example output:
+```
+Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+cac-vms = [
+  {
+    "name" = "ter3-cac-vm-0"
+    "private_ip" = "10.0.3.4"
+    "public_ip" = "52.109.24.176"
+  },
+]
+centos-graphics-workstations = [
+  {
+    "name" = "ter0-gcent-0"
+    "private_ip" = "10.0.4.5"
+    "public_ip" = "52.109.24.180"
+  },
+]
+centos-standard-workstations = [
+  {
+    "name" = "ter0-scent-0"
+    "private_ip" = "10.0.4.6"
+    "public_ip" = "52.109.26.105"
+  },
+]
+domain-controller-private-ip = "10.0.1.4"
+domain-controller-public-ip = "52.109.24.161"
+locations = [
+  "westus2",
+]
+resource_group = "my-single-connector-deployment"
+windows-standard-workstations = [
+  {
+    "name" = "ter0-swin-0"
+    "private_ip" = "10.0.4.4"
+    "public_ip" = "52.109.25.74"
+  },
+]
+windows-graphics-workstations = [
+  {
+    "name" = "ter0-gwin-0"
+    "private_ip" = "10.0.4.7"
+    "public_ip" = "52.109.25.77"
+  },
+]
+```
     
 ### 6. Adding Workstations in Cloud Access Manager
 To connect to workstations, they have to be added through the Cloud Access Manager. 
 1. Go to the CAM Admin Console and ensure you have your deployment selected. 
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
-3. Select **Private Cloud** or **Azure** with the name of your resource group declared in terraform.tfvars.
-4. Under **Remote Workstations** select the Windows and CentOS host machines.
-5. Under **User Entitlements for Workstations** add the Active Directory username declared in terraform.tfvars.
+3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of your resource group declared in terraform.tfvars.
+4. In the search box below, select Windows and CentOS workstations.
+5. At the bottom click the option **Individually select users** and select the users you would like to assign to the workstations. 
+    - **Note:** If you would like to assign certain users to certain workstations you can remove workstations under **Remote workstations to be added (x)**.
+6. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
