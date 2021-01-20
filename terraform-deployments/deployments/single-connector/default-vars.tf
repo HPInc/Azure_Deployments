@@ -27,12 +27,12 @@ variable "cac_admin_username" {
 
 variable "windows_admin_username" {
   description = "Name for the Windows Administrator of the Workstation"
-  default     = "cam_admin"
+  default     = "windows_admin"
 }
 
 variable "centos_admin_username" {
   description = "Name for the CentOS Administrator of the Workstation"
-  default     = "cam_admin"
+  default     = "centos_admin"
 }
 
 variable "dc_subnet_name" {

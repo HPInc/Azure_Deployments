@@ -152,11 +152,13 @@ module "cac-vm" {
   host_name                   = "${var.prefix}-cac-vm"
   machine_type                = var.cac_machine_type
   cac_admin_user              = var.cac_admin_username
-  cac_admin_password          = var.cac_admin_password
+  cac_admin_password          = var.ad_admin_password
   dns_zone_id                 = module.dc-cac-network.private-dns-zone-id
   application_id              = var.application_id
   aad_client_secret           = var.aad_client_secret
   tenant_id                   = var.tenant_id
+  key_vault_id                = var.key_vault_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   _artifactsLocation          = var._artifactsLocation
 }
 
@@ -181,7 +183,7 @@ module "cac-configuration" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   cac_admin_user              = var.cac_admin_username
-  cac_admin_password          = var.cac_admin_password
+  cac_admin_password          = var.ad_admin_password
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
   cac_ips                     = module.cac-network.cac-public-ips
@@ -205,7 +207,7 @@ module "windows-std-vm" {
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.windows_admin_username
-  admin_password              = var.windows_admin_password
+  admin_password              = var.ad_admin_password
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username
@@ -233,7 +235,7 @@ module "windows-gfx-vm" {
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.windows_admin_username
-  admin_password              = var.windows_admin_password
+  admin_password              = var.ad_admin_password
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username
@@ -260,7 +262,7 @@ module "centos-std-vm" {
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.centos_admin_username
-  admin_password              = var.centos_admin_password
+  admin_password              = var.ad_admin_password
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username
@@ -287,7 +289,7 @@ module "centos-gfx-vm" {
 
   resource_group_name         = azurerm_resource_group.main.name
   admin_name                  = var.centos_admin_username
-  admin_password              = var.centos_admin_password
+  admin_password              = var.ad_admin_password
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   ad_service_account_username = var.ad_admin_username

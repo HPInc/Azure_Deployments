@@ -98,16 +98,10 @@ prefix                        = "test"
 ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # CAC VM username and passwords
-cac_admin_username = "cam_admin"
-cac_admin_password = "Password!234"
-
-# Windows VMs usernames and passwords
-windows_admin_username  = "WINadmin"
-windows_admin_password  = "Password!234"
-
-# Centos VMs usernames and passwords
-centos_admin_username  = "CENTadmin"
-centos_admin_password  = "Password!234"
+# cac_admin_username      = "cam_admin"
+# ad_admin_username       = "cam_admin"
+# windows_admin_username  = "windows_admin"
+# centos_admin_username   = "centos_admin"
 
 # Debug flags for accessibility to the virtual machines
 # NOTE THAT THIS IS INSECURE! AND SHOULD ONLY BE USED FOR TESTING ETC
@@ -116,7 +110,6 @@ create_debug_rdp_access       = true
 
 # Domain controller active directory property values
 active_directory_netbios_name = "tera"
-ad_admin_username             = "cam_admin"
 
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. Follow section 5 of the documentation.
 ad_admin_password             = ""

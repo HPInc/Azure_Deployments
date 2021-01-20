@@ -38,7 +38,7 @@ resource "azurerm_linux_virtual_machine" "centos-std-vm" {
   resource_group_name             = var.resource_group_name
   location                        = each.value.location
   admin_username                  = var.admin_name
-  admin_password                  = var.admin_password
+  admin_password                  = local.ad_admin_password
   disable_password_authentication = false
   size                            = each.value.vm_size
 

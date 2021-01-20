@@ -32,7 +32,7 @@ resource "null_resource" "upload-scripts" {
   connection {
     type     = "ssh"
     user     = var.cac_admin_user
-    password = var.cac_admin_password
+    password = local.ad_admin_password
     host     = var.cac_ips[count.index]
     port     = "22"
     #private_key = file("${path.module}/tera_private_key.ppk")
@@ -72,7 +72,7 @@ resource "null_resource" "run-cac-startup-script" {
   connection {
     type     = "ssh"
     user     = var.cac_admin_user
-    password = var.cac_admin_password
+    password = local.ad_admin_password
     host     = var.cac_ips[count.index]
     port     = "22"
     #private_key = file("${path.module}/tera_private_key.ppk")

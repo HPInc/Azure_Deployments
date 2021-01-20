@@ -5,6 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  startup_cac_filename = "cac-startup.sh"
+  ad_admin_password    = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
+}
+
 resource "azurerm_linux_virtual_machine" "cac" {
   depends_on = [
     var.cac_depends_on
@@ -17,7 +28,7 @@ resource "azurerm_linux_virtual_machine" "cac" {
   resource_group_name             = var.resource_group_name
   size                            = var.machine_type
   admin_username                  = var.cac_admin_user
-  admin_password                  = var.cac_admin_password
+  admin_password                  = local.ad_admin_password
   computer_name                   = var.host_name
   disable_password_authentication = false
   network_interface_ids = [

@@ -41,7 +41,6 @@ variable "active_directory_netbios_name" {
 
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
-  default     = ""
 }
 
 variable "ad_pass_secret_name" {
@@ -72,7 +71,6 @@ variable "tenant_id" {
 variable "safe_mode_admin_password" {
   description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
   type        = string
-  default     = ""
 }
 
 variable "ad_domain_users_list_file" {
@@ -87,21 +85,5 @@ variable "_artifactsLocation" {
 
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
-  type        = string
-  default     = "void"
-}
-
-variable "cac_admin_password" {
-  description = "Password for the Administrator of the Cloud Access Connector VM"
-  type        = string
-}
-
-variable "windows_admin_password" {
-  description = "Password for the Administrator of the Workstation"
-  type        = string
-}
-
-variable "centos_admin_password" {
-  description = "Password for the Administrator of the Workstation"
   type        = string
 }
