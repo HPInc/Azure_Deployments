@@ -5,35 +5,78 @@
 
 #!/bin/bash
 
+LOG_FILE="/var/log/teradici/provisioning.log"
 AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
+CAC_BIN_PATH="/usr/sbin/cloud-access-connector"
 CAC_TOKEN=${cac_token}
 PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
 INSTALL_DIR="/root"
 CAC_INSTALL_LOG="/var/log/teradici/cac-install.log"
-
-mkdir -p "$(dirname $CAC_INSTALL_LOG)"
-touch "$CAC_INSTALL_LOG"
-chmod +644 "$CAC_INSTALL_LOG"
+cd $INSTALL_DIR
 
 log() {
     local message="$1"
-    echo "[$(date)] $${message}" | tee -a "$CAC_INSTALL_LOG"
+    echo "[$(date)] $message"
 }
 
-exit_and_restart()
-{
-    log "--> Rebooting"
-    (sleep 1; reboot -p) &
-    exit
+retry() {
+    local timeout="$1"
+    local interval="$2"
+    local command="$3"
+    local log_message="$4"
+    local err_message="$5"
+
+    until $command
+    do
+        if [ $timeout -le 0 ]
+        then
+            log $err_message
+            break
+        fi
+
+        log "$log_message Retrying in $interval seconds... (Timeout in $timeout seconds)"
+
+        timeout=$((timeout-interval))
+        sleep $interval
+    done
 }
 
-log "Starting the logging document..."
-log "$PCOIP_REGISTRATION_CODE | $AD_SERVICE_ACCOUNT_PASSWORD | $CAC_TOKEN"
+check_connector_installed() {
+    if [[ -f "$CAC_BIN_PATH" ]]; then
+        log "--> Connector already installed. Skipping provisioning script..."
+        exit 0
+    fi
+}
 
-if [[ -f "$INSTALL_DIR/cloud-access-connector" ]]; then
-    log "Connector already installed. Skipping startup script."
-    exit 0
-fi
+config_network() {
+    if [[ ! -f $PCOIP_NETWORK_CONF_FILE ]]; then
+        log "--> Configuring network..."
+        # Note the indented HEREDOC lines must be preceded by tabs, not spaces
+        cat <<- EOF > $PCOIP_NETWORK_CONF_FILE
+			# System Control network settings for CAC
+			net.core.rmem_max=160000000
+			net.core.rmem_default=160000000
+			net.core.wmem_max=160000000
+			net.core.wmem_default=160000000
+			net.ipv4.udp_mem=120000 240000 600000
+			net.core.netdev_max_backlog=2000
+			EOF
+
+        sysctl -p $PCOIP_NETWORK_CONF_FILE
+    fi
+}
+
+install_prereqs() {
+    log "--> Installing wget, jq..."
+    apt-get -y update
+    apt install -y wget jq
+
+    if [ $? -ne 0 ]
+    then
+        log "--> ERROR: Failed to install prerequisites. Exiting provisioning script..."
+        exit 1
+    fi
+}
 
 get_access_token() {
     accessToken=`curl -X POST -d "grant_type=client_credentials&client_id=$1&client_secret=$2&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$3/oauth2/token`
@@ -55,200 +98,170 @@ get_credentials() {
     fi
 }
 
-sudo apt-get -y update
+download_cac() {
+    log "--> Downloading CAC installer..."
+    curl -L ${cac_installer_url} -o $INSTALL_DIR/cloud-access-connector.tar.gz
+    tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz --no-same-owner -C /
+}
 
-sudo apt-get install -y wget
+wait_for_dc() {
+    local timeout=25
+    local interval=5
 
-sudo apt-get install -y jq
+    # Wait for service account to be added. Do this last because it takes
+    # a while for new AD user to be added in a new Domain Controller.
+    # Note: using the domain controller IP instead of the domain name for
+    #       the host is more resilient.
+
+    log "--> Updating apt-get package list..."
+    retry $timeout \
+          $interval \
+          "apt-get -qq update" \
+          "--> Updating apt-get package list..." \
+          "--> ERROR: Failed to update apt-get package list."
+
+    log "--> Installing ldap_utils..."
+    retry $timeout \
+          $interval \
+          "apt-get -qq install ldap-utils" \
+          "--> Installing ldap_utils..." \
+          "--> ERROR: Failed to install ldap-utils."
+
+    timeout=1200
+    interval=10
+
+    set +x
+    log "--> Ensure AD account is available..."
+    retry $timeout \
+          $interval \
+          "ldapwhoami \
+            -H ldap://${domain_controller_ip} \
+            -D ${ad_service_account_username}@${domain_name} \
+            -w $AD_SERVICE_ACCOUNT_PASSWORD \
+            -o nettimeout=1" \
+          "--> Waiting for AD account ${ad_service_account_username}@${domain_name} to become available." \
+          "--> ERROR: Timed out waiting for AD account ${ad_service_account_username}@${domain_name} to become available. Continuing..."
+    set -x
+    # Check that the domain name can be resolved and that the LDAP port is accepting
+    # connections. This could have been all done with the ldapwhoami command, but
+    # due to a number of occasional cac-installation issues, such as "domain
+    # controller unreachable" or "DNS error occurred" errors, check these explicitly
+    # for logging and debug purposes.
+    log "--> Ensure domain ${domain_name} can be resolved..."
+    retry $timeout \
+          $interval \
+          "host ${domain_name}" \
+          "--> Trying to resolve ${domain_name}." \
+          "--> ERROR: Timed out trying to resolve ${domain_name}. Continuing..."
+
+    log "--> Ensure domain ${domain_name} port 636 is reacheable..."
+    retry $timeout \
+          $interval \
+          "netcat -vz ${domain_name} 636" \
+          "--> Trying to contact ${domain_name}:636." \
+          "--> ERROR: Timed out trying to contact ${domain_name}:636. Continuing..."
+}
+
+install_cac() {
+    log "--> Installing Cloud Access Connector..."
+    local retries=10
+    local args=""
+
+    log "--> Running command: $CAC_BIN_PATH install"
+    log "--> CAC install options:"
+    log "  -t <cac_token>"
+    log "  --accept-policies"
+    log "  --sa-user <ad_service_account_username>"
+    log "  --sa-password <ad_service_account_password>"
+    log "  --domain ${domain_name}"
+    log "  --domain-group ${domain_group}"
+    log "  --reg-code <pcoip_registration_code>"
+    log "  --retrieve-agent-state true"
+    log "  --sync-interval 5"
+
+    # Set pipefail option to return status of the connector install command
+    set -o pipefail
+
+    if [ "${ssl_key}" ]
+    then
+        log "  --ssl-key <ssl_key>"
+        log "  --ssl-cert <ssl_cert>"
+        wget ${_artifactsLocation}${ssl_key} -P $INSTALL_DIR
+        wget ${_artifactsLocation}${ssl_cert} -P $INSTALL_DIR
+
+        args=$args"--ssl-key $INSTALL_DIR/${ssl_key} "
+        args=$args"--ssl-cert $INSTALL_DIR/${ssl_cert} "
+    else
+        log "  --insecure"
+        args=$args"--insecure "
+    fi
+
+    set +x
+    while true
+    do
+        $CAC_BIN_PATH install \
+            -t $CAC_TOKEN \
+            --accept-policies \
+            --sa-user ${ad_service_account_username} \
+            --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
+            --domain ${domain_name} \
+            --domain-group "${domain_group}" \
+            --reg-code $PCOIP_REGISTRATION_CODE \
+            --sync-interval 5 \
+            $args \
+            2>&1 | tee -a $CAC_INSTALL_LOG
+
+        local rc=$?
+        if [ $rc -eq 0 ]
+        then
+            log "--> Successfully installed Cloud Access Connector."
+            break
+        fi
+
+        if [ $retries -eq 0 ]
+        then
+            log "--> ERROR: Failed to install Cloud Access Connector. No retries remaining."
+            exit 1
+        fi
+
+        log "--> ERROR: Failed to install Cloud Access Connector. $retries retries remaining..."
+        retries=$((retries-1))
+        sleep 60
+    done
+    set -x
+}
+
+if [[ ! -f "$LOG_FILE" ]]
+then
+    mkdir -p "$(dirname $LOG_FILE)"
+    touch "$LOG_FILE"
+    chmod +644 "$LOG_FILE"
+fi
+
+log "$(date)"
+
+# Print all executed commands to the terminal
+set -x
+
+# Redirect stdout and stderr to the log file
+exec &>>$LOG_FILE
+
+install_prereqs
 
 get_credentials ${aad_client_secret} ${application_id} ${tenant_id} $PCOIP_REGISTRATION_CODE $AD_SERVICE_ACCOUNT_PASSWORD $CAC_TOKEN
 
-# Network tuning
-PCOIP_NETWORK_CONF_FILE="/etc/sysctl.d/01-pcoip-cac-network.conf"
+check_required_vars
 
-log "Running the configuration of the network..."
+check_connector_installed
 
-if [ ! -f $PCOIP_NETWORK_CONF_FILE ]; then
-    # Note the indented HEREDOC lines must be preceded by tabs, not spaces
-    cat <<- EOF > $PCOIP_NETWORK_CONF_FILE
-	# System Control network settings for CAC
-	net.core.rmem_max=160000000
-	net.core.rmem_default=160000000
-	net.core.wmem_max=160000000
-	net.core.wmem_default=160000000
-	net.ipv4.udp_mem=120000 240000 600000
-	net.core.netdev_max_backlog=2000
-	EOF
+config_network
 
-    sysctl -p $PCOIP_NETWORK_CONF_FILE
-fi
+download_cac
 
-log "Downloading the CAC Installer..."
+wait_for_dc
 
-# download CAC installer
-sudo curl -L ${cac_installer_url} -o $INSTALL_DIR/cloud-access-connector.tar.gz
-sudo tar xzvf $INSTALL_DIR/cloud-access-connector.tar.gz --no-same-owner
-
-
-# Wait for service account to be added
-# do this last because it takes a while for new AD user to be added in a
-# new Domain Controller
-# Note: using the domain controller IP instead of the domain name for the
-#       host is more resilient
-log '### Installing ldap-utils ###'
-RETRIES=5
-while true; do
-    sudo apt-get -qq update
-    sudo apt-get -qq install ldap-utils
-    RC=$?
-    if [ $RC -eq 0 ] || [ $RETRIES -eq 0 ]; then
-        break
-    fi
-
-    log "Error installing ldap-utils. $RETRIES retries remaining..."
-    RETRIES=$((RETRIES-1))
-    sleep 5
-done
-
-log '### Ensure AD account is available ###'
-TIMEOUT=1200
-until ldapwhoami \
-    -H ldap://${domain_controller_ip} \
-    -D ${ad_service_account_username}@${domain_name} \
-    -w $AD_SERVICE_ACCOUNT_PASSWORD \
-    -o nettimeout=1; do
-    if [ $TIMEOUT -le 0 ]; then
-        break
-    else
-        log "Waiting for AD account ${ad_service_account_username}@${domain_name} to become available. Retrying in 10 seconds... (Timeout in $TIMEOUT seconds)"
-    fi
-    TIMEOUT=$((TIMEOUT-10))
-    sleep 10
-done
-
-# Check that the domain name can be resolved and that the LDAP port is accepting
-# connections. This could have been all done with the ldapwhoami command, but
-# due to a number of occasional cac-installation issues, such as "domain
-# controller unreachable" or "DNS error occurred" errors, check these explicitly
-# for logging and debug purposes.
-
-echo '### Ensure domain ${domain_name} can be resolved ###'
-TIMEOUT=1200
-until host ${domain_name}; do
-    if [ $TIMEOUT -le 0 ]; then
-        break
-    else
-        echo "Trying to resolve ${domain_name}. Retrying in 10 seconds... (Timeout in $TIMEOUT seconds)"
-    fi
-    TIMEOUT=$((TIMEOUT-10))
-    sleep 10
-done
-
-echo '### Ensure domain ${domain_name} port 636 is reacheable ###'
-TIMEOUT=1200
-until netcat -vz ${domain_name} 636; do
-    if [ $TIMEOUT -le 0 ]; then
-        break
-    else
-        echo "Trying to contact ${domain_name}:636. Retrying in 10 seconds... (Timeout in $TIMEOUT seconds)"
-    fi
-    TIMEOUT=$((TIMEOUT-10))
-    sleep 10
-done
-
-# realmd installation
-export DEBIAN_FRONTEND=noninteractive
-sudo -E apt-get -y install sssd realmd krb5-user samba-common packagekit adcli
-
-# Replace krb5 config if we havent already
-if [ ! -f "./krb5.conf" ] || [ ! -f "./krb5.conf.backup" ]; then
-    sed '/\[libdefaults\]/a rdns = false' /etc/krb5.conf > ./krb5.conf
-    sudo cp /etc/krb5.conf ./krb5.conf.backup
-    sudo cp ./krb5.conf /etc/krb5.conf
-fi
-
-# Add computer to the domain
-echo $AD_SERVICE_ACCOUNT_PASSWORD | sudo realm join --user=${ad_service_account_username} --computer-name=$(hostname) ${domain_name} -v
-
-log '### Installing Cloud Access Connector ###'
-RETRIES=3
-export CAM_BASE_URI=${cam_url}
-
-# Set pipefail option to return status of the connector install command
-set -o pipefail
-
-
-
-if [ -z "${ssl_key}" ]; then
-    log "### Not installing ssl certificate ###"
-    while true
-    do
-        ./usr/sbin/cloud-access-connector install \
-            -t $CAC_TOKEN \
-            --accept-policies \
-            --insecure \
-            --sa-user ${ad_service_account_username} \
-            --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
-            --domain ${domain_name} \
-            --domain-group "${domain_group}" \
-            --reg-code $PCOIP_REGISTRATION_CODE \
-            --sync-interval 5 \
-            2>&1 | tee -a $CAC_INSTALL_LOG
-
-        RC=$?
-        if [ $RC -eq 0 ]
-        then
-            log "--> Successfully installed Cloud Access Connector."
-            break
-        fi
-
-        if [ $RETRIES -eq 0 ]
-        then
-            exit 1
-        fi
-
-        log "--> ERROR: Failed to install Cloud Access Connector. $RETRIES retries remaining..."
-        RETRIES=$((RETRIES-1))
-        sleep 60
-    done
-else
-    log "### Installing ssl certificate ###"
-    wget ${_artifactsLocation}${ssl_key} -P $INSTALL_DIR
-    wget ${_artifactsLocation}${ssl_cert} -P $INSTALL_DIR
-
-    while true
-    do
-        ./cloud-access-connector install \
-            -t $CAC_TOKEN \
-            --accept-policies \
-            --ssl-key $INSTALL_DIR/${ssl_key} \
-            --ssl-cert $INSTALL_DIR/${ssl_cert} \
-            --sa-user ${ad_service_account_username} \
-            --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
-            --domain ${domain_name} \
-            --domain-group "${domain_group}" \
-            --reg-code $PCOIP_REGISTRATION_CODE \
-            --sync-interval 5 \
-            2>&1 | tee -a $CAC_INSTALL_LOG
-
-        RC=$?
-        if [ $RC -eq 0 ]
-        then
-            log "--> Successfully installed Cloud Access Connector."
-            break
-        fi
-
-        if [ $RETRIES -eq 0 ]
-        then
-            exit 1
-        fi
-
-        log "--> ERROR: Failed to install Cloud Access Connector. $RETRIES retries remaining..."
-        RETRIES=$((RETRIES-1))
-        sleep 60
-    done
-fi
+install_cac
 
 docker service ls
 
-log "### FINISHING INSTALLING CAC ###"
+log "--> Provisioning script completed successfully."
