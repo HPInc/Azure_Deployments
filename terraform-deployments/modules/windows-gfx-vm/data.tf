@@ -21,6 +21,8 @@ locals {
   deploy_script_file_destination = "C:/Temp/${local.windows_gfx_provisioning_script}"
   deploy_temp_dir                = "C:/Temp"
 
-  ad_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
-  is_windows        = substr(pathexpand("~"), 0, 1) == "/" ? false : true
+  ad_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
+  windows_admin_password = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+
+  is_windows = substr(pathexpand("~"), 0, 1) == "/" ? false : true
 }

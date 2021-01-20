@@ -35,7 +35,7 @@ resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
   resource_group_name = var.resource_group_name
   location            = each.value.location
   admin_username      = var.admin_name
-  admin_password      = var.admin_password
+  admin_password      = local.windows_admin_password
   size                = each.value.vm_size
 
   network_interface_ids = [

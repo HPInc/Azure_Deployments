@@ -7,7 +7,7 @@
 
 locals {
   startup_cac_filename = "cac-startup.sh"
-  ad_admin_password    = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
+  cac_admin_password   = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -28,7 +28,7 @@ resource "azurerm_linux_virtual_machine" "cac" {
   resource_group_name             = var.resource_group_name
   size                            = var.machine_type
   admin_username                  = var.cac_admin_user
-  admin_password                  = local.ad_admin_password
+  admin_password                  = local.cac_admin_password
   computer_name                   = var.host_name
   disable_password_authentication = false
   network_interface_ids = [

@@ -8,6 +8,7 @@
 locals {
   centos_std_provisioning_script = "centos-std-provisioning.sh"
   ad_admin_password              = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].id)
+  centos_admin_password          = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -38,7 +39,7 @@ resource "azurerm_linux_virtual_machine" "centos-std-vm" {
   resource_group_name             = var.resource_group_name
   location                        = each.value.location
   admin_username                  = var.admin_name
-  admin_password                  = local.ad_admin_password
+  admin_password                  = local.centos_admin_password
   disable_password_authentication = false
   size                            = each.value.vm_size
 
