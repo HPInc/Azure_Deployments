@@ -17,6 +17,19 @@ data "azurerm_key_vault_secret" "ad-pass" {
   key_vault_id = var.key_vault_id
 }
 
+# Debug public ip remove if not needed
+# resource "azurerm_public_ip" "centos-std-nic-public-ip" {
+
+#   for_each = var.workstations
+
+#   name                = "centos-std-nic-public-ip-${each.value.index}"
+#   location            = each.value.location
+#   resource_group_name = var.resource_group_name
+#   allocation_method   = "Static"
+#   sku                 = "Standard"
+# }
+
+
 resource "azurerm_network_interface" "centos-std-nic" {
 
   for_each = var.workstations
@@ -28,6 +41,9 @@ resource "azurerm_network_interface" "centos-std-nic" {
     name                          = "centos-std-${each.value.index}-ipconfig"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = var.workstation_subnet_ids[index(var.workstation_subnet_locations, each.value.location)]
+
+    # Debug public ip remove if not needed
+    # public_ip_address_id = azurerm_public_ip.centos-std-nic-public-ip[each.key].id
   }
 }
 
