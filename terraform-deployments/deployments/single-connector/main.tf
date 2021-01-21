@@ -50,7 +50,6 @@ module "dc-cac-network" {
 
   # Debug flags
   create_debug_rdp_access = var.create_debug_rdp_access
-  create_debug_public_ips = var.create_debug_public_ips
 }
 
 module "cac-network" {

@@ -55,6 +55,11 @@ variable "pcoip_agent_location" {
   default     = "https://downloads.teradici.com/win/stable/"
 }
 
+variable "active_directory_netbios_name" {
+  description = "The netbios name of the Active Directory domain, for example `consoto`"
+  default     = "tera"
+}
+
 variable "domain_group" {
   description = "Active Directory Distinguished Name for the User Group to log into the CAM Management Interface. Default is 'Domain Admins'. (eg, 'CN=CAM Admins,CN=Users,DC=example,DC=com')"
   default     = "Domain Admins"
@@ -137,14 +142,38 @@ variable "_artifactsLocationSasToken" {
   default     = ""
 }
 
-variable "create_debug_public_ips" {
-  description = "Debug flag to create public ip addresses for the domain controller and cac VMs"
-  type        = bool
-  default     = false
-}
-
 variable "create_debug_rdp_access" {
   description = "Debug flag to create RDP access to the domain controller"
   type        = bool
   default     = false
+}
+
+variable "ad_pass_secret_name" {
+  description = "The name of the Active Directory secret password"
+  type        = string
+  default     = ""
+}
+
+variable "key_vault_id" {
+  description = "The key vault resource ID"
+  type        = string
+  default     = ""
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default     = ""
 }

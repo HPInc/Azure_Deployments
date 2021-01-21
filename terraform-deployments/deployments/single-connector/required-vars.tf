@@ -35,37 +35,8 @@ variable "resource_group_name" {
   description = "The name of the resource group"
 }
 
-variable "active_directory_netbios_name" {
-  description = "The netbios name of the Active Directory domain, for example `consoto`"
-}
-
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
-}
-
-variable "ad_pass_secret_name" {
-  description = "The name of the Active Directory secret password"
-  type        = string
-}
-
-variable "key_vault_id" {
-  description = "The key vault resource ID"
-  type        = string
-}
-
-variable "application_id" {
-  description = "The application (client) ID of your app registration in AAD"
-  type        = string
-}
-
-variable "aad_client_secret" {
-  description = "The client secret of your app registration in AAD"
-  type        = string
-}
-
-variable "tenant_id" {
-  description = "The directory (tenant) ID of your app registration in AAD"
-  type        = string
 }
 
 variable "safe_mode_admin_password" {
