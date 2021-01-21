@@ -148,17 +148,17 @@ module "cac-vm" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   nic_ids                     = module.cac-network.cac-network-interface-ids
-  host_name                   = "${var.prefix}-cac-vm"
-  machine_type                = var.cac_machine_type
-  cac_admin_user              = var.cac_admin_username
-  cac_admin_password          = var.ad_admin_password
-  dns_zone_id                 = module.dc-cac-network.private-dns-zone-id
-  application_id              = var.application_id
-  aad_client_secret           = var.aad_client_secret
-  tenant_id                   = var.tenant_id
-  key_vault_id                = var.key_vault_id
-  ad_pass_secret_name         = var.ad_pass_secret_name
-  _artifactsLocation          = var._artifactsLocation
+  # host_name                   = "${var.prefix}-cac-vm"
+  machine_type        = var.cac_machine_type
+  cac_admin_user      = var.cac_admin_username
+  cac_admin_password  = var.ad_admin_password
+  dns_zone_id         = module.dc-cac-network.private-dns-zone-id
+  application_id      = var.application_id
+  aad_client_secret   = var.aad_client_secret
+  tenant_id           = var.tenant_id
+  key_vault_id        = var.key_vault_id
+  ad_pass_secret_name = var.ad_pass_secret_name
+  _artifactsLocation  = var._artifactsLocation
 }
 
 module "cac-configuration" {

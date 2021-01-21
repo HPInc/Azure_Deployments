@@ -27,10 +27,6 @@ variable "cac_configuration" {
   }))
 }
 
-variable "prefix" {
-  description = "Prefix to add to name of new resources. Must be <= 9 characters."
-}
-
 variable "resource_group_name" {
   description = "The name of the resource group"
 }

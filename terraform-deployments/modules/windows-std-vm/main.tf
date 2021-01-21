@@ -45,7 +45,7 @@ resource "azurerm_windows_virtual_machine" "windows-std-vm" {
 
   for_each = var.workstations
 
-  name                = "${each.value.prefix}-swin-${each.value.index}"
+  name                = each.value.prefix == "" ? "swin-${each.value.index}" : "${each.value.prefix}-swin-${each.value.index}"
   resource_group_name = var.resource_group_name
   location            = each.value.location
   admin_username      = var.admin_name
@@ -77,7 +77,7 @@ resource "null_resource" "az-windows-host-configure-download" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-std-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_std_provisioning_script} -Verbose\""
+    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-std-vm[each.key].name} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-std-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_std_provisioning_script} -Verbose\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }
@@ -89,7 +89,7 @@ resource "null_resource" "az-windows-host-configure-run-deploy" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${each.value.prefix}-swin-${each.value.index} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_std_provisioning_script} ${local.windows_std_provisioning_script_params}\""
+    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-std-vm[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_std_provisioning_script} ${local.windows_std_provisioning_script_params}\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }

@@ -50,7 +50,7 @@ resource "azurerm_linux_virtual_machine" "centos-gfx-vm" {
 
   for_each = var.workstations
 
-  name                            = "${each.value.prefix}-gcent-${each.value.index}"
+  name                            = each.value.prefix == "" ? "gcent-${each.value.index}" : "${each.value.prefix}-gcent-${each.value.index}"
   resource_group_name             = var.resource_group_name
   location                        = each.value.location
   admin_username                  = var.admin_name
@@ -81,7 +81,7 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   depends_on = [azurerm_linux_virtual_machine.centos-gfx-vm]
 
   for_each             = var.workstations
-  name                 = "${each.value.prefix}-gcent-${each.value.index}"
+  name                 = each.value.prefix == "" ? "gcent-${each.value.index}" : "${each.value.prefix}-gcent-${each.value.index}"
   virtual_machine_id   = azurerm_linux_virtual_machine.centos-gfx-vm[each.key].id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"

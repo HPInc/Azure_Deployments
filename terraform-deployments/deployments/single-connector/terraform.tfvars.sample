@@ -65,7 +65,7 @@ cac_configuration = [
 resource_group_name           = "my-resource-group"
 
 # Prefix for DC and CAC machines.
-prefix                        = "sc"
+# prefix                        = ""
 
 # Debug flag to RDP into the DC VM.
 # create_debug_rdp_access       = false

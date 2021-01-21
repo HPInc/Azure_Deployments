@@ -7,6 +7,6 @@
 
 data "azurerm_key_vault_secret" "ad-pass" {
   count        = var.key_vault_id != "" ? 1 : 0
-  name = var.ad_pass_secret_name
+  name         = var.ad_pass_secret_name
   key_vault_id = var.key_vault_id
 }
