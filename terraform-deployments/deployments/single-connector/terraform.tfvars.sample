@@ -11,7 +11,7 @@
  
  workstations = [
     {
-        prefix           = "stdlx",
+        prefix           = "",
         location         = "westus2",
         workstation_os   = "linux",
         vm_size          = "Standard_B2ms",
@@ -21,7 +21,7 @@
         isGFXHost        = false
     },
     {
-        prefix           = "stdws",
+        prefix           = "",
         location         = "westus2",
         workstation_os   = "windows",
         vm_size          = "Standard_B2ms",
@@ -31,7 +31,7 @@
         isGFXHost        = false
     },
     {
-        prefix           = "gfxlx",
+        prefix           = "",
         location         = "westus2",
         workstation_os   = "linux",
         vm_size          = "Standard_NV6",
@@ -41,7 +41,7 @@
         isGFXHost        = true
     },
     {
-        prefix           = "gfxws",
+        prefix           = "",
         location         = "westus2",
         workstation_os   = "windows",
         vm_size          = "Standard_NV6",
@@ -61,8 +61,9 @@ cac_configuration = [
 ]
 
 # Name of resource group the deployment will be placed in.
-# Must be unique and must not already exist. 
-resource_group_name           = "my-resource-group"
+# Must be unique and does not currently exist. 
+# Leaving this commented will result in the name 'single_connector_deployment_MM_DD_YY_hhmm'
+# resource_group_name           = ""
 
 # Prefix for DC and CAC machines.
 # prefix                        = ""

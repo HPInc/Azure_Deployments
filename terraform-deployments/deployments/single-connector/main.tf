@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "single_connector_deployment_${formatdate("MM_DD_YY_hhmm", timestamp())}"
+}
+
 module "workstation-map" {
   source       = "../../modules/workstation-map"
   workstations = var.workstations
@@ -12,7 +16,7 @@ module "workstation-map" {
 
 resource "azurerm_resource_group" "main" {
   location = module.workstation-map.virtual-network-locations[0]
-  name     = var.resource_group_name
+  name     = local.resource_group_name
 }
 
 resource "random_id" "blob-name" {
@@ -120,7 +124,7 @@ module "active-directory-domain-configure" {
   ]
 
   # Populate the module properties
-  resource_group_name                    = var.resource_group_name
+  resource_group_name                    = azurerm_resource_group.main.name
   domain_controller_virtual_machine_name = module.active-directory-domain-vm.domain-controller-name
 }
 

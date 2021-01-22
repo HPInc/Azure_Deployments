@@ -27,10 +27,6 @@ variable "cac_configuration" {
   }))
 }
 
-variable "resource_group_name" {
-  description = "The name of the resource group"
-}
-
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
 }

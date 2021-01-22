@@ -75,6 +75,11 @@ variable "cac_host_name" {
   default     = "vm-cac"
 }
 
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  default     = ""
+}
+
 variable "cac_machine_type" {
   description = "Machine type for the Cloud Access Connector"
   default     = "Standard_D2s_v3"
