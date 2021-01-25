@@ -75,7 +75,7 @@ To interact directly with remote workstations, an Azure Account must be connecte
     1. Under **Role**, click the dropdown and select the role **Reader**.
     2. Leave **Assign access to** as **User, group, or service principal**
     3. Under **Select** search for the application name from step 4 and click **Save**.
-    4. Repeat steps i - iii for the role **Virtual Machine Contributor**.
+    4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 10. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com).
 11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the Cloud Acess Manager console.
 12. Click on **Cloud Service Accounts** and then **Azure**.
@@ -95,13 +95,12 @@ To interact directly with remote workstations, an Azure Account must be connecte
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-Note: This is an optional feature. If you do not want to use secrets, you can just enter the plaintext code for your safe mode admin password, PCoIP registration key, and connector token in the terraform.tfvars file.
+**Note**: This is optional. You may skip this section and enter plaintext for your AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
 
-As a security method to help protect your AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, you can store them as secrets in an Azure Key Vault. These secret values will be called when needed in the configuration scripts. In order to use secrets in Azure Key Vault you will need to deploy a few things on Azure and obtain the needed information to allow our Terraform scripts to pull from your Azure Key Vault.
+As a security method to help protect your AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, you can store them as secrets in an Azure Key Vault. Secrets will be called and decrypted in the configuration scripts. To use secrets from the Azure Key Vault you will need to do configuration following the instructions below:
 
-Configuring the Azure Key Vault:
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
-    1. Select the desired region of the deployment.
+    1. Select the same region as your deployment.
     2. Click next to go to the Access policy page.
     3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
@@ -128,16 +127,19 @@ cac_configuration : [
 
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
 # To encrypt follow section 4 of the documentation.
-ad_admin_password             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/a7db90e0d2282413197c48ed71a8d07e"
-safe_mode_admin_password      = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/298d71a77432d7eb10e488e01cad02d9"
-pcoip_registration_code       = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/2182b148d709eddc7a009a2ee1d84773"
+ad_admin_password             = "Password!234"
+safe_mode_admin_password      = "Password!234"
+pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
+
+# Used for authentication and allows Terraform to manage resources.
+application_id                = "<from section 3 step 4>"
+aad_client_secret             = "<from section 3 step 5-6>"
 
 # Only fill these when using Azure Key Vault secrets.
-application_id                = "xt18a0bc-e0fg-908h-77934-0c0v31a0d30c"
-aad_client_secret             = "A341G_4AB6cde1BQdgafBu~mEi~Q.hJ2D."
-tenant_id                     = "981a1bcd-345g-5j9k-7q21-dc351a90fg89"
-key_vault_id                  = "/subscriptions/870d5262-66bv-4dk9-8cjo-78p7pfla4e53/resourceGroups/My-Resource-Group/providers/Microsoft.KeyVault/vaults/mykeyvault"
-ad_pass_secret_name           = "adPasswordID"
+# Examples and tips can be found in section 4 of the documentation.
+# tenant_id                     = "<from section 3 step 4>"
+# key_vault_id                  = "<found in key vault properties under Resource ID>"
+# ad_pass_secret_name           = "<variable name used for ad pass secret>"
 ```
 - Tips for finding these variables:
     1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
@@ -146,7 +148,9 @@ ad_pass_secret_name           = "adPasswordID"
     3. ```ad_pass_secret_name```: This is the name you used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_pass_secret_id```.
 
 ### 5. Deploying the Single-Connector via Terraform
-terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
+terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
+
+**Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
 
 Before the deployment of the single-connector, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
 1. Change directory into: ```/terraform-deployments/deployments/single-connector```.
