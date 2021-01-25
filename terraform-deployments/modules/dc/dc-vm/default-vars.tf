@@ -29,10 +29,8 @@ variable "ad_pass_secret_name" {
 }
 
 locals {
-  ad_admin_password = var.key_vault_id == "" ? var.ad_admin_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
-  prefix            = var.prefix != "" ? "${var.prefix}-" : ""
-  # virtual_machine_name = join("${local.prefix}dc-vm", [var.prefix, "dc-vm"])
-  # virtual_machine_name = join("-", [local.prefix, "dc-vm"])
+  ad_admin_password    = var.key_vault_id == "" ? var.ad_admin_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+  prefix               = var.prefix != "" ? "${var.prefix}-" : ""
   virtual_machine_name = "${local.prefix}dc-vm"
   virtual_machine_fqdn = join(".", [local.virtual_machine_name, var.active_directory_domain_name])
   auto_logon_data      = "<AutoLogon><Password><Value>${local.ad_admin_password}</Value></Password><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>${var.ad_admin_username}</Username></AutoLogon>"

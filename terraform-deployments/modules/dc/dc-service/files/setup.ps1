@@ -58,7 +58,7 @@ Function Get-Secret
 
 Start-Transcript -path $LOG_FILE -append
 
-if ([string]::IsNullOrWhiteSpace("${aad_client_secret}")) {
+if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
   Write-Output "Not calling Get-Secret"
 }
 else {
