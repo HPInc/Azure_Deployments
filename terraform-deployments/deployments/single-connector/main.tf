@@ -6,7 +6,7 @@
  */
 
 locals {
-  resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "single_connector_deployment_${formatdate("MM_DD_YY_hhmm", timestamp())}"
+  resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "single_connector_deployment_${random_id.deployment-name.hex}"
 }
 
 module "workstation-map" {
@@ -19,12 +19,12 @@ resource "azurerm_resource_group" "main" {
   name     = local.resource_group_name
 }
 
-resource "random_id" "blob-name" {
+resource "random_id" "deployment-name" {
   byte_length = 3
 }
 
 resource "azurerm_storage_account" "windows-script-storage" {
-  name                     = "winscripts${random_id.blob-name.hex}"
+  name                     = "winscripts${random_id.deployment-name.hex}"
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
