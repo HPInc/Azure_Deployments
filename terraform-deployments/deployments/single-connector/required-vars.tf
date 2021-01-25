@@ -36,11 +36,6 @@ variable "safe_mode_admin_password" {
   type        = string
 }
 
-variable "ad_domain_users_list_file" {
-  description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
-  type        = string
-}
-
 variable "_artifactsLocation" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
   default     = ""
