@@ -20,10 +20,10 @@ variable "locations" {
 
 variable "cac_configuration" {
   description = "List of cac vrtual machines create"
-  type        = list(object({
-      location         = string
-      cac_token        = string
-    }))
+  type = list(object({
+    location  = string
+    cac_token = string
+  }))
 }
 
 variable "azurerm_virtual_network_names" {
@@ -34,4 +34,14 @@ variable "azurerm_virtual_network_names" {
 variable "network_security_group_ids" {
   description = "The network security group ids"
   type        = list(string)
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
 }

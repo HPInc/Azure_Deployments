@@ -32,3 +32,13 @@ variable "nic_id" {
 variable "active_directory_domain_name" {
   description = "the domain name for Active Directory, for example `consoto.local`"
 }
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+}
