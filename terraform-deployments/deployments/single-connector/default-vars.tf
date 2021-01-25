@@ -135,7 +135,7 @@ variable "dc_machine_type" {
   default     = "Standard_F2"
 }
 
-variable "domain_users_list" {
+variable "ad_domain_users_list_file" {
   description = "Active Directory users to create, in CSV format"
   type        = string
   default     = ""
