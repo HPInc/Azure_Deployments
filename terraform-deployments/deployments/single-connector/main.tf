@@ -122,6 +122,8 @@ module "active-directory-domain-configure" {
     module.active-directory-domain-service.uploaded-domain-users-list-count
   ]
 
+  application_id                         = var.application_id
+  aad_client_secret                      = var.aad_client_secret
   resource_group_name                    = azurerm_resource_group.main.name
   domain_controller_virtual_machine_name = module.active-directory-domain-vm.domain-controller-name
 }
