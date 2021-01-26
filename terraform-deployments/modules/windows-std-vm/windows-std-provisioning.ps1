@@ -266,7 +266,7 @@ Start-Transcript -path $LOG_FILE -append
 "--> Script running as user '$(whoami)'."
 
 #Decrypt Teradici Reg Key and AD Service Account Password
-if (!($aad_client_secret -eq $null -or $aad_client_secret -eq "")) {
+if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
     Write-Output "Running Get-Secret!"
     $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
     $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password

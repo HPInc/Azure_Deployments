@@ -26,10 +26,10 @@ variable "location" {
   default     = "centralus"
 }
 
-variable "host_name" {
-  description = "Name to give the host"
-  default     = "vm-cac"
-}
+# variable "host_name" {
+#   description = "Name to give the host"
+#   default     = "vm-cac"
+# }
 
 variable "machine_type" {
   description = "Machine type for the Cloud Access Connector"

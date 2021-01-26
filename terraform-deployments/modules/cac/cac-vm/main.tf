@@ -5,6 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  startup_cac_filename = "cac-startup.sh"
+  cac_admin_password   = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+  prefix               = var.prefix != "" ? "${var.prefix}-" : ""
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
+}
+
 resource "azurerm_linux_virtual_machine" "cac" {
   depends_on = [
     var.cac_depends_on
@@ -12,13 +24,13 @@ resource "azurerm_linux_virtual_machine" "cac" {
 
   count = length(var.cac_configuration)
 
-  name                            = "${var.prefix}-cac-vm-${count.index}"
+  name                            = "${local.prefix}cac-vm-${count.index}"
   location                        = var.cac_configuration[count.index].location
   resource_group_name             = var.resource_group_name
   size                            = var.machine_type
   admin_username                  = var.cac_admin_user
-  admin_password                  = var.cac_admin_password
-  computer_name                   = var.host_name
+  admin_password                  = local.cac_admin_password
+  computer_name                   = "${local.prefix}cac-vm"
   disable_password_authentication = false
   network_interface_ids = [
     var.nic_ids[count.index]
@@ -37,7 +49,7 @@ resource "azurerm_linux_virtual_machine" "cac" {
   }
 
   os_disk {
-    name                 = "${var.prefix}-cac-vm-osdisk-${count.index}"
+    name                 = "${local.prefix}cac-vm-osdisk-${count.index}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = var.disk_size_gb

@@ -26,3 +26,13 @@ variable "resource_group_name" {
 variable "active_directory_netbios_name" {
   description = "The netbios name of the Active Directory domain, for example `consoto`"
 }
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+}

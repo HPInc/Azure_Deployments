@@ -11,6 +11,16 @@ variable "domain_controller_virtual_machine_name" {
 }
 
 variable "resource_group_name" {
-  description = "The resouce group the domain controller vm resides in"
+  description = "The resource group the domain controller vm resides in"
+  type        = string
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
   type        = string
 }

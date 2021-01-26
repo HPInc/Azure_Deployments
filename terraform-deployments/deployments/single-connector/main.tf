@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "single_connector_deployment_${random_id.deployment-name.hex}"
+}
+
 module "workstation-map" {
   source       = "../../modules/workstation-map"
   workstations = var.workstations
@@ -12,15 +16,15 @@ module "workstation-map" {
 
 resource "azurerm_resource_group" "main" {
   location = module.workstation-map.virtual-network-locations[0]
-  name     = var.resource_group_name
+  name     = local.resource_group_name
 }
 
-resource "random_id" "blob-name" {
+resource "random_id" "deployment-name" {
   byte_length = 3
 }
 
 resource "azurerm_storage_account" "windows-script-storage" {
-  name                     = "winscripts${random_id.blob-name.hex}"
+  name                     = "winscripts${random_id.deployment-name.hex}"
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Standard"
@@ -41,30 +45,29 @@ module "dc-cac-network" {
   locations               = module.workstation-map.virtual-network-locations
   vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
 
-  prefix                  = var.prefix
-  vnet_name               = var.vnet_name
-  dc_subnet_name          = var.dc_subnet_name
-  workstation_subnet_name = var.workstation_subnet_name
-
+  prefix                        = var.prefix
+  vnet_name                     = var.vnet_name
+  dc_subnet_name                = var.dc_subnet_name
+  workstation_subnet_name       = var.workstation_subnet_name
+  application_id                = var.application_id
+  aad_client_secret             = var.aad_client_secret
   active_directory_netbios_name = var.active_directory_netbios_name
 
   # Debug flags
   create_debug_rdp_access = var.create_debug_rdp_access
-  create_debug_public_ips = var.create_debug_public_ips
 }
 
 module "cac-network" {
   source = "../../modules/cac/cac-network"
 
-  prefix              = var.prefix
-  resource_group_name = azurerm_resource_group.main.name
-  locations           = module.workstation-map.virtual-network-locations
-
-  # The number of cac network items is based on the configuration
-  cac_configuration = var.cac_configuration
-
+  prefix                        = var.prefix
+  resource_group_name           = azurerm_resource_group.main.name
+  locations                     = module.workstation-map.virtual-network-locations
+  cac_configuration             = var.cac_configuration
   network_security_group_ids    = module.dc-cac-network.network-security-group-ids
   azurerm_virtual_network_names = module.dc-cac-network.virtual-network-names
+  application_id                = var.application_id
+  aad_client_secret             = var.aad_client_secret
 }
 
 module "active-directory-domain-vm" {
@@ -72,9 +75,8 @@ module "active-directory-domain-vm" {
 
   dc_vm_depends_on = [module.dc-cac-network.all-output]
 
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-
+  resource_group_name          = azurerm_resource_group.main.name
+  location                     = azurerm_resource_group.main.location
   active_directory_domain_name = "${var.active_directory_netbios_name}.dns.internal"
   ad_admin_username            = var.ad_admin_username
   ad_admin_password            = var.ad_admin_password
@@ -83,6 +85,8 @@ module "active-directory-domain-vm" {
   dc_machine_type              = var.dc_machine_type
   nic_id                       = module.dc-cac-network.dc-network-interface-id
   prefix                       = var.prefix
+  application_id               = var.application_id
+  aad_client_secret            = var.aad_client_secret
 }
 
 module "active-directory-domain-service" {
@@ -94,21 +98,19 @@ module "active-directory-domain-service" {
     module.active-directory-domain-vm.domain-controller-id
   ]
 
-  # Populate the module properties
   domain_controller_virtual_machine_name      = module.active-directory-domain-vm.domain-controller-name
   domain_controller_virtual_machine_id        = module.active-directory-domain-vm.domain-controller-id
   domain_controller_virtual_machine_public_ip = module.dc-cac-network.dc-public-ip
   active_directory_domain_users_list_file     = var.ad_domain_users_list_file
-
-  active_directory_domain_name = "${var.active_directory_netbios_name}.dns.internal"
-  ad_admin_username            = var.ad_admin_username
-  ad_admin_password            = var.ad_admin_password
-  ad_pass_secret_name          = var.ad_pass_secret_name
-  key_vault_id                 = var.key_vault_id
-  application_id               = var.application_id
-  aad_client_secret            = var.aad_client_secret
-  tenant_id                    = var.tenant_id
-  safe_mode_admin_password     = var.safe_mode_admin_password
+  active_directory_domain_name                = "${var.active_directory_netbios_name}.dns.internal"
+  ad_admin_username                           = var.ad_admin_username
+  ad_admin_password                           = var.ad_admin_password
+  ad_pass_secret_name                         = var.ad_pass_secret_name
+  key_vault_id                                = var.key_vault_id
+  application_id                              = var.application_id
+  aad_client_secret                           = var.aad_client_secret
+  tenant_id                                   = var.tenant_id
+  safe_mode_admin_password                    = var.safe_mode_admin_password
 }
 
 module "active-directory-domain-configure" {
@@ -120,8 +122,7 @@ module "active-directory-domain-configure" {
     module.active-directory-domain-service.uploaded-domain-users-list-count
   ]
 
-  # Populate the module properties
-  resource_group_name                    = var.resource_group_name
+  resource_group_name                    = azurerm_resource_group.main.name
   domain_controller_virtual_machine_name = module.active-directory-domain-vm.domain-controller-name
 }
 
@@ -134,13 +135,9 @@ module "cac-vm" {
     module.active-directory-domain-configure.service-configured
   ]
 
-  # Populate the module properties
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-
-  # The number of cac VMs is based on the configuration
-  cac_configuration = var.cac_configuration
-
+  resource_group_name         = azurerm_resource_group.main.name
+  location                    = azurerm_resource_group.main.location
+  cac_configuration           = var.cac_configuration
   prefix                      = var.prefix
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
@@ -149,30 +146,27 @@ module "cac-vm" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   nic_ids                     = module.cac-network.cac-network-interface-ids
-  host_name                   = "${var.prefix}-cac-vm"
   machine_type                = var.cac_machine_type
   cac_admin_user              = var.cac_admin_username
-  cac_admin_password          = var.cac_admin_password
+  cac_admin_password          = var.ad_admin_password
   dns_zone_id                 = module.dc-cac-network.private-dns-zone-id
   application_id              = var.application_id
   aad_client_secret           = var.aad_client_secret
   tenant_id                   = var.tenant_id
+  key_vault_id                = var.key_vault_id
+  ad_pass_secret_name         = var.ad_pass_secret_name
   _artifactsLocation          = var._artifactsLocation
 }
 
 module "cac-configuration" {
   source = "../../modules/cac/cac-configure"
 
-  # Make sure module creation is dependent on the resource group and a fully setup network
   cac_configure_depends_on = [
     module.active-directory-domain-configure.service-configured,
     module.cac-vm.cac-vm-ids
   ]
 
-  # The number of cac VMs is based on the configuration
-  cac_configuration = var.cac_configuration
-
-  # Populate the module properties
+  cac_configuration           = var.cac_configuration
   cam_url                     = var.cam_url
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
@@ -181,7 +175,7 @@ module "cac-configuration" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   cac_admin_user              = var.cac_admin_username
-  cac_admin_password          = var.cac_admin_password
+  cac_admin_password          = var.ad_admin_password
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
   cac_ips                     = module.cac-network.cac-public-ips
@@ -201,22 +195,20 @@ module "windows-std-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations = module.workstation-map.windows-std-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
-  admin_name                  = var.windows_admin_username
-  admin_password              = var.windows_admin_password
-  pcoip_registration_code     = var.pcoip_registration_code
-  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username = var.ad_admin_username
-  ad_service_account_password = var.ad_admin_password
-  application_id              = var.application_id
-  tenant_id                   = var.tenant_id
-  aad_client_secret           = var.aad_client_secret
-  key_vault_id                = var.key_vault_id
-  ad_pass_secret_name         = var.ad_pass_secret_name
-  storage_account_name        = azurerm_storage_account.windows-script-storage.name
-
+  workstations                 = module.workstation-map.windows-std-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.windows_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  tenant_id                    = var.tenant_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  storage_account_name         = azurerm_storage_account.windows-script-storage.name
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }
@@ -229,22 +221,20 @@ module "windows-gfx-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations = module.workstation-map.windows-gfx-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
-  admin_name                  = var.windows_admin_username
-  admin_password              = var.windows_admin_password
-  pcoip_registration_code     = var.pcoip_registration_code
-  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username = var.ad_admin_username
-  ad_service_account_password = var.ad_admin_password
-  application_id              = var.application_id
-  tenant_id                   = var.tenant_id
-  aad_client_secret           = var.aad_client_secret
-  key_vault_id                = var.key_vault_id
-  ad_pass_secret_name         = var.ad_pass_secret_name
-  storage_account_name        = azurerm_storage_account.windows-script-storage.name
-
+  workstations                 = module.workstation-map.windows-gfx-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.windows_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  tenant_id                    = var.tenant_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  storage_account_name         = azurerm_storage_account.windows-script-storage.name
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }
@@ -256,22 +246,20 @@ module "centos-std-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations = module.workstation-map.centos-std-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
-  admin_name                  = var.centos_admin_username
-  admin_password              = var.centos_admin_password
-  pcoip_registration_code     = var.pcoip_registration_code
-  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username = var.ad_admin_username
-  ad_service_account_password = var.ad_admin_password
-  application_id              = var.application_id
-  tenant_id                   = var.tenant_id
-  aad_client_secret           = var.aad_client_secret
-  key_vault_id                = var.key_vault_id
-  ad_pass_secret_name         = var.ad_pass_secret_name
-  domain_controller_ip        = module.dc-cac-network.dc-private-ip
-
+  workstations                 = module.workstation-map.centos-std-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.centos_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  tenant_id                    = var.tenant_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  domain_controller_ip         = module.dc-cac-network.dc-private-ip
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }
@@ -283,22 +271,20 @@ module "centos-gfx-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations = module.workstation-map.centos-gfx-workstations
-
-  resource_group_name         = azurerm_resource_group.main.name
-  admin_name                  = var.centos_admin_username
-  admin_password              = var.centos_admin_password
-  pcoip_registration_code     = var.pcoip_registration_code
-  domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username = var.ad_admin_username
-  ad_service_account_password = var.ad_admin_password
-  application_id              = var.application_id
-  tenant_id                   = var.tenant_id
-  aad_client_secret           = var.aad_client_secret
-  key_vault_id                = var.key_vault_id
-  ad_pass_secret_name         = var.ad_pass_secret_name
-  domain_controller_ip        = module.dc-cac-network.dc-private-ip
-
+  workstations                 = module.workstation-map.centos-gfx-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.centos_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  tenant_id                    = var.tenant_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  domain_controller_ip         = module.dc-cac-network.dc-private-ip
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 }

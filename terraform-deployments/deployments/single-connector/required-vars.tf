@@ -27,55 +27,11 @@ variable "cac_configuration" {
   }))
 }
 
-variable "prefix" {
-  description = "Prefix to add to name of new resources. Must be <= 9 characters."
-}
-
-variable "resource_group_name" {
-  description = "The name of the resource group"
-}
-
-variable "active_directory_netbios_name" {
-  description = "The netbios name of the Active Directory domain, for example `consoto`"
-}
-
 variable "ad_admin_password" {
   description = "Password for the Adminstrator user"
-  default     = ""
-}
-
-variable "ad_pass_secret_name" {
-  description = "The name of the Active Directory secret password"
-  type        = string
-}
-
-variable "key_vault_id" {
-  description = "The key vault resource ID"
-  type        = string
-}
-
-variable "application_id" {
-  description = "The application (client) ID of your app registration in AAD"
-  type        = string
-}
-
-variable "aad_client_secret" {
-  description = "The client secret of your app registration in AAD"
-  type        = string
-}
-
-variable "tenant_id" {
-  description = "The directory (tenant) ID of your app registration in AAD"
-  type        = string
 }
 
 variable "safe_mode_admin_password" {
-  description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
-  type        = string
-  default     = ""
-}
-
-variable "ad_domain_users_list_file" {
   description = "Safe Mode Admin Password (Directory Service Restore Mode - DSRM)"
   type        = string
 }
@@ -87,21 +43,5 @@ variable "_artifactsLocation" {
 
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
-  type        = string
-  default     = "void"
-}
-
-variable "cac_admin_password" {
-  description = "Password for the Administrator of the Cloud Access Connector VM"
-  type        = string
-}
-
-variable "windows_admin_password" {
-  description = "Password for the Administrator of the Workstation"
-  type        = string
-}
-
-variable "centos_admin_password" {
-  description = "Password for the Administrator of the Workstation"
   type        = string
 }

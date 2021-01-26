@@ -5,7 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
- # One cac subnet network per location
+locals {
+  prefix = var.prefix != "" ? "${var.prefix}-" : ""
+}
+
+# One cac subnet network per location
 resource "azurerm_subnet" "cac" {
   depends_on = [var.cac_network_depends_on]
 
@@ -24,7 +28,7 @@ resource "azurerm_subnet_network_security_group_association" "cac" {
   network_security_group_id = var.network_security_group_ids[count.index]
 }
 
- # One public ip per cac
+# One public ip per cac
 resource "azurerm_public_ip" "cac" {
   count = length(var.cac_configuration)
 
@@ -36,11 +40,11 @@ resource "azurerm_public_ip" "cac" {
   sku                     = "Standard"
 }
 
- # One network interface per cac
+# One network interface per cac
 resource "azurerm_network_interface" "cac_nic" {
   count = length(var.cac_configuration)
 
-  name                = "${var.prefix}-cac-nic-${count.index}"
+  name                = "${local.prefix}cac-nic-${count.index}"
   location            = var.cac_configuration[count.index].location
   resource_group_name = var.resource_group_name
 

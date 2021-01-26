@@ -19,7 +19,7 @@ tenantID=${tenant_id}
 
 INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
-ERR_LOG_FILE="/var/log/teradici/agent/error.log"
+DETAILED_LOG_FILE="/var/log/teradici/agent/detailed.log"
 
 log() {
     local message="$1"
@@ -36,7 +36,7 @@ get_access_token() {
 
 get_credentials() {
     # Check if we need to get secrets from Azure Key Vault
-    if [[ -z "$aadClientSecret" ]]; then
+    if [[ -z "$tenantID" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
         log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5"
@@ -339,9 +339,9 @@ then
     touch "$INST_LOG_FILE"
     chmod +644 "$INST_LOG_FILE"
 
-    mkdir -p "$(dirname $ERR_LOG_FILE)"
-    touch "$ERR_LOG_FILE"
-    chmod +644 "$ERR_LOG_FILE"
+    mkdir -p "$(dirname $DETAILED_LOG_FILE)"
+    touch "$DETAILED_LOG_FILE"
+    chmod +644 "$DETAILED_LOG_FILE"
 
 else
     RE_ENTER=1
@@ -351,7 +351,7 @@ fi
 set -x
 
 # Redirect stdout and stderr to the log file
-exec &>>$ERR_LOG_FILE
+exec &>>$DETAILED_LOG_FILE
 
 if [[ $RE_ENTER -eq 0 ]]
 then

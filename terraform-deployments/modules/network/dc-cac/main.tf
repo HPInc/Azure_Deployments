@@ -32,7 +32,7 @@ resource "azurerm_network_security_group" "nsg" {
 
   count = length(azurerm_virtual_network.network)
 
-  name                = "${var.prefix}-dc-nsg-${var.locations[count.index]}"
+  name                = "${local.prefix}dc-nsg-${var.locations[count.index]}"
   location            = var.locations[count.index]
   resource_group_name = var.resource_group_name
 }
@@ -156,7 +156,7 @@ resource "azurerm_subnet" "workstation" {
 }
 
 resource "azurerm_network_interface" "dc_nic" {
-  name                = "${var.prefix}-dc-primary"
+  name                = "${local.prefix}dc-primary"
   location            = var.locations[0]
   resource_group_name = var.resource_group_name
 
@@ -265,7 +265,7 @@ resource "azurerm_private_dns_srv_record" "dns-cac" {
 }
 
 resource "azurerm_private_dns_srv_record" "dns-ldaps" {
-  name                = "_ldap._tcp.${var.prefix}-dc.${var.active_directory_netbios_name}"
+  name                = "_ldap._tcp.${local.prefix}dc.${var.active_directory_netbios_name}"
   zone_name           = azurerm_private_dns_zone.dns.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
