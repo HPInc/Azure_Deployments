@@ -25,7 +25,6 @@ output "windows-standard-workstations" {
   value = [for index, item in module.workstation-map.windows-std-workstations :
     {
       name : module.windows-std-vm.windows-std-vm-names[item.index],
-      public_ip : module.windows-std-vm.windows-std-vm-public-ips[item.index],
       private_ip : module.windows-std-vm.windows-std-vm-private-ips[item.index]
     }
   ]
@@ -35,7 +34,6 @@ output "windows-graphics-workstations" {
   value = [for index, item in module.workstation-map.windows-gfx-workstations :
     {
       name : module.windows-gfx-vm.windows-gfx-vm-names[item.index],
-      public_ip : module.windows-gfx-vm.windows-gfx-vm-public-ips[item.index],
       private_ip : module.windows-gfx-vm.windows-gfx-vm-private-ips[item.index]
     }
   ]
@@ -45,7 +43,6 @@ output "centos-graphics-workstations" {
   value = [for index, item in module.workstation-map.centos-gfx-workstations :
     {
       name : module.centos-gfx-vm.centos-gfx-vm-names[item.index],
-      public_ip : module.centos-gfx-vm.centos-gfx-vm-public-ips[item.index],
       private_ip : module.centos-gfx-vm.centos-gfx-vm-private-ips[item.index]
     }
   ]
@@ -55,7 +52,6 @@ output "centos-standard-workstations" {
   value = [for index, item in module.workstation-map.centos-std-workstations :
     {
       name : module.centos-std-vm.centos-std-vm-names[item.index],
-      public_ip : module.centos-std-vm.centos-std-vm-public-ips[item.index],
       private_ip : module.centos-std-vm.centos-std-vm-private-ips[item.index]
     }
   ]
