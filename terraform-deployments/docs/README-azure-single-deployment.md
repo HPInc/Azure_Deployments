@@ -253,12 +253,12 @@ Run ```terraform destroy -force``` to remove all resources created by Terraform.
 ### 10. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If the script fails you can try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
-- If you are trying to run a fresh deployment and have been running into errors, you may need to delete all files containing  ```.tfstate``` and ```.hcl```. .tfstate files store the state of your current infrastructure and configuration. 
+- If you are trying to run a fresh deployment and have been running into errors, you may need to delete all files containing  ```.tfstate```. .tfstate files store the state of your current infrastructure and configuration. 
 
 Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
-    1. SSH into the Connector. ```ssh <cac_admin_username>@<cac-public-ip>``` e.g.: ```cam_admin@52.128.90.145```
-    2. From inside the Connector, SSH into the CentOS workstation. ```ssh <cac_admin_username>@<centos-internal-ip>``` e.g.: ```ssh cam_admin@10.0.4.5```
+    1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cam_admin@52.128.90.145```
+    2. From inside the Connector, SSH into the CentOS workstation. ```ssh <ad_admin_username>@<centos-internal-ip>``` e.g.: ```ssh cam_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
