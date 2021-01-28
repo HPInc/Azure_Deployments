@@ -75,10 +75,7 @@ cac_configuration = [
 # ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
 
 # VM username and passwords.
-# cac_admin_username      = "cam_admin"
 # ad_admin_username       = "cam_admin"
-# windows_admin_username  = "windows_admin"
-# centos_admin_username   = "centos_admin"
 
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
 # To encrypt follow section 4 of the documentation.
