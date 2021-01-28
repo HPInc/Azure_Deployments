@@ -6,12 +6,20 @@
 #!/bin/bash
 
 LOG_FILE="/var/log/teradici/provisioning.log"
-AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
 CAC_BIN_PATH="/usr/sbin/cloud-access-connector"
-CAC_TOKEN=${cac_token}
-PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
 INSTALL_DIR="/root"
 CAC_INSTALL_LOG="/var/log/teradici/cac-install.log"
+
+AD_SERVICE_ACCOUNT_USERNAME=${ad_service_account_username}
+AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
+CAC_TOKEN=${cac_token}
+PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
+DOMAIN_NAME=${domain_name}
+DOMAIN_CONTROLLER_IP=${domain_controller_ip}
+APPLICATION_ID=${application_id}
+AAD_CLIENT_SECRET=${aad_client_secret}
+TENANT_ID=${tenant_id}
+
 cd $INSTALL_DIR
 
 log() {
@@ -78,23 +86,15 @@ install_prereqs() {
     fi
 }
 
-get_access_token() {
-    accessToken=`curl -X POST -d "grant_type=client_credentials&client_id=$1&client_secret=$2&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$3/oauth2/token`
-    token=$(echo $accessToken | jq ".access_token" -r)
-    json_map=`curl -X GET -H "Authorization: Bearer $token" -H "Content-Type: application/json" --url "$4?api-version=2016-10-01"`
-    value=$(echo $json_map | jq -r '.value')
-    echo "$value"
-}
-
 get_credentials() {
-    # Check if we need to get secrets from Azure Key Vault
     if [[ -z "${tenant_id}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
-        log "Getting secrets from Azure Key Vault. Using the following passed variables: $2, $1, $3, $4, $5, $6"
-        PCOIP_REGISTRATION_CODE=$(get_access_token $2 $1 $3 $4)
-        AD_SERVICE_ACCOUNT_PASSWORD=$(get_access_token $2 $1 $3 $5)
-        CAC_TOKEN=$(get_access_token $2 $1 $3 $6)
+        log "Getting secrets from Azure Key Vault..."
+        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)
+        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$PCOIP_REGISTRATION_CODE?api-version=2016-10-01" | jq -r '.value')
+        AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$AD_SERVICE_ACCOUNT_PASSWORD?api-version=2016-10-01" | jq -r '.value')
+        CAC_TOKEN=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$CAC_TOKEN?api-version=2016-10-01" | jq -r '.value')
     fi
 }
 
@@ -135,31 +135,31 @@ wait_for_dc() {
     retry $timeout \
           $interval \
           "ldapwhoami \
-            -H ldap://${domain_controller_ip} \
-            -D ${ad_service_account_username}@${domain_name} \
+            -H ldap://$DOMAIN_CONTROLLER_IP \
+            -D $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME \
             -w $AD_SERVICE_ACCOUNT_PASSWORD \
             -o nettimeout=1" \
-          "--> Waiting for AD account ${ad_service_account_username}@${domain_name} to become available." \
-          "--> ERROR: Timed out waiting for AD account ${ad_service_account_username}@${domain_name} to become available. Continuing..."
+          "--> Waiting for AD account $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME to become available." \
+          "--> ERROR: Timed out waiting for AD account $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME to become available. Continuing..."
     set -x
     # Check that the domain name can be resolved and that the LDAP port is accepting
     # connections. This could have been all done with the ldapwhoami command, but
     # due to a number of occasional cac-installation issues, such as "domain
     # controller unreachable" or "DNS error occurred" errors, check these explicitly
     # for logging and debug purposes.
-    log "--> Ensure domain ${domain_name} can be resolved..."
+    log "--> Ensure domain $DOMAIN_NAME can be resolved..."
     retry $timeout \
           $interval \
-          "host ${domain_name}" \
-          "--> Trying to resolve ${domain_name}." \
-          "--> ERROR: Timed out trying to resolve ${domain_name}. Continuing..."
+          "host $DOMAIN_NAME" \
+          "--> Trying to resolve $DOMAIN_NAME." \
+          "--> ERROR: Timed out trying to resolve $DOMAIN_NAME. Continuing..."
 
-    log "--> Ensure domain ${domain_name} port 636 is reacheable..."
+    log "--> Ensure domain $DOMAIN_NAME port 636 is reacheable..."
     retry $timeout \
           $interval \
-          "netcat -vz ${domain_name} 636" \
-          "--> Trying to contact ${domain_name}:636." \
-          "--> ERROR: Timed out trying to contact ${domain_name}:636. Continuing..."
+          "netcat -vz $DOMAIN_NAME 636" \
+          "--> Trying to contact $DOMAIN_NAME:636." \
+          "--> ERROR: Timed out trying to contact $DOMAIN_NAME:636. Continuing..."
 }
 
 install_cac() {
@@ -173,7 +173,7 @@ install_cac() {
     log "  --accept-policies"
     log "  --sa-user <ad_service_account_username>"
     log "  --sa-password <ad_service_account_password>"
-    log "  --domain ${domain_name}"
+    log "  --domain $DOMAIN_NAME"
     log "  --domain-group ${domain_group}"
     log "  --reg-code <pcoip_registration_code>"
     log "  --retrieve-agent-state true"
@@ -202,9 +202,9 @@ install_cac() {
         $CAC_BIN_PATH install \
             -t $CAC_TOKEN \
             --accept-policies \
-            --sa-user ${ad_service_account_username} \
+            --sa-user $AD_SERVICE_ACCOUNT_USERNAME \
             --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
-            --domain ${domain_name} \
+            --domain $DOMAIN_NAME \
             --domain-group "${domain_group}" \
             --reg-code $PCOIP_REGISTRATION_CODE \
             --sync-interval 5 \
@@ -248,9 +248,7 @@ exec &>>$LOG_FILE
 
 install_prereqs
 
-get_credentials ${aad_client_secret} ${application_id} ${tenant_id} $PCOIP_REGISTRATION_CODE $AD_SERVICE_ACCOUNT_PASSWORD $CAC_TOKEN
-
-check_required_vars
+get_credentials
 
 check_connector_installed
 

@@ -99,7 +99,6 @@ resource "azurerm_virtual_machine_extension" "centos-std-provisioning" {
   application_id              = var.application_id,
   aad_client_secret           = var.aad_client_secret,
   tenant_id                   = var.tenant_id,
-  app_id                      = var.application_id,
 })
 )
 }"
