@@ -253,7 +253,6 @@ function Join-Domain
     [string]$ad_service_account_username,
     [string]$ad_service_account_password
 ) {
-    Write-Output "Passed Variables $domain_name ; $ad_service_account_username ; $ad_service_account_password"
     $obj = Get-WmiObject -Class Win32_ComputerSystem
 
     if ($obj.PartOfDomain) {
@@ -320,7 +319,7 @@ Start-Transcript -path $LOG_FILE -append
 "--> Script running as user '$(whoami)'."
 
 #Decrypt Teradici Reg Key and AD Service Account Password
-if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
+if (!([string]::IsNullOrWhiteSpace("${tenant_id}"))) {
     Write-Output "Running Get-Secret!"
     $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
     $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
