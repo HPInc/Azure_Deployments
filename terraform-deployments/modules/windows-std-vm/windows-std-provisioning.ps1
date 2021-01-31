@@ -263,13 +263,19 @@ function Join-Domain
 Start-Transcript -path $LOG_FILE -append
 
 "--> Script running as user '$(whoami)'."
-
-#Decrypt Teradici Reg Key and AD Service Account Password
-if (!([string]::IsNullOrWhiteSpace("${tenant_id}"))) {
-    Write-Output "Running Get-Secret!"
-    $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
-    $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
+function Decrypt-Credentials {
+    #Decrypt Teradici Reg Key and AD Service Account Password
+    if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
+        Write-Output "Not using Key Vault Secrets. Skipping .."
+    }
+    else {
+        Write-Output "Decrypting Key Vault Secrets .."
+        $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
+        $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
+    }
 }
+
+Decrypt-Credentials
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
