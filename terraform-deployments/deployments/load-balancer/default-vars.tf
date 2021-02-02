@@ -15,6 +15,26 @@ variable "cac_subnet_name" {
   default     = "cac-subnet"
 }
 
+variable "ad_admin_username" {
+  description = "Username for the Domain Administrator user"
+  default     = "cam_admin"
+}
+
+variable "cac_admin_username" {
+  description = "Username of the Cloud Access Connector Administrator"
+  default     = "cam_admin"
+}
+
+variable "windows_admin_username" {
+  description = "Name for the Windows Administrator of the Workstation"
+  default     = "windows_admin"
+}
+
+variable "centos_admin_username" {
+  description = "Name for the CentOS Administrator of the Workstation"
+  default     = "centos_admin"
+}
+
 variable "dc_subnet_name" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
   default     = "dc-subnet"
@@ -35,14 +55,29 @@ variable "pcoip_agent_location" {
   default     = "https://downloads.teradici.com/win/stable/"
 }
 
+variable "active_directory_netbios_name" {
+  description = "The netbios name of the Active Directory domain, for example `consoto`"
+  default     = "tera"
+}
+
 variable "domain_group" {
   description = "Active Directory Distinguished Name for the User Group to log into the CAM Management Interface. Default is 'Domain Admins'. (eg, 'CN=CAM Admins,CN=Users,DC=example,DC=com')"
   default     = "Domain Admins"
 }
 
+variable "instance_count" {
+  description = "Number of Cloud Access Connectors to deploy"
+  default     = 1
+}
+
 variable "cac_host_name" {
   description = "Name to give the host"
   default     = "vm-cac"
+}
+
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  default     = ""
 }
 
 variable "cac_machine_type" {
@@ -53,11 +88,6 @@ variable "cac_machine_type" {
 variable "disk_size_gb" {
   description = "Disk size (GB) of the Cloud Access Connector"
   default     = "50"
-}
-
-variable "cac_installer_url" {
-  description = "Location of the Cloud Access Connector installer"
-  default     = "https://teradici.bintray.com/cloud-access-connector/cloud-access-connector-0.1.1.tar.gz"
 }
 
 variable "ssl_key" {
@@ -105,7 +135,7 @@ variable "dc_machine_type" {
   default     = "Standard_F2"
 }
 
-variable "domain_users_list" {
+variable "ad_domain_users_list_file" {
   description = "Active Directory users to create, in CSV format"
   type        = string
   default     = ""
@@ -117,14 +147,43 @@ variable "_artifactsLocationSasToken" {
   default     = ""
 }
 
-variable "create_debug_public_ips" {
-  description = "Debug flag to create public ip addresses for the domain controller and cac VMs"
-  type        = bool
-  default     = false
-}
-
 variable "create_debug_rdp_access" {
   description = "Debug flag to create RDP access to the domain controller"
   type        = bool
   default     = false
+}
+
+variable "ad_pass_secret_name" {
+  description = "The name of the Active Directory secret password"
+  type        = string
+  default     = ""
+}
+
+variable "key_vault_id" {
+  description = "The key vault resource ID"
+  type        = string
+  default     = ""
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "prefix" {
+  description = "Prefix to add to name of new resources. Must be <= 9 characters."
+  default     = ""
 }
