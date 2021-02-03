@@ -9,3 +9,8 @@ output "load-balancer-ids" {
   description = "The created load balancer ids"
   value       = [for item in azurerm_lb.main : item.id]
 }
+
+output "load-balancer-ips" {
+  description = "Load balancer IP addresses"
+  value       = [for item in azurerm_public_ip.loadbalancer_public_ip : item.ip_address]
+}
