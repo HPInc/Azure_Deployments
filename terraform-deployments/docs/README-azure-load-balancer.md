@@ -248,7 +248,7 @@ Note that it may take a 5-10 minutes for the workstation to show up in the **Sel
 Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
+2. Enter the IP address of the **Load Balancer** and enter a name for this connection. If you would like to connect to a specific CAC VM, enter the public IP address of the VM.
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** in CAM.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
