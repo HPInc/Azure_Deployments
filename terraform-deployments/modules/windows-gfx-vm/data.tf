@@ -13,7 +13,7 @@ data "azurerm_key_vault_secret" "ad-pass" {
 
 locals {
   windows_gfx_provisioning_script        = "windows-gfx-provisioning.ps1"
-  windows_gfx_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${local.nvidia_driver_url} ${local.nvidia_driver_filename} ${var.application_id} ${var.tenant_id} ${var.aad_client_secret}"
+  windows_gfx_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${local.nvidia_driver_url} ${local.nvidia_driver_filename} ${var.application_id} ${var.aad_client_secret} ${var.tenant_id}"
 
   nvidia_driver_url      = "https://go.microsoft.com/fwlink/?linkid=874181"
   nvidia_driver_filename = "452.57_grid_win10_server2016_server2019_64bit_international.exe"

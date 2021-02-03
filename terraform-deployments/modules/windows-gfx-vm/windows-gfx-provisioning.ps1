@@ -36,11 +36,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [string]
-    $tenant_id,
+    $aad_client_secret,
 
     [Parameter(Mandatory = $false)]
     [string]
-    $aad_client_secret
+    $tenant_id
 )
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
@@ -49,8 +49,9 @@ $NVIDIA_DIR = "C:\Program Files\NVIDIA Corporation\NVSMI"
 $PCOIP_AGENT_FILENAME = ""
 $PCOIP_AGENT_LOCATION_URL = "https://downloads.teradici.com/win/stable/"
 
-#Disable Scheulded Tasks: ServerManager
-Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask -Verbose
+$DATA = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+$DATA.Add("pcoip_registration_code", "${pcoip_registration_code}")
+$DATA.Add("ad_service_account_password", "${ad_service_account_password}")
 
 $global:restart = $false
 
@@ -74,6 +75,7 @@ function Retry([scriptblock]$Action, $Interval = 10, $Attempts = 30) {
     }
 }
 
+
 Function Get-AccessToken
 (
     [string]$application_id,
@@ -84,32 +86,24 @@ Function Get-AccessToken
     $body += '&client_id=' + $application_id
     $body += '&client_secret=' + [Uri]::EscapeDataString($aad_client_secret)
     $body += '&resource=' + [Uri]::EscapeDataString("https://vault.azure.net")
-
     $response = Invoke-RestMethod -Method POST -Uri $oath2Uri -Headers @{} -Body $body
 
     return $response.access_token
 }
 
-Function Get-Secret
-(   
-    [string]$application_id,
-    [string]$aad_client_secret,
-    [string]$tenant_id,
-    [string]$secret_identifier
-) {
-    $oath2Uri = "https://login.microsoftonline.com/$tenant_id/oauth2/token"
-  
-    $accessToken = Get-AccessToken $application_id $aad_client_secret $oath2Uri
+Function Decrypt-Credentials {
+    $oath2Uri = "https://login.microsoftonline.com/${tenant_id}/oauth2/token"
+    $accessToken = Get-AccessToken ${application_id} ${aad_client_secret} $oath2Uri
 
-    $queryUrl = "$secret_identifier" + '?api-version=7.0'       
-  
+    $pcoipRegCodeQueryUrl = "${pcoip_registration_code}" + '?api-version=7.0'       
     $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+    $response = Invoke-RestMethod -Method GET -Ur $pcoipRegCodeQueryUrl -Headers $headers
+    $DATA."pcoip_registration_code" = $response.value
 
-    $response = Invoke-RestMethod -Method GET -Ur $queryUrl -Headers $headers
-  
-    $result = $response.value
-
-    return $result
+    $adAdminPasswordCodeQueryUrl = "${ad_service_account_password}" + '?api-version=7.0'       
+    $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+    $response = Invoke-RestMethod -Method GET -Ur $adAdminPasswordCodeQueryUrl -Headers $headers
+    $DATA."ad_service_account_password" = $response.value
 }
 
 function Nvidia-is-Installed {
@@ -228,7 +222,7 @@ function PCoIP-Agent-Register {
 
     do {
         $Retry = $false
-        & .\pcoip-register-host.ps1 -RegistrationCode $pcoip_registration_code
+        & .\pcoip-register-host.ps1 -RegistrationCode $DATA."pcoip_registration_code"
         # The script already produces error message
 
         if ( $LastExitCode -ne 0 ) {
@@ -268,7 +262,7 @@ function Join-Domain
     "Computer not part of a domain. Joining $domain_name..."
 
     $username = "$ad_service_account_username" + "@" + "$domain_name"
-    $password = ConvertTo-SecureString $ad_service_account_password -AsPlainText -Force
+    $password = ConvertTo-SecureString $DATA."ad_service_account_password" -AsPlainText -Force
     $cred = New-Object System.Management.Automation.PSCredential ($username, $password)
 
     # Looping in case Domain Controller is not yet available
@@ -317,19 +311,13 @@ function Join-Domain
 Start-Transcript -path $LOG_FILE -append
 
 "--> Script running as user '$(whoami)'."
-function Decrypt-Credentials {
-    #Decrypt Teradici Reg Key and AD Service Account Password
-    if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
-        Write-Output "Not using Key Vault Secrets. Skipping .."
-    }
-    else {
-        Write-Output "Decrypting Key Vault Secrets .."
-        $pcoip_registration_code = Get-Secret $application_id $aad_client_secret $tenant_id $pcoip_registration_code
-        $ad_service_account_password = Get-Secret $application_id $aad_client_secret $tenant_id $ad_service_account_password
-    }
+if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
+    Write-Output "Not using Key Vault Secrets. Skipping .."
 }
-
-Decrypt-Credentials
+else {
+    Write-Output "Decrypting Key Vault Secrets .."
+    Decrypt-Credentials
+}
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
@@ -339,7 +327,6 @@ PCoIP-Agent-Install
 
 PCoIP-Agent-Register
 
-#Join Domain Controller
 Write-Output "Joining Domain"
 
 Join-Domain $domain_name $ad_service_account_username $ad_service_account_password
