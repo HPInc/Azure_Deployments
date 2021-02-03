@@ -68,11 +68,6 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "_artifactsLocation" {
-  description = "The base URI where artifacts required by this template are located including a trailing '/'"
-  type        = string
-}
-
 variable "cac_vm_ids" {
   description = "The id of the cac vm"
   type        = list(string)

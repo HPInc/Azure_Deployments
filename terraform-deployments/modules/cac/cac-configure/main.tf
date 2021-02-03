@@ -55,7 +55,6 @@ resource "null_resource" "upload-scripts" {
       application_id              = var.application_id
       aad_client_secret           = var.aad_client_secret
       tenant_id                   = var.tenant_id
-      _artifactsLocation          = var._artifactsLocation
     })
     destination = "/home/${var.cac_admin_user}/cac-startup.sh"
   }

@@ -77,10 +77,6 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "_artifactsLocation" {
-  description = "The base URI where artifacts required by this template are located including a trailing '/'"
-}
-
 variable "key_vault_id" {
   description = "Key vault ID for ad admin password"
 }

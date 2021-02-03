@@ -186,8 +186,6 @@ install_cac() {
     then
         log "  --ssl-key <ssl_key>"
         log "  --ssl-cert <ssl_cert>"
-        wget ${_artifactsLocation}${ssl_key} -P $INSTALL_DIR
-        wget ${_artifactsLocation}${ssl_cert} -P $INSTALL_DIR
 
         args=$args"--ssl-key $INSTALL_DIR/${ssl_key} "
         args=$args"--ssl-cert $INSTALL_DIR/${ssl_cert} "
