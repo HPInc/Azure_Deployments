@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "traffic-manager-id" {
-     description = "The id of the created traffic manager"
-     value       = azurerm_traffic_manager_profile.main.id
+output "traffic-manager-fqdn" {
+  description = "The FQDN of the traffic manager"
+  value       = azurerm_traffic_manager_profile.main.fqdn
 }
