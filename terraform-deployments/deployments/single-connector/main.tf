@@ -157,7 +157,6 @@ module "cac-vm" {
   tenant_id                   = var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
-  _artifactsLocation          = var._artifactsLocation
 }
 
 module "cac-configuration" {
@@ -187,7 +186,6 @@ module "cac-configuration" {
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   tenant_id                   = var.tenant_id
-  _artifactsLocation          = var._artifactsLocation
 }
 
 module "windows-std-vm" {
