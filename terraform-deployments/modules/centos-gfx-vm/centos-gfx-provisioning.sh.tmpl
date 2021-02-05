@@ -392,6 +392,7 @@ then
 
         if [ $? -ne 0 ]; then
             log "Failed to install Linux GUI on the second attempt."
+            exit 1
         fi
     fi
 
