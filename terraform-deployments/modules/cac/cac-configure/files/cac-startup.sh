@@ -187,6 +187,9 @@ install_cac() {
         log "  --ssl-key <ssl_key>"
         log "  --ssl-cert <ssl_cert>"
 
+        mv /tmp/${ssl_key} $INSTALL_DIR
+        mv /tmp/${ssl_cert} $INSTALL_DIR
+
         args=$args"--ssl-key $INSTALL_DIR/${ssl_key} "
         args=$args"--ssl-cert $INSTALL_DIR/${ssl_cert} "
     else
