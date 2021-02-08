@@ -201,7 +201,6 @@ centos-graphics-workstations = [
   {
     "name" = "gcent-0"
     "private_ip" = "10.0.4.5"
-    "public_ip" = ""
   },
 ]
 centos-standard-workstations = [
