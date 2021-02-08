@@ -89,6 +89,10 @@ cac_configuration = [
 # e.g.: the value 'teradici' will create the FQDN 'teradici.trafficmanager.net'
 traffic_manager_dns_name = "teradici"
 
+# (Optional) Specify SSL certificate for Connector
+# ssl_key  = "~/clouddrive/privkey.pem"
+# ssl_cert = "~/clouddrive/fullchain.pem"
+
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
 # To encrypt follow section 4 of the documentation.
 ad_admin_password             = "Password!234"
