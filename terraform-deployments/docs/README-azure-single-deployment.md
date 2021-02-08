@@ -1,6 +1,6 @@
 # Single-Connector Deployment
 
-**Learning Objective**: The objective of this script is to automate the deployment of the single-connector architecture. This document is a guide on how to deploy a single-connector deployment on Azure from **Azure Cloud Shell** (ACS). 
+**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using **Azure Cloud Shell** (ACS). 
 
 We also support deployments on Amazon Web Services (AWS) and Google Cloud Platform (GCP).
 - For AWS deployments click [here](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md).
@@ -11,12 +11,13 @@ We also support deployments on Amazon Web Services (AWS) and Google Cloud Platfo
 2. [Requirements](#2-requirements)
 3. [Connect Azure to Cloud Access Manager](#3-connect-azure-to-cloud-access-manager)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
-5. [Deploying the Single-Connector via Terraform](#5-deploying-the-single-connector-via-terraform)
-6. [Adding Workstations in Cloud Access Manager](#6-adding-workstations-in-cloud-access-manager)
-7. [Starting a PCoIP Session](#7-starting-a-pcoip-session)
-8. [Changing the deployment](#8-changing-the-deployment)
-9. [Deleting the deployment](#9-deleting-the-deployment)
-10. [Troubleshooting](#10-troubleshooting)
+5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
+6. [Deploying the Single-Connector via Terraform](#6-deploying-the-single-connector-via-terraform)
+7. [Adding Workstations in Cloud Access Manager](#7-adding-workstations-in-cloud-access-manager)
+8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
+9. [Changing the deployment](#9-changing-the-deployment)
+10. [Deleting the deployment](#10-deleting-the-deployment)
+11. [Troubleshooting](#11-troubleshooting)
 
 ### 1. Single-Connector Architecture
 
@@ -95,22 +96,22 @@ To interact directly with remote workstations, an Azure Account must be connecte
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-**Note**: This is optional. You may skip this section and enter plaintext for your AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
 
-As a security method to help protect your AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, you can store them as secrets in an Azure Key Vault. Secrets will be called and decrypted in the configuration scripts. To use secrets from the Azure Key Vault you will need to do configuration following the instructions below:
+As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, users can store them as secrets in an Azure Key Vault. Secrets will be called and decrypted in the configuration scripts.
 
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
-    1. Select the same region as your deployment.
+    1. Select the same region of the deployment.
     2. Click next to go to the Access policy page.
     3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
-        3. Find the application from [section 3](#3-connect-azure-to-cloud-access-manager) and click **Select**. The ID underneath should match the Client ID/Application ID you saved from earlier.
+        3. Find the application from [section 3](#3-connect-azure-to-cloud-access-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
         4. Click **Review + create** and then **Create**.
 2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
 3. To create **AD safe mode admin password**, **AD admin password**, **PCoIP registration key**, and **connector token** as secrets follow these steps for each value:
     1. Click **+ Generate/Import**.
-    2. Enter the name of your secret.
+    2. Enter the name of the secret.
     3. Input the secret value.
     4. Click **Create**.
     5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
@@ -143,11 +144,22 @@ aad_client_secret             = "<from section 3 step 5-6>"
 ```
 - Tips for finding these variables:
     1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
-    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cloud-access-manager). If you no longer have this, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
-    2. ```key_vault_id```: Go to your key vault and click on **Properties** inside the opened blade. Copy the **Resource ID**.
-    3. ```ad_pass_secret_name```: This is the name you used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_pass_secret_id```.
+    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cloud-access-manager). If this secret is no longer saved, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
+    2. ```key_vault_id```: Go to the key vault on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
+    3. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_pass_secret_id```.
 
-### 5. Deploying the Single-Connector via Terraform
+### 5. (Optional) Assigning a SSL Certificate
+
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+
+To upload a SSL certificate and SSL key onto ACS:
+  1. Go into the **Resource group** that contains ACS storage. Default name should look like: **cloud-shell-storage-[region]**
+  2. Click on the storage account being used for deployment.
+  3. Next, click **File shares** and then click the file share that is mounted onto ACS.
+  4. Upload the SSL certificate and SSL key. Must be in .pem format.
+  5. The location of these files will be found in ```~/clouddrive/```
+
+### 6. Deploying the Single-Connector via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
@@ -158,7 +170,7 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
     - Users can edit files inside ACS by doing ```code terraform.tfvars```.
     - The resource group name must be unique and must not already exist.
     - Make sure the locations of the connectors and work stations are identical.
-    - Graphics agents require the [**NV-series**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) instance types which use M60 GPUs. We suggest using ```"Standard_NV6"``` as the ```"vm_size"``` for graphics workstations.
+    - Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix). 
 3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
@@ -180,23 +192,22 @@ Outputs:
 
 cac-vms = [
   {
-    "name" = "ter3-cac-vm-0"
+    "name" = "cac-vm-0"
     "private_ip" = "10.0.3.4"
     "public_ip" = "52.109.24.176"
   },
 ]
 centos-graphics-workstations = [
   {
-    "name" = "ter0-gcent-0"
+    "name" = "gcent-0"
     "private_ip" = "10.0.4.5"
     "public_ip" = ""
   },
 ]
 centos-standard-workstations = [
   {
-    "name" = "ter0-scent-0"
+    "name" = "scent-0"
     "private_ip" = "10.0.4.6"
-    "public_ip" = ""
   },
 ]
 domain-controller-private-ip = "10.0.1.4"
@@ -204,36 +215,34 @@ domain-controller-public-ip = "52.109.24.161"
 locations = [
   "westus2",
 ]
-resource_group = "my-single-connector-deployment"
+resource_group = "single_connector_deployment_c4fe3"
 windows-standard-workstations = [
   {
-    "name" = "ter0-swin-0"
+    "name" = "swin-0"
     "private_ip" = "10.0.4.4"
-    "public_ip" = ""
   },
 ]
 windows-graphics-workstations = [
   {
-    "name" = "ter0-gwin-0"
+    "name" = "gwin-0"
     "private_ip" = "10.0.4.7"
-    "public_ip" = ""
   },
 ]
 ```
     
-### 6. Adding Workstations in Cloud Access Manager
+### 7. Adding Workstations in Cloud Access Manager
 To connect to workstations, they have to be added through the Cloud Access Manager. 
-1. Go to the CAM Admin Console and ensure you have your deployment selected. 
+1. Go to the CAM Admin Console and ensure the correct deployment is selected. 
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
-3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of your resource group declared in terraform.tfvars.
+3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of the resource group of the deployment.
 4. In the search box below, select Windows and CentOS workstations.
-5. At the bottom click the option **Individually select users** and select the users you would like to assign to the workstations. 
-    - **Note:** If you would like to assign certain users to certain workstations you can remove workstations under **Remote workstations to be added (x)**.
+5. At the bottom click the option **Individually select users** and select the users to assign to the workstations. 
+    - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
 6. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
-### 7. Starting a PCoIP Session
+### 8. Starting a PCoIP Session
 Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
@@ -242,18 +251,18 @@ Once the workstations have been added to be managed by CAM and assigned to Activ
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
-### 8. Changing the deployment
+### 9. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
 Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAM Admin Console. Create a new connector to obtain a new token.
 
-### 9. Deleting the deployment
+### 10. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
-### 10. Troubleshooting
+### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
-- If the script fails you can try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
-- If you are trying to run a fresh deployment and have been running into errors, you may need to delete all files containing  ```.tfstate```. .tfstate files store the state of your current infrastructure and configuration. 
+- If the script fails try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
+- If trying to run a fresh deployment and have been running into errors,  delete all files containing  ```.tfstate```. .tfstate files store the state of the current infrastructure and configuration. 
 
 Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
@@ -262,7 +271,7 @@ Information about connecting to virtual machines for investigative purposes:
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. You should now be able to connect via RDP.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
     1. RDP into the Domain Controller virtual machine. 
     
     ```
@@ -278,3 +287,22 @@ Information about connecting to virtual machines for investigative purposes:
     Password: <ad_admin_password_set_in_terraform.tfvars>
     ```
    3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
+
+## Appendix
+### Current VM sizes supported by PCoIP Graphics Agents
+
+[NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs / Expected network bandwidth (Mbps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NC4as_T4_v3**|4|28|180|1|16|8|2 / 8000|
+|**Standard_NC8as_T4_v3**|8|56|360|1|16|16|4 / 8000|
+|**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
+|**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
+
+
+[NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV6**|6|56|340|1|8|24|1|1|25|
+|**Standard_NV12**|12|112|680|2|16|48|2|2|50|
+|**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
