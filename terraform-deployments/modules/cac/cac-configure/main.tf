@@ -25,7 +25,7 @@ resource "null_resource" "upload-ssl" {
     var.cac_configure_depends_on
   ]
 
-  count = var.ssl_key == "" ? 0 : 1
+  count = var.ssl_key == "" ? 0 : length(var.cac_vm_ids)
 
   connection {
     type     = "ssh"
