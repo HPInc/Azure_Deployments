@@ -88,11 +88,11 @@ To interact directly with remote workstations, an Azure Account must be connecte
     ```
     cac_configuration : [
             { 
-                cac_token: "token_here", 
+                cac_token: "vk315Gci2iJIdzLxT.. ", 
                 location: "westus2" 
             },
             { 
-                cac_token: "token_here", 
+                cac_token: "zpJ2bGciOmJdUzkfM.. ", 
                 location: "westus2" 
             }
             ..
@@ -102,7 +102,7 @@ To interact directly with remote workstations, an Azure Account must be connecte
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-**Note**: This is optional. Users may skip this section and enter plaintext the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector tokens in terraform.tfvars.
 
 As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key, and connector tokens, users can store them as secrets in an Azure Key Vault. Secrets will be called and decrypted in the configuration scripts.
 
@@ -120,8 +120,9 @@ As a security method to help protect the AD safe mode admin password, AD admin p
     2. Enter the name of the secret.
     3. Input the secret value.
     4. Click **Create**.
-    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
-5. Fill in the following variables from this completed example. There are tips underneath that can aid in finding the values.
+    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**. 
+      - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
+5. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
 ```
 ...
 
@@ -139,19 +140,19 @@ cac_configuration : [
 
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
 # To encrypt follow section 4 of the documentation.
-ad_admin_password             = "Password!234"
-safe_mode_admin_password      = "Password!234"
-pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
+ad_admin_password             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/123abcexample"
+safe_mode_admin_password      = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/123abcexample"
+pcoip_registration_code       = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/123abcexample"
 
 # Used for authentication and allows Terraform to manage resources.
-application_id                = "<from section 3 step 4>"
-aad_client_secret             = "<from section 3 step 5-6>"
+application_id                = "4928a0xd-e1re-592l-9321-5f114953d88c"
+aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 
 # Only fill these when using Azure Key Vault secrets.
 # Examples and tips can be found in section 4 of the documentation.
-# tenant_id                     = "<from section 3 step 4>"
-# key_vault_id                  = "<found in key vault properties under Resource ID>"
-# ad_pass_secret_name           = "<variable name used for ad_admin_password secret>"
+# tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
+# key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
+# ad_pass_secret_name           = "adPasswordID"
 ```
 - Tips for finding these variables:
     1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
@@ -164,7 +165,7 @@ aad_client_secret             = "<from section 3 step 5-6>"
 **Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
-  1. Go into the **Resource group** that contains ACS storage. Default name should look like: **cloud-shell-storage-[region]**
+  1. Go into the **Resource group** that contains ACS storage. By default, the name should look like: **cloud-shell-storage-[region]**
   2. Click on the storage account being used for deployment.
   3. Next, click **File shares** and then click the file share that is mounted onto ACS.
   4. Upload the SSL certificate and SSL key. Must be in .pem format.
@@ -178,11 +179,12 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 
 Before the deployment of the load-balancer, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
 1. After cloning the repository into the [**ACS**](https://portal.azure.com/#cloudshell/) environment, change directory into: ```/terraform-deployments/deployments/load-balancer```.
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```.
+2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```. **Tip**: to clone use ```git clone https://github.com/teradici/Azure_Deployments```
     - Edit files inside ACS by doing: ```code terraform.tfvars```.
+    - To include optional variables, uncomment the line by removing preceding ```#```.
     - Make sure the locations of the connectors and work stations are identical.
     - Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix). 
-3. Save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and add domain users.
+3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
       - 1 lowercase letter
@@ -193,7 +195,7 @@ Before the deployment of the load-balancer, ```terraform.tfvars``` and ```domain
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the load-balancer infrastructure. 
 
-A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. Connectors should register themselves with the CAM service and show up in the CAM Admin Console.
+A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAM so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
@@ -258,10 +260,11 @@ To connect to workstations, they have to be added through the Cloud Access Manag
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
-Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
+Once the workstations have been added to be managed by CAM and assigned to Active Directory users, users can connect through the PCoIP client using the public IP of the load balancer. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the IP address of the **Load Balancer** and enter a name for this connection. To connect to a specific CAC VM, enter the public IP address of the VM.
+    - **Note**: If the ```load-balancer-public-ip``` output does not show at the end of completion due to error or script timeout it can be found on the Portal. Go into the **load balancer** resource and the **Public IP address** will be shown.
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** in CAM.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
@@ -277,7 +280,6 @@ Run ```terraform destroy -force``` to remove all resources created by Terraform.
 ### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If no machines are showing up on CAM or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
-- If the script fails try rerunning the deployment again using ```terraform apply | tee -a installer.log```.
 - If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. .tfstate files store the state of the current infrastructure and configuration. 
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAM.
 
