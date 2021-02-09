@@ -7,6 +7,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
 - **Microsoft Azure:**
   - [Single-Connector Deployment](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md)
   - [Load Balancer (Multi-connector) Deployment](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Multi Region (Traffic Manager) Deployment](docs/README-azure-multi-region-traffic-manager.md)
 - [Amazon Web Services](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [Google Cloud Platform](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
