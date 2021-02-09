@@ -4,8 +4,8 @@
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - [Single-Connector Deployment](docs/README-azure-single-deployment.md)
-  - [Load Balancer Deployment](docs/README-azure-load-balancer.md)
+  - [Single-Connector Deployment](/README-azure-single-deployment.md)
+  - [Load Balancer Deployment](/README-azure-load-balancer.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
