@@ -1,11 +1,11 @@
 # Single-Connector Deployment
 
-**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using **Azure Cloud Shell** (ACS). 
+**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - [Load Balancer Deployment](/README-azure-load-balancer.md)
-  - [Multi Region (Traffic Manager) Deployment](/README-azure-multi-region-traffic-manager.md)
+  - [Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
