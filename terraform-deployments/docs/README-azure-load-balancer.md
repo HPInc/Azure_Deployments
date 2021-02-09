@@ -2,9 +2,12 @@
 
 **Objective**: The objective of this documentation is to deploy the load balancer architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). 
 
-We also support deployments on Amazon Web Services (AWS) and Google Cloud Platform (GCP).
-- For AWS deployments click [here](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md).
-- For GCP deployments click [here](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md).
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+  - [Single-Connector Deployment](docs/README-azure-single-deployment.md)
+  - [Multi Region (Traffic Manager) Deployment](docs/README-azure-multi-region-traffic-manager.md)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
 1. [Load Balancer Architecture](#1-load-balancer-architecture)
