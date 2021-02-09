@@ -22,6 +22,9 @@ Description and instructions for different deployments and architectures.
 The building blocks of deployments, e.g. a Domain Controller, a Cloud Access
 Connector, a Workstation, etc.
 
+## tools/
+Various scripts to help with Terraform deployments.  e.g. a Python script to
+generate random users for an Active Directory in a CSV file.
 
 # Maintainer
 If any security issues or bugs are found, or if there are feature requests, please contact Bob Ljujic at bljujic@teradici.com
