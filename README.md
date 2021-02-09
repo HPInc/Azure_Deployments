@@ -4,9 +4,9 @@ Teradici is the creator of the PCoIP remoting protocol technology and Cloud Acce
 This repository contains a collection of Terraform scripts for demonstrating how to deploy Cloud Access Connectors in a user's Azure cloud environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
 
 # Documentation
-- [Microsoft Azure](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-        -[Single-Connector Deployment] (https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md)
-        -[Load Balancer (Multi-connector) Deployment] (https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-load-balancer.md)
+- Microsoft Azure:
+  - [Single-Connector Deployment](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md)
+  - [Load Balancer (Multi-connector) Deployment](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-load-balancer.md)
 - [Amazon Web Services](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [Google Cloud Platform](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
