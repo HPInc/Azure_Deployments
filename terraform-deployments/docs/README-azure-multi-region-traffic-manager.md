@@ -172,10 +172,10 @@ Before the deployment ```terraform.tfvars``` must be complete.
 1. After cloning this [repo](https://github.com/teradici/Azure_Deployments) into the [**ACS**](https://portal.azure.com/#cloudshell/) environment, change directory into: ```/terraform-deployments/deployments/multi-region-traffic-manager```. **Tip**: to clone use ```git clone https://github.com/teradici/Azure_Deployments```
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```.
     - Edit files inside ACS by doing: ```code terraform.tfvars```.
-    - For optional variables, make sure to uncomment the line by remove the preceding ```#```.
+    - To include optional variables, uncomment the line by removing preceding ```#```.
     - Ensure there are atleast **2** unique locations of the connectors and workstations. 
     - Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix). 
-3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit the file accordingly.
+3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
       - 1 lowercase letter
@@ -186,7 +186,7 @@ Before the deployment ```terraform.tfvars``` must be complete.
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the multi region infrastructure. 
 
-A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. Connectors should register themselves with the CAM service and show up in the CAM Admin Console. It takes a few minutes for a connector to sync with CAM so the **Health** status may show as **Unhealthy** temporarily. 
+A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAM so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
