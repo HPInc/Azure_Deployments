@@ -5,16 +5,17 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
 # Documentation
 - [Microsoft Azure](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-        -[Single CAC Deployment] 
+        -[Single-Connector Deployment] (https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md)
+        -[Load Balancer (Multi-connector) Deployment] (https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-load-balancer.md)
 - [Amazon Web Services](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [Google Cloud Platform](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 # Directory structure
 ## deployments/
-The top level terraform scripts that creates entire deployments.
+The top level terraform scripts that create specific deployments.
 
 ## docs/
-Description and instructions for deployments on different clouds.
+Description and instructions for different deployments and architectures.
 
 ## modules/
 The building blocks of deployments, e.g. a Domain Controller, a Cloud Access
