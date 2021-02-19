@@ -90,11 +90,13 @@ get_credentials() {
     if [[ -z "${tenant_id}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
+        set +x
         log "Getting secrets from Azure Key Vault..."
         ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)
         PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$PCOIP_REGISTRATION_CODE?api-version=2016-10-01" | jq -r '.value')
         AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$AD_SERVICE_ACCOUNT_PASSWORD?api-version=2016-10-01" | jq -r '.value')
         CAC_TOKEN=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$CAC_TOKEN?api-version=2016-10-01" | jq -r '.value')
+        set -x
     fi
 }
 
