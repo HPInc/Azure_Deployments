@@ -173,14 +173,25 @@ def deployment_delete():
         os.chdir('../single-connector')
         resource_group_name = deployment_outputs_get('resource_group')
 
+        print(f'Deleting resource group {resource_group_name}..')
         tf_destroy_cmd = f'az group delete -n {resource_group_name} --no-wait -y'
         subprocess.run(tf_destroy_cmd.split(' '), check=True)
-        
-        os.chdir('../quickstart-single-connector')
-        for f in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
-            os.remove(f)
 
-        print(f'Deleting resource group: {resource_group_name} ..')
+        for filename in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
+            try:
+                os.remove(filename)
+            except OSError:
+                pass
+
+        os.chdir('../quickstart-single-connector')
+        for filename in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
+            try:
+                os.remove(filename)
+            except OSError:
+                pass
+
+        print(f'Log in to https://cam.teradici.com and delete the deployment named azure_quickstart_<timestamp>')
+        print('You may close Azure Cloud Shell.')
 
     except:
         print('There was a problem deleting the deployment.')
