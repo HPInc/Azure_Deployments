@@ -5,28 +5,18 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential
-import base64
 import datetime
-import getpass
-import importlib
 import json
 import os
 import re
-import secrets
-import shutil
-import site
 import subprocess
 import sys
-import textwrap
 import time
 
 import cam
 
 CFG_FILE_PATH = 'azure-cloudshell-quickstart.cfg'
 TERRAFORM_BIN_PATH = 'terraform'
-CURRENT_DIR = os.getcwd()
 iso_time = datetime.datetime.utcnow().isoformat(
     timespec='seconds').replace(':', '').replace('-', '') + 'Z'
 DEPLOYMENT_NAME = "azure_quickstart_" + iso_time
@@ -79,13 +69,6 @@ def deployment_outputs_get(output_name):
 
 # Creates a new .tfvar based on the .tfvar.sample file
 def tf_vars_create(ref_file_path, tfvar_file_path, settings):
-
-    # if os.path.exists(tfvar_file_path):
-    #     overwrite = input(
-    #         "Found an existing .tfvar file, overwrite (y/n)? ").strip().lower()
-    #     if overwrite not in ('y', 'yes'):
-    #         print('{} already exists. Exiting...'.format(tfvar_file_path))
-    #         sys.exit(1)
 
     with open(ref_file_path, 'r') as ref_file, open(tfvar_file_path, 'w') as out_file:
         for line in ref_file:
