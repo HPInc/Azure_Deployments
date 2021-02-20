@@ -33,7 +33,9 @@ After changes have been made, save (Ctrl + S) the  ```azure-cloudshell-quickstar
 
 ### Running the script
 
-Run the following command in Azure Cloud Shell: ```azure-cloudshell-quickstart.py``` The script should take approximately 35-45 minutes to run.
+Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quickstart.py | output.txt```
+-   ```| output.txt``` logs the script's execution outputs into a .txt file.
+-   The script should take approximately 35-45 minutes to run.
 
 ### Connect to a workstation
 
@@ -55,4 +57,5 @@ Run the following command in Azure Cloud Shell: ```azure-cloudshell-quickstart.p
   3. Click on the resource group that was created. It should look like ```single_connector_deployment_<timestamp>```.
   4. Click on the virtual machine ```cac-vm-0```.
   5. Under **Public IP address** is the value that will be entered in the PCoIP client.
+- If the script suddenly stops at 'Adding cloud service account...', repeat the process of getting a new API token from [CAM](https://cam.teradici.com) and inserting it in ```azure-cloudshell-quickstart.cfg```.
   
