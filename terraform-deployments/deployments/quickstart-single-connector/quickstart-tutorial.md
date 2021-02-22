@@ -33,8 +33,8 @@ After changes have been made, save (Ctrl + S) the  ```azure-cloudshell-quickstar
 
 ### Running the script
 
-Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quickstart.py | output.txt```
--   ```| output.txt``` logs the script's execution outputs into a .txt file.
+Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quickstart.py | tee -a output.txt```
+-   ```| tee -a output.txt``` logs the script's execution outputs into a .txt file.
 -   The script should take approximately 35-45 minutes to run.
 
 ### Connect to a workstation
@@ -57,5 +57,6 @@ Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quick
   3. Click on the resource group that was created. It should look like ```single_connector_deployment_<timestamp>```.
   4. Click on the virtual machine ```cac-vm-0```.
   5. Under **Public IP address** is the value that will be entered in the PCoIP client.
-- If the script suddenly stops at 'Adding cloud service account...', repeat the process of getting a new API token from [CAM](https://cam.teradici.com) and inserting it in ```azure-cloudshell-quickstart.cfg```.
+- If the script stops at **'Adding cloud service account...'**, repeat the process of getting a new API token from [CAM](https://cam.teradici.com) and replace it in ```azure-cloudshell-quickstart.cfg```.
+- If the script stops at **'Adding "[machine-name]-0" to Cloud Access Manager...'**, you will need to [manually add machines](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md#7-adding-workstations-in-cloud-access-manager) on [CAM](https://cam.teradici.com).
   
