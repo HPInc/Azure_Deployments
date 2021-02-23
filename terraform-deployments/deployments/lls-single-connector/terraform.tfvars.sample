@@ -61,7 +61,7 @@ cac_configuration = [
 ]
 
 # Name of resource group for deployment resources. Name must be unique.
-# Leaving this commented will result in the name: 'load_balancer_deployment_[random_id]'
+# Leaving this commented will result in the name: 'single_connector_lls_[random_id]'
 # resource_group_name           = ""
 
 # Prefix for DC and CAC machines.
@@ -71,7 +71,7 @@ cac_configuration = [
 # create_debug_rdp_access       = false
 
 # Full path to the domain users list .csv file.
-# ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/load-balancer/domain_users_list.csv"
+# ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/lls-single-connector/domain_users_list.csv"
 
 # Active directory administrator username.
 # ad_admin_username       = "cam_admin"
