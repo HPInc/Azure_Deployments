@@ -164,6 +164,20 @@ wait_for_dc() {
           "--> ERROR: Timed out trying to contact $DOMAIN_NAME:636. Continuing..."
 }
 
+wait_for_lls() {
+    local timeout=1200
+    local interval=10
+    local lls_health_check_url="http://${lls_ip}:7070/api/1.0/health"
+
+    log "--> Performing LLS health check using endpoint $lls_health_check_url..."
+    retry $timeout \
+          $interval \
+          # Need to escape Terraform template directive using %%
+          "[ $(curl --silent --write-out "%%{http_code}\n" --output /dev/null $lls_health_check_url) -eq 200 ]" \
+          "--> Performing LLS health check using endpoint $lls_health_check_url..." \
+          "--> ERROR: Timed out trying to perform health check using endpoint $lls_health_check_url. Continuing..."
+}
+
 install_cac() {
     log "--> Installing Cloud Access Connector..."
     local retries=10
@@ -197,6 +211,12 @@ install_cac() {
     else
         log "  --insecure"
         args=$args"--insecure "
+    fi
+
+    if [ "${lls_ip}" ]
+    then
+        log "  --local-license-server-url http://${lls_ip}:7070/request"
+        args=$args"--local-license-server-url http://${lls_ip}:7070/request "
     fi
 
     set +x
@@ -260,6 +280,11 @@ config_network
 download_cac
 
 wait_for_dc
+
+if [ "${lls_ip}" ]
+then
+    wait_for_lls
+fi
 
 install_cac
 
