@@ -167,16 +167,12 @@ module "lls" {
   lls_activation_code = var.lls_activation_code
   lls_license_count   = var.lls_license_count
 
-  # depends_on = [
-  #   module.dc-cac-network.all-output,
-  # ]
-
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
   azurerm_virtual_network_name = module.dc-cac-network.virtual-network-name
   application_id               = var.application_id
   aad_client_secret            = var.aad_client_secret
-  admin_name                  = var.cac_admin_username
+  admin_name                   = var.cac_admin_username
   admin_password               = var.ad_admin_password
 }
 
