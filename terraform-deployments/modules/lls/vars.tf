@@ -22,7 +22,7 @@ variable "admin_password" {
 
 variable "machine_type" {
   description = "Azure virtual machine size."
-  default = "Standard_B2ms"
+  default     = "Standard_B2ms"
 }
 
 variable "application_id" {
@@ -81,4 +81,12 @@ variable "azurerm_virtual_network_name" {
 
 variable "location" {
   description = "Location of the Local License Server"
+}
+
+variable "key_vault_id" {
+  description = "Key vault ID for ad admin password"
+}
+
+variable "ad_pass_secret_name" {
+  description = "Name of ad admin password"
 }

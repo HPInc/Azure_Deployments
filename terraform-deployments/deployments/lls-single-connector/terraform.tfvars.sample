@@ -60,6 +60,9 @@ cac_configuration = [
     }
 ]
 
+# Number of PCoIP licenses to activate
+lls_license_count = 1
+
 # Name of resource group for deployment resources. Name must be unique.
 # Leaving this commented will result in the name: 'single_connector_lls_[random_id]'
 # resource_group_name           = ""
@@ -84,11 +87,13 @@ cac_configuration = [
 # ssl_key  = "~/clouddrive/privkey.pem"
 # ssl_cert = "~/clouddrive/fullchain.pem"
 
-# (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
+# (Encryption is optional) Following 5 values and cac_token from cac_configuration can be encrypted. 
 # To encrypt follow section 4 of the documentation.
 ad_admin_password             = "Password!234"
 safe_mode_admin_password      = "Password!234"
 pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
+lls_admin_password            = "Password!234"
+lls_activation_code           = "0123-4567-89AB-CDEF"
 
 # Used for authentication and allows Terraform to manage resources.
 application_id                = "<from section 3 step 4>"
@@ -99,7 +104,3 @@ aad_client_secret             = "<from section 3 step 5-6>"
 # tenant_id                     = "<from section 3 step 4>"
 # key_vault_id                  = "<found in key vault properties under Resource ID>"
 # ad_pass_secret_name           = "<variable name used for ad pass secret>"
-
-lls_license_count = 1
-lls_admin_password          = "Password!234"
-lls_activation_code         = "0123-4567-89AB-CDEF"

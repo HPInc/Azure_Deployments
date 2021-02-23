@@ -1,12 +1,19 @@
 locals {
   lls_provisioning_script = "lls-provisioning.sh"
+  lls_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
+}
+
+data "azurerm_key_vault_secret" "ad-pass" {
+  count        = var.key_vault_id != "" ? 1 : 0
+  name         = var.ad_pass_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 resource "azurerm_subnet" "lls" {
   # depends_on = [var.dc_network_depends_on]
 
   name                 = var.lls_subnet_name
-  address_prefixes       = ["10.0.2.0/24"]
+  address_prefixes     = ["10.0.2.0/24"]
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.azurerm_virtual_network_name
 }
@@ -37,7 +44,7 @@ resource "azurerm_linux_virtual_machine" "lls-vm" {
   resource_group_name             = var.resource_group_name
   location                        = var.location
   admin_username                  = var.admin_name
-  admin_password                  = var.admin_password
+  admin_password                  = local.lls_admin_password
   disable_password_authentication = false
   size                            = var.machine_type
 

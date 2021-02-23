@@ -13,10 +13,26 @@ LLS_YUM_PKG="pcoip-license-server"
 
 LLS_ADMIN_PASSWORD=${lls_admin_password}
 LLS_ACTIVATION_CODE=${lls_activation_code}
+APPLICATION_ID=${application_id}
+AAD_CLIENT_SECRET=${aad_client_secret}
+TENANT_ID=${tenant_id}
 
 log() {
     local message="$1"
     echo "[$(date)] $message"
+}
+
+get_credentials() {
+    if [[ -z "$TENANT_ID" ]]; then
+        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
+    else
+        set +x
+        log "Getting secrets from Azure Key Vault..."
+        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)
+        LLS_ACTIVATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$LLS_ACTIVATION_CODE?api-version=2016-10-01" | jq -r '.value')
+        LLS_ADMIN_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$LLS_ADMIN_PASSWORD?api-version=2016-10-01" | jq -r '.value')
+        set -x
+    fi
 }
 
 check_required_vars() {

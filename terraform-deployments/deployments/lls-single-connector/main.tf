@@ -174,6 +174,10 @@ module "lls" {
   aad_client_secret            = var.aad_client_secret
   admin_name                   = var.cac_admin_username
   admin_password               = var.ad_admin_password
+  tenant_id                    = var.tenant_id
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+
 }
 
 module "cac-configuration" {
