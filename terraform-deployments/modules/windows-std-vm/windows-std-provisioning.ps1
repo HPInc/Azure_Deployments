@@ -269,7 +269,9 @@ else {
 
 PCoIP-Agent-Install
 
-PCoIP-Agent-Register
+if ("${pcoip_registration_code}" -ne "null") {
+    PCoIP-Agent-Register
+}
 
 Write-Output "Joining Domain"
 
