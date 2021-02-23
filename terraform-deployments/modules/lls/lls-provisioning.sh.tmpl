@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Copyright (c) 2020 Teradici Corporation
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+LOG_FILE="/var/log/teradici/provisioning.log"
+
+LLS_YUM_PKG="pcoip-license-server"
+
+LLS_ADMIN_PASSWORD=${lls_admin_password}
+LLS_ACTIVATION_CODE=${lls_activation_code}
+
+log() {
+    local message="$1"
+    echo "[$(date)] $message"
+}
+
+check_required_vars() {
+    set +x
+    if [[ -z "$LLS_ADMIN_PASSWORD" ]]; then
+        log "--> ERROR: Missing LLS Administrator Password."
+        missing_vars="true"
+    fi
+
+    if [[ -z "$LLS_ACTIVATION_CODE" ]]; then
+        log "--> ERROR: Missing LLS Activation Code."
+        missing_vars="true"
+    fi
+    set -x
+
+    if [[ "$missing_vars" = "true" ]]; then
+        log "--> Exiting..."
+        exit 1
+    fi
+}
+
+if [[ ! -f "$LOG_FILE" ]]
+then
+    mkdir -p "$(dirname $LOG_FILE)"
+    touch "$LOG_FILE"
+    chmod 600 "$LOG_FILE"
+fi
+
+yum info $LLS_YUM_PKG
+if [[ $? -eq 0 ]]
+then
+    log "PCoIP licence Server already installed. Skipping startup script."
+    exit 0
+fi
+
+log "$(date)"
+
+# Print all executed commands to the terminal
+set -x
+
+# Redirect stdout and stderr to the log file
+exec &>>$LOG_FILE
+
+yum update -y --exclude=WALinuxAgent
+yum install -y wget yum-utils
+
+get_credentials
+
+check_required_vars
+
+yum install -y ${lls_repo_url}
+yum install -y $LLS_YUM_PKG
+
+set +x
+pcoip-set-password -p "1P@ssw0rd!" -n "$LLS_ADMIN_PASSWORD"
+
+pcoip-activate-online-license -a "$LLS_ACTIVATION_CODE" -c ${lls_license_count} -p "$LLS_ADMIN_PASSWORD"
+set -x
