@@ -289,12 +289,18 @@ if __name__ == '__main__':
         for i in range(int(cfg_data.get(t))):
             hostname = f'{t}-{i}'
             print(f'Adding "{hostname}" to Cloud Access Manager...')
-            my_cam.machine_add_existing(
-                hostname,
-                az_app_outputs['subscription_id'],
-                resource_group_name,
-                deployment
-            )
+            try:
+                my_cam.machine_add_existing(
+                    hostname,
+                    az_app_outputs['subscription_id'],
+                    resource_group_name,
+                    deployment
+                )
+            except:
+                print('Error adding "{hostname}" to CAM. You will need to manually add workstations & users.')
+                print('Please follow: https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md#7-adding-workstations-in-cloud-access-manager')
+                print(f'Deployment name: {DEPLOYMENT_NAME}')
+
 
     # Loop until cam_admin user is found in CAM
     while True:
