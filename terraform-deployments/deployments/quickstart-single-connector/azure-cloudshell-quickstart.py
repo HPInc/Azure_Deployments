@@ -36,6 +36,7 @@ ENTITLE_USER = 'cam_admin'
 # Types of workstations
 WS_TYPES = ['scent', 'gcent', 'swin', 'gwin']
 
+
 def quickstart_config_read(cfg_file):
     cfg_data = {}
 
@@ -164,7 +165,8 @@ def deployment_delete():
 
     try:
         if not os.path.isfile(TF_VARS_PATH):
-            print('No existing terraform deployment exists. Did you mean "python azure-cloudshell-quickstart.py"?')
+            print(
+                'No existing terraform deployment exists. Did you mean "python azure-cloudshell-quickstart.py"?')
             sys.exit(1)
 
         app_kv_destroy_cmd = f'{TERRAFORM_BIN_PATH} destroy -force'
@@ -203,12 +205,12 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1 and sys.argv[1] == 'cleanup':
         deployment_delete()
-        sys.exit()
+        sys.exit(0)
 
     elif len(sys.argv) > 1 and sys.argv[1] != 'cleanup':
         print('Did you mean \'python azure-cloudshell-quickstart.py\' or \'python azure-cloudshell-quickstart.py cleanup\'?')
         print()
-        sys.exit()
+        sys.exit(0)
 
     cfg_data = quickstart_config_read(CFG_FILE_PATH)
 
@@ -297,10 +299,11 @@ if __name__ == '__main__':
                     deployment
                 )
             except:
-                print('Error adding "{hostname}" to CAM. You will need to manually add workstations & users.')
+                print(
+                    f'Error adding "{hostname}" to CAM. You will need to manually add workstations & users.')
                 print('Please follow: https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md#7-adding-workstations-in-cloud-access-manager')
                 print(f'Deployment name: {DEPLOYMENT_NAME}')
-
+                sys.exit(1)
 
     # Loop until cam_admin user is found in CAM
     while True:
