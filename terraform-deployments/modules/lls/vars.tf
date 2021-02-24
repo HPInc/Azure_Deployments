@@ -6,17 +6,17 @@
  */
 
 variable "resource_group_name" {
-  description = "Basename of the Resource Group to deploy the workstation. Hostname will be <prefix>-<name>.Lower case only."
+  description = "Basename of the Resource Group to deploy the LLS server machine."
   type        = string
 }
 
-variable "admin_name" {
-  description = "Name for the Administrator of the Workstation"
+variable "ad_service_account_username" {
+  description = "Name for the Administrator of the LLS server machine"
   type        = string
 }
 
-variable "admin_password" {
-  description = "Password for the Administrator of the Workstation"
+variable "ad_service_account_password" {
+  description = "Password for the Administrator of the LLS server machine"
   type        = string
 }
 
@@ -89,4 +89,10 @@ variable "key_vault_id" {
 
 variable "ad_pass_secret_name" {
   description = "Name of ad admin password"
+}
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default     = ""
 }

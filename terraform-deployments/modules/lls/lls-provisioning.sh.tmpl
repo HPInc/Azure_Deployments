@@ -26,6 +26,19 @@ get_credentials() {
     if [[ -z "$TENANT_ID" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
     else
+        log "--> Installing epel-release.."
+        yum -y install epel-release
+        if [ $? -ne 0 ]; then
+            log "--> Failed to install epel-release"
+            exit 1
+        fi
+
+        log "--> Installing jq.."
+        yum install -y jq
+        if [ $? -ne 0 ]; then
+            log "Failed to install jq"
+        fi
+
         set +x
         log "Getting secrets from Azure Key Vault..."
         ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)

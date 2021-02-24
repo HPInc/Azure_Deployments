@@ -43,7 +43,7 @@ resource "azurerm_linux_virtual_machine" "lls-vm" {
   name                            = var.host_name
   resource_group_name             = var.resource_group_name
   location                        = var.location
-  admin_username                  = var.admin_name
+  admin_username                  = var.ad_service_account_username
   admin_password                  = local.lls_admin_password
   disable_password_authentication = false
   size                            = var.machine_type
@@ -85,6 +85,9 @@ resource "azurerm_virtual_machine_extension" "lls-provisioning" {
   lls_admin_password  = var.lls_admin_password,
   lls_activation_code = var.lls_activation_code,
   lls_license_count   = var.lls_license_count,
+  application_id              = var.application_id
+  aad_client_secret           = var.aad_client_secret
+  tenant_id                   = var.tenant_id
 })
 )
 }"
