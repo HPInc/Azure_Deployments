@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# Copyright (c) 2020 Teradici Corporation
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+LOG_FILE="/var/log/teradici/provisioning.log"
+
+LLS_YUM_PKG="pcoip-license-server"
+
+LLS_ADMIN_PASSWORD=${lls_admin_password}
+LLS_ACTIVATION_CODE=${lls_activation_code}
+APPLICATION_ID=${application_id}
+AAD_CLIENT_SECRET=${aad_client_secret}
+TENANT_ID=${tenant_id}
+
+log() {
+    local message="$1"
+    echo "[$(date)] $message"
+}
+
+get_credentials() {
+    if [[ -z "$TENANT_ID" ]]; then
+        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
+    else
+        log "--> Installing epel-release.."
+        yum -y install epel-release
+        if [ $? -ne 0 ]; then
+            log "--> Failed to install epel-release"
+            exit 1
+        fi
+
+        log "--> Installing jq.."
+        yum install -y jq
+        if [ $? -ne 0 ]; then
+            log "Failed to install jq"
+        fi
+
+        set +x
+        log "Getting secrets from Azure Key Vault..."
+        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)
+        LLS_ACTIVATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$LLS_ACTIVATION_CODE?api-version=2016-10-01" | jq -r '.value')
+        LLS_ADMIN_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$LLS_ADMIN_PASSWORD?api-version=2016-10-01" | jq -r '.value')
+        set -x
+    fi
+}
+
+check_required_vars() {
+    set +x
+    if [[ -z "$LLS_ADMIN_PASSWORD" ]]; then
+        log "--> ERROR: Missing LLS Administrator Password."
+        missing_vars="true"
+    fi
+
+    if [[ -z "$LLS_ACTIVATION_CODE" ]]; then
+        log "--> ERROR: Missing LLS Activation Code."
+        missing_vars="true"
+    fi
+    set -x
+
+    if [[ "$missing_vars" = "true" ]]; then
+        log "--> Exiting..."
+        exit 1
+    fi
+}
+
+if [[ ! -f "$LOG_FILE" ]]
+then
+    mkdir -p "$(dirname $LOG_FILE)"
+    touch "$LOG_FILE"
+    chmod 600 "$LOG_FILE"
+fi
+
+yum info $LLS_YUM_PKG
+if [[ $? -eq 0 ]]
+then
+    log "PCoIP licence Server already installed. Skipping startup script."
+    exit 0
+fi
+
+log "$(date)"
+
+# Print all executed commands to the terminal
+set -x
+
+# Redirect stdout and stderr to the log file
+exec &>>$LOG_FILE
+
+yum update -y --exclude=WALinuxAgent
+yum install -y wget yum-utils
+
+get_credentials
+
+check_required_vars
+
+yum install -y ${lls_repo_url}
+yum install -y $LLS_YUM_PKG
+
+set +x
+pcoip-set-password -p "1P@ssw0rd!" -n "$LLS_ADMIN_PASSWORD"
+
+pcoip-activate-online-license -a "$LLS_ACTIVATION_CODE" -c ${lls_license_count} -p "$LLS_ADMIN_PASSWORD"
+set -x

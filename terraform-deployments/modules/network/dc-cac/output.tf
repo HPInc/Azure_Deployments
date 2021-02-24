@@ -78,3 +78,8 @@ output "resource-group-name" {
   description = "Name of the resource group"
   value       = var.resource_group_name
 }
+
+output "virtual-network-name" {
+  description = "Name of the virtual network"
+  value       = azurerm_virtual_network.network[0].name
+}

@@ -36,3 +36,8 @@ variable "cam_url" {
   type    = string
   default = "https://cam.teradici.com"
 }
+
+variable "lls_ip" {
+  description = "Internal IP of the PCoIP License Server"
+  default     = ""
+}
