@@ -217,7 +217,7 @@ if __name__ == '__main__':
     terraform_deploy()
     az_app_outputs = deployment_outputs_get('ids')
 
-    az_email_cmd = 'az ad signed-in-user show --query sipProxyAddress -o tsv'
+    az_email_cmd = 'az ad signed-in-user show --query userPrincipalName -o tsv'
     az_email = az_credential_get(az_email_cmd)
 
     user_object_id_cmd = f'az ad user show --id {az_email} --query objectId --out tsv'
