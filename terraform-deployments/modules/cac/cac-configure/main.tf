@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Teradici Corporation
+ * Copyright (c) 2021 Teradici Corporation
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -74,7 +74,7 @@ resource "null_resource" "upload-scripts" {
       ad_service_account_username = var.ad_service_account_username
       ad_service_account_password = local.ad_admin_password
       domain_name                 = var.domain_name
-      cam_url                     = var.cam_url
+      cas_mgr_url                 = var.cas_mgr_url
       cac_token                   = var.cac_configuration[count.index].cac_token
       domain_group                = var.domain_group
       pcoip_registration_code     = var.pcoip_registration_code

@@ -168,7 +168,6 @@ module "cac-configuration" {
   ]
 
   cac_configuration           = var.cac_configuration
-  cas_mgr_url                     = var.cas_mgr_url
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
