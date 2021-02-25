@@ -40,3 +40,13 @@ variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
   type        = string
 }
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+}
