@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Teradici Corporation
+ * Copyright (c) 2021 Teradici Corporation
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -47,8 +47,6 @@ module "dc-cac-network" {
 
   prefix                        = var.prefix
   vnet_name                     = var.vnet_name
-  dc_subnet_name                = var.dc_subnet_name
-  workstation_subnet_name       = var.workstation_subnet_name
   application_id                = var.application_id
   aad_client_secret             = var.aad_client_secret
   active_directory_netbios_name = var.active_directory_netbios_name
@@ -167,7 +165,6 @@ module "cac-configuration" {
   ]
 
   cac_configuration           = var.cac_configuration
-  cam_url                     = var.cam_url
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
