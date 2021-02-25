@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 locals {
   lls_provisioning_script = "lls-provisioning.sh"
   lls_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
