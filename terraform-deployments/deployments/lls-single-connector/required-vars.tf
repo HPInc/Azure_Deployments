@@ -41,6 +41,18 @@ variable "pcoip_registration_code" {
   type        = string
 }
 
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
 variable "lls_admin_password" {
   description = "Administrative password for the Teradici License Server"
 }

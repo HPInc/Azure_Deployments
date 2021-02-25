@@ -47,8 +47,6 @@ module "dc-cac-network" {
 
   prefix                        = var.prefix
   vnet_name                     = var.vnet_name
-  dc_subnet_name                = var.dc_subnet_name
-  workstation_subnet_name       = var.workstation_subnet_name
   application_id                = var.application_id
   aad_client_secret             = var.aad_client_secret
   active_directory_netbios_name = var.active_directory_netbios_name
