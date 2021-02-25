@@ -13,11 +13,11 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 ## Table of Contents
 1. [Single-Connector Architecture](#1-single-connector-architecture)
 2. [Requirements](#2-requirements)
-3. [Connect Azure to Cloud Access Manager](#3-connect-azure-to-cloud-access-manager)
+3. [Connect Azure to CAS Manager](#3-connect-azure-to-cas-manager)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying the Single-Connector via Terraform](#6-deploying-the-single-connector-via-terraform)
-7. [Adding Workstations in Cloud Access Manager](#7-adding-workstations-in-cloud-access-manager)
+7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
@@ -34,7 +34,7 @@ Network Security Rules are created to allow wide-open access within the Virtual 
 
 A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a ```domain_users_list``` CSV file is specified. The Domain Controller is given a static IP (configurable).
 
-A Cloud Access Connector is created and registers itself with the CAM service with the given Token and PCoIP Registration code.
+A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the following respective parameters:
 - ```workstations```: List of objects, where each object defines a workstation
@@ -55,15 +55,15 @@ The following diagram shows a single-connector deployment instance with multiple
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a Cloud Access Manager Deployment Service Account. CAM can be accessed [here](https://cam.teradici.com/)
+- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cam.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
-### 3. Connect Azure to Cloud Access Manager
-To interact directly with remote workstations, an Azure Account must be connected to the Cloud Access Manager.
+### 3. Connect Azure to CAS Manager
+To interact directly with remote workstations, an Azure Account must be connected to the CAS Manager.
 1. Login to the [Azure portal](http://portal.azure.com/)
 2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
@@ -81,8 +81,8 @@ To interact directly with remote workstations, an Azure Account must be connecte
     2. Leave **Assign access to** as **User, group, or service principal**
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
-10. Login to Cloud Access Manager Admin Console [here](https://cam.teradici.com).
-11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the Cloud Acess Manager console.
+10. Login to CAS Manager admin console [here](https://cam.teradici.com).
+11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
 12. Click on **Cloud Service Accounts** and then **Azure**.
 13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
@@ -100,9 +100,9 @@ To interact directly with remote workstations, an Azure Account must be connecte
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector tokens in terraform.tfvars.
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
 
-As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key, and connector tokens, users can store them as secrets in an Azure Key Vault. Secrets will be called and decrypted in the configuration scripts.
+As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
     1. Select the same region as the deployment.
@@ -110,7 +110,7 @@ As a security method to help protect the AD safe mode admin password, AD admin p
     3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
-        3. Find the application from [section 3](#3-connect-azure-to-cloud-access-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+        3. Find the application from [section 3](#3-connect-azure-to-cas-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
         4. Click **Review + create** and then **Create**.
 2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
 3. To create **AD safe mode admin password**, **AD admin password**, **PCoIP registration key**, and **connector token** as secrets follow these steps for each value:
@@ -148,10 +148,10 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 # ad_pass_secret_name           = "adPasswordID"
 ```
 - Tips for finding these variables:
-    1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cloud-access-manager) step 4.
-    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cloud-access-manager). If this secret is no longer saved, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
+    1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cas-manager) step 4.
+    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cas-manager). If this secret is no longer saved, follow section 3 from steps 1-3 & 5-6 to obtain a new client secret.
     3. ```key_vault_id```: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
-    4. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```.
+    4. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```. From the example above, this would be ```adPasswordID```.
     
 ### 5. (Optional) Assigning a SSL Certificate
 
@@ -188,7 +188,7 @@ Before the deployment of the single-connector, ```terraform.tfvars``` and ```dom
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
-A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAM so **Health** statuses may show as **Unhealthy** temporarily. 
+A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
@@ -235,9 +235,9 @@ windows-graphics-workstations = [
 ]
 ```
     
-### 7. Adding Workstations in Cloud Access Manager
-To connect to workstations, they have to be added through the Cloud Access Manager. 
-1. Go to the CAM Admin Console and ensure the correct deployment is selected. 
+### 7. Adding Workstations in CAS Manager
+To connect to workstations, they have to be added through the CAS Manager. 
+1. Go to the CAS Manager admin console and ensure the correct deployment is selected. 
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
 3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of the resource group of the deployment.
 4. In the search box below, select Windows and CentOS workstations.
@@ -248,32 +248,33 @@ To connect to workstations, they have to be added through the Cloud Access Manag
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
-Once the workstations have been added to be managed by CAM and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
+Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
     - **Note**: If the ```public_ip``` of the ```cac-vms``` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine ```[prefix]-cac-vm-0``` and the **Public IP address** will be shown.
-3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** in CAM.
+3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5. 
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
 ### 9. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
-Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAM Admin Console. Create a new connector to obtain a new token.
+Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAS Manager admin console. Create a new connector to obtain a new token.
 
 ### 10. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
 ### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
-- If no machines are showing up on CAM or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
-- If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. .tfstate files store the state of the current infrastructure and configuration. 
-- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAM.
+- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
+- If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
+- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
+    - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine ```[prefix]-cac-vm-0```, and the **Public IP address** will be shown on the top right.
 
 Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
-    1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cam_admin@52.128.90.145```
+    1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
     
@@ -283,7 +284,7 @@ Information about connecting to virtual machines for investigative purposes:
     
     ```
     Computer: <domain-controller-public-ip>
-    User: cam_admin
+    User: cas_admin
     Password: <ad_admin_password from terraform.tfvars>
     ```
    2. From inside the Domain Controller, RDP into the Windows workstation. 
