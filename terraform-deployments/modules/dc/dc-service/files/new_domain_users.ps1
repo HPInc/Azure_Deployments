@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2020 Teradici Corporation
+﻿# Copyright (c) 2021 Teradici Corporation
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -35,24 +35,21 @@ $ADUsers = Import-csv ${csv_file}
 Write-Output "Creating new AD Domain Users from CSV file..."
 
 #Loop through each row containing user details in the CSV file 
-foreach ($User in $ADUsers)
-{
+foreach ($User in $ADUsers) {
     #Read user data from each field in each row and assign the data to a variable as below
 
-    $Username 	= $User.username
-    $Password 	= $User.password
-    $Firstname 	= $User.firstname
-    $Lastname 	= $User.lastname
-    $Isadmin    = $User.isadmin
+    $Username = $User.username
+    $Password = $User.password
+    $Firstname = $User.firstname
+    $Lastname = $User.lastname
+    $Isadmin = $User.isadmin
 
     #Check to see if the user already exists in AD
-    if (Get-ADUser -F {SamAccountName -eq $Username})
-    {
+    if (Get-ADUser -F { SamAccountName -eq $Username }) {
         #If user does exist, give a warning
         Write-Warning "A user account with username $Username already exist in Active Directory."
     }
-    else
-    {
+    else {
         #User does not exist then proceed to create the new user account
 
         #Account will be created in the OU provided by the $OU variable read from the CSV file
@@ -66,8 +63,7 @@ foreach ($User in $ADUsers)
             -DisplayName "$Lastname, $Firstname" `
             -AccountPassword (convertto-securestring $Password -AsPlainText -Force) -ChangePasswordAtLogon $False
 
-        if ($Isadmin -eq "true")
-        {
+        if ($Isadmin -eq "true") {
             Add-ADGroupMember `
                 -Identity "Domain Admins" `
                 -Members $Username

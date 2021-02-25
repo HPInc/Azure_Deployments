@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Teradici Corporation
+ * Copyright (c) 2021 Teradici Corporation
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -36,12 +36,17 @@ variable "safe_mode_admin_password" {
   type        = string
 }
 
-variable "_artifactsLocation" {
-  description = "The base URI where artifacts required by this template are located including a trailing '/'"
-  default     = ""
-}
-
 variable "pcoip_registration_code" {
   description = "PCoIP Registration code"
+  type        = string
+}
+
+variable "application_id" {
+  description = "The application (client) ID of your app registration in AAD"
+  type        = string
+}
+
+variable "aad_client_secret" {
+  description = "The client secret of your app registration in AAD"
   type        = string
 }

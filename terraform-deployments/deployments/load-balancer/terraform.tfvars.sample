@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Teradici Corporation
+ * Copyright (c) 2021 Teradici Corporation
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -78,7 +78,7 @@ cac_configuration = [
 # ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/load-balancer/domain_users_list.csv"
 
 # Active directory administrator username.
-# ad_admin_username       = "cam_admin"
+# ad_admin_username       = "cas_admin"
 
 # Active Directory NetBIOS name
 # e.g: "tera" will create the domain name "tera.dns.internal"

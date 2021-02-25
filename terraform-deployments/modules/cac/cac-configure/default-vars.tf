@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2020 Teradici Corporation
+ * Copyright (c) 2021 Teradici Corporation
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -32,9 +31,9 @@ variable "cac_installer_url" {
   default     = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cloud-access-connector/raw/names/cloud-access-connector-linux-tgz/versions/latest/cloud-access-connector_latest_Linux.tar.gz"
 }
 
-variable "cam_url" {
-  type    = string
-  default = "https://cam.teradici.com"
+variable "cas_mgr_url" {
+  description = "CAS Manager URL"
+  default     = "https://cam.teradici.com"
 }
 
 variable "lls_ip" {
