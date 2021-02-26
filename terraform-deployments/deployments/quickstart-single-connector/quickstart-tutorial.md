@@ -13,7 +13,7 @@ The Python script is a wrapper script that sets up the environment required for 
 
 Edit files inside Azure Cloud Shell by entering: ```code azure-cloudshell-quickstart.cfg```
 1. **reg_code**: Replace **`<code>`** with your PCoIP Registration code. If you don't have one, visit [https://www.teradici.com/compare-plans](https://www.teradici.com/compare-plans)
-2. **api_token**: Replace **`<token>`** with the Cloud Access Manager API token. Log into [https://cam.teradici.com](https://cam.teradici.com), click on your email address on the top right, and select **Get API token**.
+2. **api_token**: Replace **`<token>`** with the CAS Manager API token. Log into [https://cam.teradici.com](https://cam.teradici.com), click on your email address on the top right, and select **Get API token**.
 3. **ad_admin_password** & **safe_mode_admin_password** must have atleast 3 of the following requirements:
     - 1 UPPERCASE letter
     - 1 lowercase letter
@@ -40,12 +40,12 @@ Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quick
 ### Connect to a workstation
 
 1. From a PCoIP client, connect to the public IP Address of the Cloud Access Connector.
-2. Sign in with the **cam_admin** user credentials. Default password is ```Password!234```.
+2. Sign in with the **cas_admin** user credentials. Default password is ```Password!234```.
 
 **Note:** When connecting to a workstation immediately after this script completes, the workstation (especially graphics ones) may still be setting up. You may see "Remote Desktop is restarting..." in the client. Please wait a few minutes or reconnect if it times out.
 
 ### Clean up
-1. Change directory into ```~/terraform-deployments\deployments\quickstart-single-connector```
+1. Change directory into ```~/terraform-deployments/deployments/quickstart-single-connector```
 2. Use the command: ```python azure-cloudshell-quickstart.py cleanup``` to delete all deployment resources.
     -   If an error message shows, manually delete resource groups on the Azure Portal.
 3. Log in to https://cam.teradici.com and delete the deployment named ```azure_quickstart_<timestamp>```
@@ -57,6 +57,6 @@ Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quick
   3. Click on the resource group that was created. It should look like ```single_connector_deployment_<timestamp>```.
   4. Click on the virtual machine ```cac-vm-0```.
   5. Under **Public IP address** is the value that will be entered in the PCoIP client.
-- If the script stops at **'Adding cloud service account...'**, repeat the process of getting a new API token from [CAM](https://cam.teradici.com) and replace it in ```azure-cloudshell-quickstart.cfg```.
-- If the script stops at **'Adding "[machine-name]-0" to Cloud Access Manager...'**, you will need to [manually add machines](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md#7-adding-workstations-in-cloud-access-manager) on [CAM](https://cam.teradici.com).
+- If the script stops at **'Adding cloud service account...'**, repeat the process of getting a new API token from [CAS Manager](https://cam.teradici.com) and replace it in ```azure-cloudshell-quickstart.cfg```.
+- If the script stops at **'Adding "[machine-name]-0" to Cloud Access Manager...'**, you will need to [manually add machines](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-single-deployment.md#7-adding-workstations-in-cloud-access-manager) on [CAS Manager](https://cam.teradici.com).
   
