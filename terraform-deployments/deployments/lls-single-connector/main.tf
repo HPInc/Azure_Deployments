@@ -170,8 +170,8 @@ module "lls" {
   azurerm_virtual_network_name = module.dc-cac-network.virtual-network-name
   application_id               = var.application_id
   aad_client_secret            = var.aad_client_secret
-  ad_service_account_username = var.ad_admin_username
-  ad_service_account_password = var.ad_admin_password
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
   tenant_id                    = var.tenant_id
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -187,7 +187,6 @@ module "cac-configuration" {
   ]
 
   cac_configuration           = var.cac_configuration
-  cam_url                     = var.cam_url
   pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip

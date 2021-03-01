@@ -77,7 +77,7 @@ lls_license_count = 1
 # ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/lls-single-connector/domain_users_list.csv"
 
 # Active directory administrator username.
-# ad_admin_username       = "cam_admin"
+# ad_admin_username       = "cas_admin"
 
 # Active Directory NetBIOS name
 # e.g: "tera" will create the domain name "tera.dns.internal"
