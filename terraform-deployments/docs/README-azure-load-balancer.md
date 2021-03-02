@@ -179,7 +179,7 @@ To upload a SSL certificate and SSL key onto ACS:
 
 ### 6. Deploying via Terraform
 
-Detailed instructions can be viewed [here](/terraform-config-step-by-step.md).
+Detailed instructions can be viewed [here](/terraform-deployments/docs/terraform-config-step-by-step.md).
 
 ### 7. Adding Workstations in CAS Manager
 To connect to workstations, they have to be added through the CAS Manager.
