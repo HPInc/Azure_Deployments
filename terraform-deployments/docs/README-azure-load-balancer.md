@@ -4,6 +4,7 @@
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+  - **[Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)**
   - [Quickstart Single-Connector Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
   - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
@@ -177,79 +178,8 @@ To upload a SSL certificate and SSL key onto ACS:
   6. Enter the paths to the SSL certificate and SSL key inside ```terraform.tfvars```.
 
 ### 6. Deploying via Terraform
-terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
-**Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
-
-Before the deployment of the load-balancer, ```terraform.tfvars``` and ```domain_users_list.csv``` must be complete. 
-1. After cloning the repository into the [**ACS**](https://portal.azure.com/#cloudshell/) environment, change directory into: ```/terraform-deployments/deployments/load-balancer```.
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```. **Tip**: to clone use ```git clone https://github.com/teradici/Azure_Deployments```
-    - Edit files inside ACS by doing: ```code terraform.tfvars```.
-    - To include optional variables, uncomment the line by removing preceding ```#```.
-    - Make sure the locations of the connectors and work stations are identical.
-    - Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix). 
-3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
-    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
-      - 1 UPPERCASE letter
-      - 1 lowercase letter
-      - 1 number
-      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
-4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
-    - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer ```yes``` to start provisioning the load-balancer infrastructure. 
-
-A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
-
-Example output:
-```
-Apply complete! Resources: 77 added, 0 changed, 0 destroyed.
-
-Outputs:
-
-cac-vms = [
-  {
-    "name" = "cac-vm-0"
-    "private_ip" = "10.0.3.4"
-    "public_ip" = "52.109.24.176"
-  },
-]
-centos-graphics-workstations = [
-  {
-    "name" = "gcent-0"
-    "private_ip" = "10.0.4.5"
-  },
-]
-centos-standard-workstations = [
-  {
-    "name" = "scent-0"
-    "private_ip" = "10.0.4.6"
-  },
-]
-domain-controller-private-ip = "10.0.1.4"
-domain-controller-public-ip = "52.109.24.161"
-load-balancer-public-ip = [
-  {
-    "public_ip" = "12.345.6.78"
-  },
-]
-locations = [
-  "westus2",
-]
-resource_group = "load_balancer_deployment_5f3520"
-windows-standard-workstations = [
-  {
-    "name" = "swin-0"
-    "private_ip" = "10.0.4.4"
-  },
-]
-windows-graphics-workstations = [
-  {
-    "name" = "gwin-0"
-    "private_ip" = "10.0.4.7"
-  },
-]
-```
+Detailed instructions can be viewed [here](/terraform-deployments/docs/terraform-config-step-by-step.md).
 
 ### 7. Adding Workstations in CAS Manager
 To connect to workstations, they have to be added through the CAS Manager.
@@ -311,22 +241,3 @@ Information about connecting to virtual machines for investigative purposes:
     ```
    3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
    
-   
-## Appendix
-### Current VM sizes supported by PCoIP Graphics Agents
-
-[NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs / Expected network bandwidth (Mbps)**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NC4as_T4_v3**|4|28|180|1|16|8|2 / 8000|
-|**Standard_NC8as_T4_v3**|8|56|360|1|16|16|4 / 8000|
-|**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
-|**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
-
-
-[NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NV6**|6|56|340|1|8|24|1|1|25|
-|**Standard_NV12**|12|112|680|2|16|48|2|2|50|
-|**Standard_NV24**|24|224|1440|4|32|64|4|4|100|

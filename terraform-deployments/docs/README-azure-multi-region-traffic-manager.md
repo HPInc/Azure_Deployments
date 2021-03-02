@@ -4,6 +4,7 @@
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+  - **[Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)**
   - [Quickstart Single-Connector Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
   - [Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
