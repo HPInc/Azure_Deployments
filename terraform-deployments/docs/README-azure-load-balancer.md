@@ -14,11 +14,11 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 ## Table of Contents
 1. [Load Balancer Architecture](#1-load-balancer-architecture)
 2. [Requirements](#2-requirements)
-3. [Connect Azure to CAS Manager](#3-connect-azure-to-cas-manager)
+3. [Connect Azure to CAS Manager as a Service](#3-connect-azure-to-cas-manager-as-a-service)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying via Terraform](#6-deploying-via-terraform)
-7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
+7. [Adding Workstations through CAS Manager](#7-adding-workstations-through-cas-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
@@ -32,7 +32,7 @@ Workstations and Cloud Access Connectors can be defined in the ```workstations``
 
 The following diagram shows a load-balancer deployment instance with two Cloud Access Connectors and two workstations specified by the user:
 
-![load-balancer diagram](load-balancer-azure.png)
+![load-balancer diagram](/terraform-deployments/docs/png/load-balancer-azure.png)
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
 
@@ -62,8 +62,8 @@ These workstations are automatically domain-joined and have the PCoIP Agent inst
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
-### 3. Connect Azure to CAS Manager
-To interact directly with remote workstations, an Azure Account must be connected to the CAS Manager.
+### 3. Connect Azure to CAS Manager as a Service
+This section configures the deployment so that it can be managed through CAS Manager as a Service (CAS-MAAS).
 1. Login to the [Azure portal](http://portal.azure.com/)
 2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
@@ -82,7 +82,7 @@ To interact directly with remote workstations, an Azure Account must be connecte
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 10. Login to CAS Manager admin console [here](https://cam.teradici.com).
-11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager console.
+11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
 12. Click on **Cloud Service Accounts** and then **Azure**.
 13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
@@ -181,7 +181,7 @@ To upload a SSL certificate and SSL key onto ACS:
 
 Detailed instructions can be viewed [here](/terraform-deployments/docs/terraform-config-step-by-step.md).
 
-### 7. Adding Workstations in CAS Manager
+### 7. Adding Workstations through CAS Manager
 To connect to workstations, they have to be added through the CAS Manager.
 1. Go to the CAS Manager admin console and ensure the correct deployment is selected. 
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
