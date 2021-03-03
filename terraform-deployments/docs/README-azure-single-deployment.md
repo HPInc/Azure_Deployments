@@ -51,7 +51,7 @@ These workstations are automatically domain-joined and have the PCoIP Agent inst
 
 The following diagram shows a single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. 
 
-![single-connector diagram](single-connector-azure.PNG)
+![single-connector diagram](/terraform-deployments/docs/png/single-connector-azure.png)
 
 ### 2. Requirements
 - Access to a subscription on Azure. 

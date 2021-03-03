@@ -38,7 +38,7 @@ Network Security Rules are created and Global Virtual Network Peering is used to
 
 The following diagram shows a multiple-connector deployment instance with multiple workstations and Cloud Access Connectors across two distinct regions specified by the user.
 
-![multi-region traffic manager diagram](multi-region-traffic-manager-azure.png)
+![multi-region traffic manager diagram](/terraform-deployments/docs/png/multi-region-traffic-manager-azure.png)
 
 ### 2. Requirements
 - Access to a subscription on Azure. 

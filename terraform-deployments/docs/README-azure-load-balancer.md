@@ -32,7 +32,7 @@ Workstations and Cloud Access Connectors can be defined in the ```workstations``
 
 The following diagram shows a load-balancer deployment instance with two Cloud Access Connectors and two workstations specified by the user:
 
-![load-balancer diagram](load-balancer-azure.png)
+![load-balancer diagram](/terraform-deployments/docs/png/load-balancer-azure.png)
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
 
