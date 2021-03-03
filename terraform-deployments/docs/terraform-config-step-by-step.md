@@ -3,15 +3,22 @@
 Before a deployment ```terraform.tfvars``` must be completed. This file contains different input variables for a deployment.
 **Note:** Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
 
-1. After cloning the repository into the [**ACS**](https://portal.azure.com/#cloudshell/) environment, change directory into: ```/terraform-deployments/deployments/load-balancer```.
-    - **Tip**: to clone use ```git clone https://github.com/teradici/Azure_Deployments```
-    ![using ACS](/terraform-deployments/docs/png/azure-cloudshell.png)
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
-    - **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```.
+1. Clone the repository into your Azure Cloud Shell (ACS) environment. 
+    -   ```git clone https://github.com/teradici/Azure_Deployments``` 
+    ![clone repo in ACS](/terraform-deployments/docs/png/git-clone-repo.png)
+2. Change directory into: ```Azure_Deployments/terraform-deployments/deployments/load-balancer```.
+    - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer```
+    ![change directory](/terraform-deployments/docs/png/acs-change-directory.png)
+3. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+    - ```cp terraform.tfvars.sample terraform.tfvars```.
+    ![copy tfvars file](/terraform-deployments/docs/png/copy-tfvars.png)
+4. Configure the ```terraform.tfvars```file.
     - Edit files inside ACS by doing: ```code terraform.tfvars```.
     ![code terraform.tfvars](/terraform-deployments/docs/png/editing-tfvars.png)
     - To include optional variables, uncomment the line by removing preceding ```#```.
     - Make sure the locations of the connectors and work stations are identical.
+
+    ```terraform.tfvars``` variables:
 
     1. workstation configuration:
         - ```prefix```: prefix added to workstation machines. e.g.: 'tera0' will name a standard Linux VM **tera0**-scent-0
@@ -61,18 +68,18 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
     10. Azure key vault secrets (optional):
         -   [Link to Key Vault instructions](terraform-deployments/docs/README-azure-load-balancer.md#4-optional-storing-secrets-on-azure-key-vault)
 
-3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
+5. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
       - 1 lowercase letter
       - 1 number
       - 1 special character. e.g.: ```!@#$%^&*(*))_+```
-4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
-    - **Note:** ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose any problems.
+6. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
+7. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
+    - ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose any problems.
     ![terraform apply prompt](/terraform-deployments/docs/png/terraform-apply-prompt.png)
-6. Answer ```yes``` to start provisioning the load-balancer infrastructure. 
-7. After completion, click [here](/terraform-deployments/docs/README-azure-load-balancer.md#7-adding-workstations-in-cas-manager) for instructions to add workstations in the CAS Manager admin console. 
+8. Answer ```yes``` to start provisioning the load balancer infrastructure. 
+9. After completion, click [here](/terraform-deployments/docs/README-azure-load-balancer.md#7-adding-workstations-in-cas-manager) for instructions to add workstations in the CAS Manager admin console. 
 
 A typical deployment should take around 30-40 minutes. When finished, the script will display information such as IP addresses & names. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
