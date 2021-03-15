@@ -47,7 +47,7 @@ These workstations are automatically domain-joined and have the PCoIP Agent inst
 
 The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
 
-![cas manager single-connector diagram](/terraform-deployments/docs/png/cas-manager-single-deployment.PNG)
+![cas manager single-connector diagram](/terraform-deployments/docs/png/cas-mgr-single-deployment.png)
 
 ### 2. Requirements
 - Access to a subscription on Azure. 
@@ -136,7 +136,7 @@ To upload a SSL certificate and SSL key onto ACS:
   5. The location of these files will be found in ```~/clouddrive/```
   6. Enter the paths to the SSL certificate and SSL key inside ```terraform.tfvars```.
 
-### 6. Deploying the Single-Connector via Terraform
+### 6. Deploying via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
