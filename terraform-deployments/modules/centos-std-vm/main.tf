@@ -88,6 +88,10 @@ resource "azurerm_virtual_machine_extension" "centos-std-provisioning" {
   type                 = "CustomScript"
   type_handler_version = "2.0"
 
+  timeouts {
+    create = "60m"
+  }
+
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.centos_std_provisioning_script}.tmpl", {
