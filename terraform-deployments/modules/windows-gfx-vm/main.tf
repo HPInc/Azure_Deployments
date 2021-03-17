@@ -57,6 +57,7 @@ resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
   ]
 
   os_disk {
+    name                 = each.value.prefix == "" ? "gwin-vm-osdisk-${each.value.index}" : "${each.value.prefix}-gwin-vm-osdisk-${each.value.index}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = each.value.disk_size

@@ -21,6 +21,7 @@ resource "azurerm_windows_virtual_machine" "domain-controller" {
   ]
 
   os_disk {
+    name                 = "dc-vm-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
   }

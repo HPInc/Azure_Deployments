@@ -100,6 +100,7 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
   ]
 
   os_disk {
+    name                 = "cas-mgr-vm-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = var.disk_size_gb
