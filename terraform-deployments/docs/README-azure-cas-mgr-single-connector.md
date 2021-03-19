@@ -1,4 +1,4 @@
-# CAS Manager Single-Connector Deployment
+# CAS Manager (Single-Connector) Deployment
 
 **Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
@@ -6,8 +6,10 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
   - **[CAS Manager Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-deployment.md)**
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
-  - [Quickstart Single-Connector Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
+  - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
   - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)

@@ -1,14 +1,15 @@
-# Local License Server (Single-connector) Deployment
+# Local License Server (Single-Connector) Deployment
 
 **Objective**: The objective of this documentation is to deploy the local license server (LLS) single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
   - **[Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)**
-  - [CAS Manager Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-deployment.md)
-  - [Quickstart Single-Connector Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Single Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
+  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-deployment.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
   - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)

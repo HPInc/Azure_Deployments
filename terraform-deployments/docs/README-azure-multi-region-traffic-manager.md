@@ -5,9 +5,12 @@
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
   - **[Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)**
-  - [Quickstart Single-Connector Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
-  - [Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
+  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-deployment.md)
+  - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
@@ -170,13 +173,34 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
 
-Before the deployment ```terraform.tfvars``` must be complete.
-1. After cloning this [repo](https://github.com/teradici/Azure_Deployments) into the [**ACS**](https://portal.azure.com/#cloudshell/) environment, change directory into: ```/terraform-deployments/deployments/multi-region-traffic-manager```. **Tip**: to clone use ```git clone https://github.com/teradici/Azure_Deployments```
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. **Tip**: to copy use ```cp terraform.tfvars.sample terraform.tfvars```.
-    - Edit files inside ACS by doing: ```code terraform.tfvars```.
+Before deploying, ```terraform.tfvars``` must be complete. 
+1. Clone the repository into your Azure Cloud Shell (ACS) environment.
+  - ```git clone https://github.com/teradici/Azure_Deployments```
+2. Change directory into: ```/terraform-deployments/deployments/single-connector```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer```.
+2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+    - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
+    - To configure: ```code terraform.tfvars```
     - To include optional variables, uncomment the line by removing preceding ```#```.
-    - Ensure there are atleast **2** unique locations of the connectors and workstations. 
-    - Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix). 
+    - Ensure there are atleast **2** unique locations of the connectors and workstations.
+    
+    ```terraform.tfvars``` variables:
+
+    1. workstation configuration:
+        - ```prefix```: prefix added to workstation machines. e.g.: 'tera0' will name a standard Linux VM **tera0**-scent-0
+            -   Must be a max of 5 characters to avoid name cropping. Can be left blank.
+        - ```location```: location of the workstation. **westus** machines will be placed in the West US region. 
+            -   Possible values: [Regions](https://azure.microsoft.com/en-us/global-infrastructure/geographies/). 
+            -   e.g. West US 2 will be inputted as **westus2**. Central US as **centralus**.
+        - ```workstation_os```: Operating system of the workstation.
+            -   Possible values: **windows** or **linux**
+        - ```vm_size```: Size of the virtual machine. 
+            -   Possible values: [VM Sizes](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes). 
+        - ```disk_type```: Type of storage for the workstation. 
+            -   Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
+        - ```count```: Number of workstations to deploy under the specific settings.
+        - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+            -   Possible values: **true** or **false**
 3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
@@ -186,7 +210,7 @@ Before the deployment ```terraform.tfvars``` must be complete.
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer ```yes``` to start provisioning the multi region infrastructure. 
+6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
 A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
