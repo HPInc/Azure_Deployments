@@ -5,7 +5,7 @@
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
   - **[CAS Manager Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)**
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
+  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
   - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
   - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)

@@ -5,7 +5,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
 # Documentation
 - **Microsoft Azure:**
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-deployment.md)
+  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
   - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
   - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
