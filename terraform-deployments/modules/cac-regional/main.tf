@@ -26,7 +26,7 @@ resource "time_offset" "start" {
 }
 
 resource "time_offset" "expiry" {
-  offset_minutes = 28
+  offset_minutes = 32
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {

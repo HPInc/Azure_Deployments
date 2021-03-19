@@ -5,10 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "cac-public-ip" {
-  value = azurerm_public_ip.cac.*.ip_address
-}
-
-output "network-interface-ids" {
-  value = azurerm_network_interface.cac-nic.*.id
+output "public-ip" {
+  description = "Load balancer IP addresses"
+  value       = azurerm_public_ip.loadbalancer_public_ip.*.ip_address
 }

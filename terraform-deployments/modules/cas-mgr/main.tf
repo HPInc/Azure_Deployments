@@ -16,7 +16,7 @@ resource "time_offset" "start" {
 }
 
 resource "time_offset" "expiry" {
-  offset_minutes = 28
+  offset_minutes = 35
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {

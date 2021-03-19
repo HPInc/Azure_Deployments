@@ -63,6 +63,7 @@ resource "azurerm_linux_virtual_machine" "centos-gfx-vm" {
   ]
 
   os_disk {
+    name                 = each.value.prefix == "" ? "gcent-vm-osdisk-${each.value.index}" : "${each.value.prefix}-gcent-vm-osdisk-${each.value.index}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = each.value.disk_size
