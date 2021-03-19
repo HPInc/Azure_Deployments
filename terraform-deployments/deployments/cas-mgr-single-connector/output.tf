@@ -17,40 +17,32 @@ output "domain-controller-public-ip" {
   value = module.dc-cac-network.dc-public-ip
 }
 
-output "windows-standard-workstations" {
-  value = [for index, item in module.workstation-map.windows-std-workstations :
-    {
-      name : module.windows-std-vm.windows-std-vm-names[item.index],
-      private_ip : module.windows-std-vm.windows-std-vm-private-ips[item.index]
-    }
-  ]
+output "windows-std-internal-ip" {
+  value = {
+    for i in range(length(module.workstation-map.windows-std-workstations)) :
+    module.windows-std-vm.windows-std-vm-names[i] => module.windows-std-vm.windows-std-vm-private-ips[i]
+  }
 }
 
-output "windows-graphics-workstations" {
-  value = [for index, item in module.workstation-map.windows-gfx-workstations :
-    {
-      name : module.windows-gfx-vm.windows-gfx-vm-names[item.index],
-      private_ip : module.windows-gfx-vm.windows-gfx-vm-private-ips[item.index]
-    }
-  ]
+output "windows-gfx-internal-ip" {
+  value = {
+    for i in range(length(module.workstation-map.windows-gfx-workstations)) :
+    module.windows-gfx-vm.windows-gfx-vm-names[i] => module.windows-gfx-vm.windows-gfx-vm-private-ips[i]
+  }
 }
 
-output "centos-graphics-workstations" {
-  value = [for index, item in module.workstation-map.centos-gfx-workstations :
-    {
-      name : module.centos-gfx-vm.centos-gfx-vm-names[item.index],
-      private_ip : module.centos-gfx-vm.centos-gfx-vm-private-ips[item.index]
-    }
-  ]
+output "centos-gfx-internal-ip" {
+  value = {
+    for i in range(length(module.workstation-map.centos-gfx-workstations)) :
+    module.centos-gfx-vm.centos-gfx-vm-names[i] => module.centos-gfx-vm.centos-gfx-vm-private-ips[i]
+  }
 }
 
-output "centos-standard-workstations" {
-  value = [for index, item in module.workstation-map.centos-std-workstations :
-    {
-      name : module.centos-std-vm.centos-std-vm-names[item.index],
-      private_ip : module.centos-std-vm.centos-std-vm-private-ips[item.index]
-    }
-  ]
+output "centos-std-internal-ip" {
+  value = {
+    for i in range(length(module.workstation-map.centos-std-workstations)) :
+    module.centos-std-vm.centos-std-vm-names[i] => module.centos-std-vm.centos-std-vm-private-ips[i]
+  }
 }
 
 output "cas-mgr-public-ip" {
