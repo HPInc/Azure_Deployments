@@ -8,3 +8,7 @@
 output "cac-public-ip" {
   value = azurerm_public_ip.cac.*.ip_address
 }
+
+output "network-interface-ids" {
+  value = azurerm_network_interface.cac-nic.*.id
+}

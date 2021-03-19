@@ -8,3 +8,7 @@
 output "public-ip" {
   value = module.cac-regional[*].cac-public-ip
 }
+
+output "network-interface-nic-ids" {
+  value = module.cac-regional[*].network-interface-ids
+}
