@@ -70,7 +70,7 @@ resource "azurerm_public_ip" "cac" {
 
   count = var.instance_count
 
-  name                    = "public-ip-cac-${count.index}"
+  name                    = "public-ip-cac-${var.location}-${count.index}"
   location                = var.location
   resource_group_name     = var.resource_group_name
   allocation_method       = "Static"
@@ -82,7 +82,7 @@ resource "azurerm_network_interface" "cac-nic" {
 
   count = var.instance_count
 
-  name                = "${local.prefix}cac-nic-${count.index}"
+  name                = "${local.prefix}cac-nic-${var.location}-${count.index}"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -99,7 +99,7 @@ resource "azurerm_linux_virtual_machine" "cac-vm" {
 
   count = var.instance_count
 
-  name                            = "${local.prefix}cac-vm-${count.index}"
+  name                            = "${local.prefix}cac-vm-${var.location}-${count.index}"
   location                        = var.location
   resource_group_name             = var.resource_group_name
   size                            = var.machine_type
@@ -120,7 +120,7 @@ resource "azurerm_linux_virtual_machine" "cac-vm" {
   }
 
   os_disk {
-    name                 = "${local.prefix}cac-vm-osdisk-${count.index}"
+    name                 = "${local.prefix}cac-vm-osdisk-${var.location}-${count.index}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     disk_size_gb         = var.disk_size_gb
