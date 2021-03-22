@@ -27,7 +27,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 
-### 1. Local License Server Single-Connector Architecture
+### 1. Local License Server Architecture
 
 The Single-Connector deployment creates a Virtual Network with 4 subnets in the same region as follows:
 
@@ -48,7 +48,7 @@ This CAS Manager variant allows administrators to manage users using [CAS Manage
 
 The following diagram shows a single-connector deployment instance with multiple workstations, a Cloud Access Connector and a LLS server deployed in the same region specified.
 
-![lls diagram](lls-single-connector-azure.png)
+![lls diagram](/terraform-deployments/docs/png/lls-single-connector-azure.png)
 
 ### 2. Requirements
 - Access to a subscription on Azure. 
@@ -61,7 +61,7 @@ The following diagram shows a single-connector deployment instance with multiple
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
 ### 3. Connect Azure to CAS Manager
-To interact directly with remote workstations, an Azure Account must be connected to the CAS Manager.
+To interact directly with remote workstations, an Azure account must be connected to the CAS Manager.
 1. Login to the [Azure portal](http://portal.azure.com/)
 2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
@@ -232,7 +232,7 @@ centos-std-internal-ip = {
 }
 domain-controller-private-ip = "10.0.1.4"
 domain-controller-public-ip = "52.109.24.161"
-resource_group = "single_connector_deployment_c4fe3"
+resource_group = "single_connector_lls_c4fe3"
 windows-std-internal-ip = {
     "swin-0" = "10.0.4.4"
 }
@@ -276,11 +276,10 @@ Note that changes involving creating or recreating Cloud Access Connectors requi
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
 ### 11. Troubleshooting
-- If the console looks frozen, try pressing Enter to unfreeze it.
+- If the console is frozen, try pressing Enter to unfreeze it. If freezing persists, a fresh deployment must be performed.
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
-- If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
-- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
-    - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine ```[prefix]-cac-vm-0```, and the **Public IP address** will be shown on the top right.
+- If trying to run a fresh deployment and have been running into errors, delete ```terraform.tfstate```. This file stores the state of the current infrastructure and configuration. Remember to also delete the previous deployment on the [Azure Portal](http://portal.azure.com/) if it's no longer being used.
+- If for any reason there are no outputs displaying on ACS the IP address of the cac machine can be found by going onto the [Azure Portal](http://portal.azure.com/). Go into the deployment's resource group, select the machine ```[prefix]-cac-vm-0```, and the **Public IP address** will be shown on the top right.
 
 Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
