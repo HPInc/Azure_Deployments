@@ -52,8 +52,8 @@ get_credentials() {
     else
         log "Getting secrets from Azure Key Vault..."
         ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${application_id}&client_secret=${aad_client_secret}&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/${tenant_id}/oauth2/token | jq ".access_token" -r)
-        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$PCOIP_REGISTRATION_CODE?api-version=2016-10-01" | jq -r '.value')
-        AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$AD_SERVICE_ACCOUNT_PASSWORD?api-version=2016-10-01" | jq -r '.value')
+        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${pcoip_registration_code}?api-version=2016-10-01" | jq -r '.value')
+        AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${ad_service_account_password}?api-version=2016-10-01" | jq -r '.value')
     fi
     set -x
 }
