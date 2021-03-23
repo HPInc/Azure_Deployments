@@ -227,6 +227,10 @@ module "windows-std-vm" {
   storage_account_name         = azurerm_storage_account.windows-script-storage.name
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 
@@ -253,6 +257,10 @@ module "windows-gfx-vm" {
   storage_account_name         = azurerm_storage_account.windows-script-storage.name
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 module "centos-std-vm" {
@@ -278,6 +286,10 @@ module "centos-std-vm" {
   domain_controller_ip         = module.dc-cac-network.dc-private-ip
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 module "centos-gfx-vm" {
@@ -303,4 +315,8 @@ module "centos-gfx-vm" {
   domain_controller_ip         = module.dc-cac-network.dc-private-ip
   workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
   workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }

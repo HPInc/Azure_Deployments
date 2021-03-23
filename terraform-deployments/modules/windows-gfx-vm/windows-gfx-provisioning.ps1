@@ -40,6 +40,18 @@ param(
 
     [Parameter(Mandatory = $false)]
     [string]
+    $enable_workstation_idle_shutdown,
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $minutes_idle_before_shutdown,
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $minutes_cpu_polling_interval,
+
+    [Parameter(Mandatory = $false)]
+    [string]
     $tenant_id
 )
 
@@ -52,6 +64,10 @@ $PCOIP_AGENT_LOCATION_URL = "https://downloads.teradici.com/win/stable/"
 $DATA = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $DATA.Add("pcoip_registration_code", "${pcoip_registration_code}")
 $DATA.Add("ad_service_account_password", "${ad_service_account_password}")
+
+$ENABLE_AUTO_SHUTDOWN = [System.Convert]::ToBoolean("${enable_workstation_idle_shutdown}")
+$AUTO_SHUTDOWN_IDLE_TIMER = ${minutes_idle_before_shutdown}
+$CPU_POLLING_INTERVAL = ${minutes_cpu_polling_interval}
 
 $global:restart = $false
 
@@ -241,6 +257,60 @@ function PCoIP-Agent-Register {
     "--> PCoIP agent registered successfully."
 }
 
+function Cam-Idle-Shutdown-is-Installed {
+    Get-Service "CamIdleShutdown"
+    return $?
+}
+function Install-Idle-Shutdown {
+    "################################################################"
+    "Installing Idle Shutdown..."
+    "################################################################"
+    $path = "C:\Program Files\Teradici\PCoIP Agent\bin"
+    cd $path
+
+    # Skip if already installed
+    if (Cam-Idle-Shutdown-is-Installed) {  
+        "--> Idle shutdown is already installed. Skipping..."
+        return 
+    }
+
+    # Install service and check for success
+    $ret = .\IdleShutdownAgent.exe -install
+    if ( !$? ) {
+        "ERROR: failed to install idle shutdown."
+        exit 1
+    }
+    "--> Idle shutdown is successfully installed."
+
+    $idleShutdownRegKeyPath = "HKLM:SOFTWARE\Teradici\CAMShutdownIdleMachineAgent"
+    $idleTimerRegKeyName = "MinutesIdleBeforeShutdown"
+    $cpuPollingIntervalRegKeyName = "PollingIntervalMinutes"
+
+    if (!(Test-Path $idleShutdownRegKeyPath)) {
+        New-Item -Path $idleShutdownRegKeyPath -Force
+    }
+    New-ItemProperty -Path $idleShutdownRegKeyPath -Name $idleTimerRegKeyName -Value $AUTO_SHUTDOWN_IDLE_TIMER -PropertyType DWORD -Force
+    New-ItemProperty -Path $idleShutdownRegKeyPath -Name $cpuPollingIntervalRegKeyName -Value $CPU_POLLING_INTERVAL -PropertyType DWORD -Force
+
+    if (!$ENABLE_AUTO_SHUTDOWN) {
+        $svc = Get-Service -Name "CAMIdleShutdown"
+        "Attempting to disable CAMIdleShutdown..."
+        try {
+            if ($svc.Status -ne "Stopped") {
+                Start-Sleep -s 15
+                $svc.Stop()
+                $svc.WaitForStatus("Stopped", 180)
+            }
+            Set-Service -InputObject $svc -StartupType "Disabled"
+            $status = if ($?) { "succeeded" } else { "failed" }
+            $msg = "Disabling CAMIdleShutdown {0}." -f $status
+            "$msg"
+        }
+        catch {
+            throw "ERROR: Failed to disable CAMIdleShutdown service."
+        }
+    }
+}
 function Join-Domain 
 (
     [string]$domain_name,
@@ -328,6 +398,8 @@ PCoIP-Agent-Install
 if ("${pcoip_registration_code}" -ne "null") {
     PCoIP-Agent-Register
 }
+
+Install-Idle-Shutdown
 
 Write-Output "Joining Domain"
 
