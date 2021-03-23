@@ -39,6 +39,14 @@ resource "azurerm_storage_blob" "windows-std-script" {
   storage_container_name = var.storage_account_name
   type                   = "Block"
   source                 = "${path.module}/${local.windows_std_provisioning_script}"
+  # source = templatefile(
+  #   "${path.module}/${local.windows_std_provisioning_script}.tmpl",
+  #   {
+  #     enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown,
+  #     minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval,
+  #     minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown,
+  #   }
+  # )
 }
 
 resource "azurerm_windows_virtual_machine" "windows-std-vm" {

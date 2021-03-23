@@ -215,22 +215,25 @@ module "windows-std-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations                 = module.workstation-map.windows-std-workstations
-  resource_group_name          = azurerm_resource_group.main.name
-  admin_name                   = var.windows_admin_username
-  admin_password               = var.ad_admin_password
-  pcoip_registration_code      = "null"
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username  = var.ad_admin_username
-  ad_service_account_password  = var.ad_admin_password
-  application_id               = var.application_id
-  tenant_id                    = var.tenant_id
-  aad_client_secret            = var.aad_client_secret
-  key_vault_id                 = var.key_vault_id
-  ad_pass_secret_name          = var.ad_pass_secret_name
-  storage_account_name         = azurerm_storage_account.windows-script-storage.name
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+  workstations                     = module.workstation-map.windows-std-workstations
+  resource_group_name              = azurerm_resource_group.main.name
+  admin_name                       = var.windows_admin_username
+  admin_password                   = var.ad_admin_password
+  pcoip_registration_code          = "null"
+  domain_name                      = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username      = var.ad_admin_username
+  ad_service_account_password      = var.ad_admin_password
+  application_id                   = var.application_id
+  tenant_id                        = var.tenant_id
+  aad_client_secret                = var.aad_client_secret
+  key_vault_id                     = var.key_vault_id
+  ad_pass_secret_name              = var.ad_pass_secret_name
+  storage_account_name             = azurerm_storage_account.windows-script-storage.name
+  workstation_subnet_ids           = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations     = module.dc-cac-network.subnet-workstation-locations
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 
@@ -241,22 +244,25 @@ module "windows-gfx-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations                 = module.workstation-map.windows-gfx-workstations
-  resource_group_name          = azurerm_resource_group.main.name
-  admin_name                   = var.windows_admin_username
-  admin_password               = var.ad_admin_password
-  pcoip_registration_code      = "null"
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username  = var.ad_admin_username
-  ad_service_account_password  = var.ad_admin_password
-  application_id               = var.application_id
-  tenant_id                    = var.tenant_id
-  aad_client_secret            = var.aad_client_secret
-  key_vault_id                 = var.key_vault_id
-  ad_pass_secret_name          = var.ad_pass_secret_name
-  storage_account_name         = azurerm_storage_account.windows-script-storage.name
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+  workstations                     = module.workstation-map.windows-gfx-workstations
+  resource_group_name              = azurerm_resource_group.main.name
+  admin_name                       = var.windows_admin_username
+  admin_password                   = var.ad_admin_password
+  pcoip_registration_code          = "null"
+  domain_name                      = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username      = var.ad_admin_username
+  ad_service_account_password      = var.ad_admin_password
+  application_id                   = var.application_id
+  tenant_id                        = var.tenant_id
+  aad_client_secret                = var.aad_client_secret
+  key_vault_id                     = var.key_vault_id
+  ad_pass_secret_name              = var.ad_pass_secret_name
+  storage_account_name             = azurerm_storage_account.windows-script-storage.name
+  workstation_subnet_ids           = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations     = module.dc-cac-network.subnet-workstation-locations
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 module "centos-std-vm" {
@@ -266,22 +272,25 @@ module "centos-std-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations                 = module.workstation-map.centos-std-workstations
-  resource_group_name          = azurerm_resource_group.main.name
-  admin_name                   = var.centos_admin_username
-  admin_password               = var.ad_admin_password
-  pcoip_registration_code      = ""
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username  = var.ad_admin_username
-  ad_service_account_password  = var.ad_admin_password
-  application_id               = var.application_id
-  tenant_id                    = var.tenant_id
-  aad_client_secret            = var.aad_client_secret
-  key_vault_id                 = var.key_vault_id
-  ad_pass_secret_name          = var.ad_pass_secret_name
-  domain_controller_ip         = module.dc-cac-network.dc-private-ip
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+  workstations                     = module.workstation-map.centos-std-workstations
+  resource_group_name              = azurerm_resource_group.main.name
+  admin_name                       = var.centos_admin_username
+  admin_password                   = var.ad_admin_password
+  pcoip_registration_code          = ""
+  domain_name                      = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username      = var.ad_admin_username
+  ad_service_account_password      = var.ad_admin_password
+  application_id                   = var.application_id
+  tenant_id                        = var.tenant_id
+  aad_client_secret                = var.aad_client_secret
+  key_vault_id                     = var.key_vault_id
+  ad_pass_secret_name              = var.ad_pass_secret_name
+  domain_controller_ip             = module.dc-cac-network.dc-private-ip
+  workstation_subnet_ids           = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations     = module.dc-cac-network.subnet-workstation-locations
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 module "centos-gfx-vm" {
@@ -291,20 +300,23 @@ module "centos-gfx-vm" {
     module.cac-vm.cac-vm-ids,
   ]
 
-  workstations                 = module.workstation-map.centos-gfx-workstations
-  resource_group_name          = azurerm_resource_group.main.name
-  admin_name                   = var.centos_admin_username
-  admin_password               = var.ad_admin_password
-  pcoip_registration_code      = ""
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
-  ad_service_account_username  = var.ad_admin_username
-  ad_service_account_password  = var.ad_admin_password
-  application_id               = var.application_id
-  tenant_id                    = var.tenant_id
-  aad_client_secret            = var.aad_client_secret
-  key_vault_id                 = var.key_vault_id
-  ad_pass_secret_name          = var.ad_pass_secret_name
-  domain_controller_ip         = module.dc-cac-network.dc-private-ip
-  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
-  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
+  workstations                     = module.workstation-map.centos-gfx-workstations
+  resource_group_name              = azurerm_resource_group.main.name
+  admin_name                       = var.centos_admin_username
+  admin_password                   = var.ad_admin_password
+  pcoip_registration_code          = ""
+  domain_name                      = "${var.active_directory_netbios_name}.dns.internal"
+  ad_service_account_username      = var.ad_admin_username
+  ad_service_account_password      = var.ad_admin_password
+  application_id                   = var.application_id
+  tenant_id                        = var.tenant_id
+  aad_client_secret                = var.aad_client_secret
+  key_vault_id                     = var.key_vault_id
+  ad_pass_secret_name              = var.ad_pass_secret_name
+  domain_controller_ip             = module.dc-cac-network.dc-private-ip
+  workstation_subnet_ids           = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations     = module.dc-cac-network.subnet-workstation-locations
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }

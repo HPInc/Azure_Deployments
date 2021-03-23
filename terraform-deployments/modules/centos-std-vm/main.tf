@@ -96,14 +96,17 @@ resource "azurerm_virtual_machine_extension" "centos-std-provisioning" {
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.centos_std_provisioning_script}.tmpl", {
-  pcoip_registration_code     = var.pcoip_registration_code,
-  ad_service_account_password = local.ad_admin_password,
-  ad_service_account_username = var.ad_service_account_username,
-  domain_name                 = var.domain_name,
-  domain_controller_ip        = var.domain_controller_ip,
-  application_id              = var.application_id,
-  aad_client_secret           = var.aad_client_secret,
-  tenant_id                   = var.tenant_id,
+  pcoip_registration_code          = var.pcoip_registration_code,
+  ad_service_account_password      = local.ad_admin_password,
+  ad_service_account_username      = var.ad_service_account_username,
+  domain_name                      = var.domain_name,
+  domain_controller_ip             = var.domain_controller_ip,
+  application_id                   = var.application_id,
+  aad_client_secret                = var.aad_client_secret,
+  tenant_id                        = var.tenant_id,
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown,
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval,
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
 })
 )
 }"

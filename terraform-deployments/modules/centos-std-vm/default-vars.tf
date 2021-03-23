@@ -10,3 +10,18 @@ variable "centos_std_depends_on" {
   type        = any
   default     = null
 }
+
+variable "enable_workstation_idle_shutdown" {
+  description = "Enable Cloud Access Manager auto idle shutdown for Workstations"
+  default     = true
+}
+
+variable "minutes_idle_before_shutdown" {
+  description = "Minimum idle time for Workstations before auto idle shutdown, must be between 5 and 10000"
+  default     = 240
+}
+
+variable "minutes_cpu_polling_interval" {
+  description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
+  default     = 15
+}
