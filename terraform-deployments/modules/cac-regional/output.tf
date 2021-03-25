@@ -12,3 +12,7 @@ output "cac-public-ip" {
 output "network-interface-ids" {
   value = azurerm_network_interface.cac-nic.*.id
 }
+
+output "cac-vm-names" {
+  value = azurerm_linux_virtual_machine.cac-vm.*.name
+}
