@@ -59,7 +59,7 @@
 # cac_location_list = ["westus2", "eastus"]
 # cac_count_list    = [1, 1]
 
-cac_location_list   = ["westus2, "eastus"]
+cac_location_list   = ["westus2", "eastus"]
 cac_count_list      = [1, 1]
 
 # Name of resource group for deployment resources. Name must be unique.
