@@ -1,5 +1,0 @@
-resource_group_name                    = "sample-resource-group"
-
-// From active-directory-domain-vm module output > domain-controller-name
-domain_controller_virtual_machine_name = ""
-

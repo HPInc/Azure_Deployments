@@ -59,7 +59,7 @@ The following diagram shows a single-connector deployment instance with multiple
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cam.teradici.com/)
+- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
@@ -85,12 +85,12 @@ To interact directly with remote workstations, an Azure Account must be connecte
     2. Leave **Assign access to** as **User, group, or service principal**
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
-10. Login to CAS Manager admin console [here](https://cam.teradici.com).
-11. [Create](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+10. Login to CAS Manager admin console [here](https://cas.teradici.com).
+11. [Create](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
 12. Click on **Cloud Service Accounts** and then **Azure**.
-13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/deployments/#azure-cloud-credentials). 
+13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
-15. Input a connector name to [generate](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/) a token. Save this as it will be used later. 
+15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token) a token. Tokens will be used in the .tfvars file. 
     - This token expires in 2 hours. 
     - The value will be used inside ```terraform.tfvars``` like so: 
     ```

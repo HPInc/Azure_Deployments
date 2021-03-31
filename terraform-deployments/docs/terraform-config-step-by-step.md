@@ -37,7 +37,7 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
             -   Possible values: **true** or **false**
 
     2. cac_configuration:
-        - ```cac_token```: token obtained from [CAS Manager](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/cam_admin_console/obtaining_connector_token_install/). This will be used when installing the Cloud Access Connector.
+        - ```cac_token```: token obtained from [CAS Manager](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token). This will be used when installing the Cloud Access Connector.
         ![obtaining a token](/terraform-deployments/docs/png/obtaining-cac-token.png)
         - ```location```: location of the cac. Ensure this is identical to the workstations' location.
 

@@ -25,11 +25,6 @@ variable "centos_admin_username" {
   default     = "centos_admin"
 }
 
-variable "cas_mgr_url" {
-  description = "CAS Manager URL"
-  default     = "https://cam.teradici.com"
-}
-
 variable "pcoip_agent_location" {
   description = "URL of Teradici PCoIP Standard Agent"
   default     = "https://downloads.teradici.com/win/stable/"

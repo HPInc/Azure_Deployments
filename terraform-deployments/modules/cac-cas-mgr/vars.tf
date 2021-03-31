@@ -83,7 +83,7 @@ variable "cas_mgr_insecure" {
 
 variable "cas_mgr_url" {
   description = "CAS Manager URL"
-  default     = "https://cam.teradici.com"
+  default     = "https://cas.teradici.com"
 }
 
 variable "disk_size_gb" {
@@ -97,7 +97,7 @@ variable "domain_controller_ip" {
 }
 
 variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAM Management Interface. Default is 'Domain Admins'. (eg, 'CN=CAM Admins,CN=Users,DC=example,DC=com')"
+  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
   default     = "Domain Admins"
 }
 

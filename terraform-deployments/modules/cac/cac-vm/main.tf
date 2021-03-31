@@ -36,11 +36,6 @@ resource "azurerm_linux_virtual_machine" "cac" {
     var.nic_ids[count.index]
   ]
 
-  /*admin_ssh_keys {
-      public_key = file("${path.module}/id_rsa.pub") # Azure VM only supports RSA SSH2 with at least 2048 bits
-      username   = var.cac_admin_user
-  }*/
-
   source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"

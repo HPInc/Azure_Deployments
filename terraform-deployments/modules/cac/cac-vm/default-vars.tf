@@ -17,7 +17,7 @@ variable "prefix" {
 }
 
 variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAM Management Interface. Default is 'Domain Admins'. (eg, 'CN=CAM Admins,CN=Users,DC=example,DC=com')"
+  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
   default     = "Domain Admins"
 }
 
@@ -25,11 +25,6 @@ variable "location" {
   description = "Zone to deploy the Cloud Access Connector"
   default     = "centralus"
 }
-
-# variable "host_name" {
-#   description = "Name to give the host"
-#   default     = "vm-cac"
-# }
 
 variable "machine_type" {
   description = "Machine type for the Cloud Access Connector"
