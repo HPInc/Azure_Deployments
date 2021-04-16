@@ -138,10 +138,8 @@ module "cac-vm" {
   location                    = azurerm_resource_group.main.location
   cac_configuration           = var.cac_configuration
   prefix                      = var.prefix
-  pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
-  domain_group                = var.domain_group
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   nic_ids                     = module.cac-network.cac-network-interface-ids
@@ -165,10 +163,8 @@ module "cac-configuration" {
   ]
 
   cac_configuration           = var.cac_configuration
-  pcoip_registration_code     = var.pcoip_registration_code
   domain_name                 = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip        = module.dc-cac-network.dc-private-ip
-  domain_group                = var.domain_group
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   cac_admin_user              = var.cac_admin_username

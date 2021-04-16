@@ -18,7 +18,7 @@ resource "azurerm_public_ip" "loadbalancer_public_ip" {
 
 resource "azurerm_lb" "main" {
   count = length(var.locations)
-  
+
   name                = "${var.prefix}-loadbalancer-${var.locations[count.index]}"
   location            = var.locations[count.index]
   resource_group_name = var.resource_group_name
@@ -33,9 +33,8 @@ resource "azurerm_lb" "main" {
 resource "azurerm_lb_backend_address_pool" "main" {
   count = length(var.locations)
 
-  resource_group_name = var.resource_group_name
-  loadbalancer_id     = azurerm_lb.main[count.index].id
-  name                = "backend-address-pool"
+  loadbalancer_id = azurerm_lb.main[count.index].id
+  name            = "backend-address-pool"
 }
 
 # Optional load balancer vm association

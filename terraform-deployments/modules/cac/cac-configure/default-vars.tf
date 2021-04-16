@@ -11,11 +11,6 @@ variable "cac_configure_depends_on" {
   default     = null
 }
 
-variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
-  default     = "Domain Admins"
-}
-
 variable "ssl_key" {
   description = "SSL private key for the Connector"
   default     = ""
@@ -39,4 +34,10 @@ variable "cas_mgr_url" {
 variable "lls_ip" {
   description = "Internal IP of the PCoIP License Server"
   default     = ""
+}
+
+variable "cas_mgr_insecure" {
+  description = "Allow unverified SSL access to CAS Manager"
+  type        = bool
+  default     = false
 }

@@ -7,23 +7,13 @@
 
  # List of workstations to deploy.
  # For workstation prefixes, max 5 characters to avoid name cropping.
- # The example below deploys 1 standard CentOS VM, 1 standard Windows VM, 1 graphics CentOS VM and 1 graphics Windows VM.
+ # The example below deploys 1 standard CentOS VM and 1 graphics Linux VM in US West 2. 1 standard Windows VM and 1 graphics Windows VM in US East.
  
  workstations = [
     {
         prefix           = "",
         location         = "westus2",
         workstation_os   = "linux",
-        vm_size          = "Standard_B2ms",
-        disk_type        = "Standard_LRS",
-        disk_size        = 128,
-        count            = 1,
-        isGFXHost        = false
-    },
-    {
-        prefix           = "",
-        location         = "westus2",
-        workstation_os   = "windows",
         vm_size          = "Standard_B2ms",
         disk_type        = "Standard_LRS",
         disk_size        = 128,
@@ -42,7 +32,17 @@
     },
     {
         prefix           = "",
-        location         = "westus2",
+        location         = "eastus",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "",
+        location         = "eastus",
         workstation_os   = "windows",
         vm_size          = "Standard_NV6",
         disk_type        = "Standard_LRS",
@@ -60,7 +60,7 @@ cac_configuration = [
     },
     {
         cac_token = "cac token obtained from https://cam.teradici.com/app/connectors",
-        location  = "westus2",
+        location  = "eastus",
     }
 ]
 

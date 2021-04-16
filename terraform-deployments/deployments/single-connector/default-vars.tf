@@ -50,11 +50,6 @@ variable "active_directory_netbios_name" {
   default     = "tera"
 }
 
-variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAM Management Interface. Default is 'Domain Admins'. (eg, 'CN=CAM Admins,CN=Users,DC=example,DC=com')"
-  default     = "Domain Admins"
-}
-
 variable "resource_group_name" {
   description = "The name of the resource group"
   default     = ""

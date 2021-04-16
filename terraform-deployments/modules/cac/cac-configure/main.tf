@@ -70,14 +70,13 @@ resource "null_resource" "upload-scripts" {
   provisioner "file" {
     content = templatefile("${path.module}/files/cac-startup.sh", {
       cac_installer_url           = var.cac_installer_url
+      cas_mgr_insecure            = var.cas_mgr_insecure
       domain_controller_ip        = var.domain_controller_ip
       ad_service_account_username = var.ad_service_account_username
       ad_service_account_password = local.ad_admin_password
       domain_name                 = var.domain_name
       cas_mgr_url                 = var.cas_mgr_url
       cac_token                   = var.cac_configuration[count.index].cac_token
-      domain_group                = var.domain_group
-      pcoip_registration_code     = var.pcoip_registration_code
       ssl_key                     = local.ssl_key_filename
       ssl_cert                    = local.ssl_cert_filename
       application_id              = var.application_id
