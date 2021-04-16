@@ -16,11 +16,6 @@ variable "prefix" {
   default     = ""
 }
 
-variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
-  default     = "Domain Admins"
-}
-
 variable "location" {
   description = "Zone to deploy the Cloud Access Connector"
   default     = "centralus"

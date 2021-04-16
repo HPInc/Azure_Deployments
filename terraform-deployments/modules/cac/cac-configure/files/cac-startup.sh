@@ -10,16 +10,6 @@ CAC_BIN_PATH="/usr/sbin/cloud-access-connector"
 INSTALL_DIR="/root"
 CAC_INSTALL_LOG="/var/log/teradici/cac-install.log"
 
-AD_SERVICE_ACCOUNT_USERNAME=${ad_service_account_username}
-AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
-CAC_TOKEN=${cac_token}
-PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
-DOMAIN_NAME=${domain_name}
-DOMAIN_CONTROLLER_IP=${domain_controller_ip}
-APPLICATION_ID=${application_id}
-AAD_CLIENT_SECRET=${aad_client_secret}
-TENANT_ID=${tenant_id}
-
 cd $INSTALL_DIR
 
 log() {
@@ -89,13 +79,14 @@ install_prereqs() {
 get_credentials() {
     if [[ -z "${tenant_id}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
+        AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
+        CAC_TOKEN=${cac_token}
     else
         set +x
         log "Getting secrets from Azure Key Vault..."
-        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=$APPLICATION_ID&client_secret=$AAD_CLIENT_SECRET&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/$TENANT_ID/oauth2/token | jq ".access_token" -r)
-        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$PCOIP_REGISTRATION_CODE?api-version=2016-10-01" | jq -r '.value')
-        AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$AD_SERVICE_ACCOUNT_PASSWORD?api-version=2016-10-01" | jq -r '.value')
-        CAC_TOKEN=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "$CAC_TOKEN?api-version=2016-10-01" | jq -r '.value')
+        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${application_id}&client_secret=${aad_client_secret}&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/${tenant_id}/oauth2/token | jq ".access_token" -r)
+        AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${ad_service_account_password}?api-version=2016-10-01" | jq -r '.value')
+        CAC_TOKEN=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${cac_token}?api-version=2016-10-01" | jq -r '.value')
         set -x
     fi
 }
@@ -137,31 +128,31 @@ wait_for_dc() {
     retry $timeout \
           $interval \
           "ldapwhoami \
-            -H ldap://$DOMAIN_CONTROLLER_IP \
-            -D $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME \
+            -H ldap://${domain_controller_ip} \
+            -D ${ad_service_account_username}@${domain_name} \
             -w $AD_SERVICE_ACCOUNT_PASSWORD \
             -o nettimeout=1" \
-          "--> Waiting for AD account $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME to become available." \
-          "--> ERROR: Timed out waiting for AD account $AD_SERVICE_ACCOUNT_USERNAME@$DOMAIN_NAME to become available. Continuing..."
+          "--> Waiting for AD account ${ad_service_account_username}@${domain_name} to become available." \
+          "--> ERROR: Timed out waiting for AD account ${ad_service_account_username}@${domain_name} to become available. Continuing..."
     set -x
     # Check that the domain name can be resolved and that the LDAP port is accepting
     # connections. This could have been all done with the ldapwhoami command, but
     # due to a number of occasional cac-installation issues, such as "domain
     # controller unreachable" or "DNS error occurred" errors, check these explicitly
     # for logging and debug purposes.
-    log "--> Ensure domain $DOMAIN_NAME can be resolved..."
+    log "--> Ensure domain ${domain_name} can be resolved..."
     retry $timeout \
           $interval \
-          "host $DOMAIN_NAME" \
-          "--> Trying to resolve $DOMAIN_NAME." \
-          "--> ERROR: Timed out trying to resolve $DOMAIN_NAME. Continuing..."
+          "host ${domain_name}" \
+          "--> Trying to resolve ${domain_name}." \
+          "--> ERROR: Timed out trying to resolve ${domain_name}. Continuing..."
 
-    log "--> Ensure domain $DOMAIN_NAME port 636 is reacheable..."
+    log "--> Ensure domain ${domain_name} port 636 is reacheable..."
     retry $timeout \
           $interval \
-          "netcat -vz $DOMAIN_NAME 636" \
-          "--> Trying to contact $DOMAIN_NAME:636." \
-          "--> ERROR: Timed out trying to contact $DOMAIN_NAME:636. Continuing..."
+          "netcat -vz ${domain_name} 636" \
+          "--> Trying to contact ${domain_name}:636." \
+          "--> ERROR: Timed out trying to contact ${domain_name}:636. Continuing..."
 }
 
 wait_for_lls() {
@@ -189,9 +180,7 @@ install_cac() {
     log "  --accept-policies"
     log "  --sa-user <ad_service_account_username>"
     log "  --sa-password <ad_service_account_password>"
-    log "  --domain $DOMAIN_NAME"
-    log "  --domain-group ${domain_group}"
-    log "  --reg-code <pcoip_registration_code>"
+    log "  --domain ${domain_name}"
     log "  --retrieve-agent-state true"
     log "  --sync-interval 5"
 
@@ -209,8 +198,14 @@ install_cac() {
         args=$args"--ssl-key $INSTALL_DIR/${ssl_key} "
         args=$args"--ssl-cert $INSTALL_DIR/${ssl_cert} "
     else
-        log "  --insecure"
-        args=$args"--insecure "
+        log "  --self-signed"
+        args=$args"--self-signed "
+    fi
+
+    if [ "${cas_mgr_insecure}" ]
+    then
+        log "  --cam-insecure"
+        args=$args"--cam-insecure "
     fi
 
     if [ "${lls_ip}" ]
@@ -219,18 +214,21 @@ install_cac() {
         args=$args"--local-license-server-url http://${lls_ip}:7070/request "
     fi
 
+    external_ip=$(curl -4 http://l2.io/ip)
+
     set +x
     while true
     do
         $CAC_BIN_PATH install \
             -t $CAC_TOKEN \
             --accept-policies \
-            --sa-user $AD_SERVICE_ACCOUNT_USERNAME \
+            --sa-user ${ad_service_account_username} \
             --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
-            --domain $DOMAIN_NAME \
-            --domain-group "${domain_group}" \
-            --reg-code $PCOIP_REGISTRATION_CODE \
+            --domain ${domain_name} \
+            --retrieve-agent-state true \
             --sync-interval 5 \
+            --cam-url ${cas_mgr_url} \
+            --external-pcoip-ip $external_ip \
             $args \
             2>&1 | tee -a $CAC_INSTALL_LOG
 

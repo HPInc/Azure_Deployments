@@ -10,7 +10,7 @@ data "azurerm_subscription" "primary" {}
 data "azurerm_client_config" "current" {}
 
 locals {
-  resource_group_name = "single_connector_app_${random_id.quickstart-name.hex}"
+  resource_group_name = "single_connector_keyvault_${random_id.quickstart-name.hex}"
 }
 
 resource "azurerm_resource_group" "primary" {

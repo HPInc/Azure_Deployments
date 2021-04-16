@@ -31,7 +31,7 @@ AZ_KEY_VAULT_DIR = './az-key-vault'
 SINGLE_CONNECTOR_DIR = '../../single-connector'
 
 # User entitled to workstations
-ENTITLE_USER = 'cam_admin'
+ENTITLE_USER = 'cas_admin'
 
 # Types of workstations
 WS_TYPES = ['scent', 'gcent', 'swin', 'gwin']
@@ -267,6 +267,7 @@ if __name__ == '__main__':
     single_connector_settings = {
         'workstations':                 workstations_config_get(cfg_data.get('region'), workstations_count),
         'cac_configuration':            cac_connector_config_get(az_vault_outputs['cac_token'], cfg_data.get('region')),
+        'resource_group_name':          "single_connector_deployment_%s" % (az_app_outputs['random_hex_id']),
         'pcoip_registration_code':      az_vault_outputs['pcoip_registration_code'],
         'ad_admin_password':            az_vault_outputs['ad_admin_password'],
         'safe_mode_admin_password':     az_vault_outputs['safe_mode_admin_password'],
@@ -282,8 +283,9 @@ if __name__ == '__main__':
 
     terraform_deploy()
 
-    cac_public_ip = deployment_outputs_get('cac-vms')[0]['public_ip']
+    cac_public_ip = deployment_outputs_get('cac-vm')[0]['public_ip']
     resource_group_name = deployment_outputs_get('resource_group')
+
     print('Terraform deployment complete.\n')
 
     #  Add existing workstations
@@ -305,7 +307,7 @@ if __name__ == '__main__':
                 print(f'Deployment name: {DEPLOYMENT_NAME}')
                 sys.exit(1)
 
-    # Loop until cam_admin user is found in CAM
+    # Loop until cas_admin user is found in CAM
     while True:
         entitle_user = my_cam.user_get(ENTITLE_USER, deployment)
         if entitle_user:

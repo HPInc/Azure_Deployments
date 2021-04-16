@@ -75,6 +75,10 @@ remove_nouveau() {
 }
 
 install_kernel_header() {
+    # Clear cache before installing kernel headers
+    yum clean all
+    rm -rf /var/cache/yum/*
+
     log "--> Installing kernel headers and development packages..."
     yum install kernel-devel kernel-headers -y
     exitCode=$?
