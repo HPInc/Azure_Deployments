@@ -312,6 +312,8 @@ install_idle_shutdown
 if [[ $IS_GUI_INSTALLED -eq 1 ]] 
 then
     log "--> Retrying installation of Linux GUI ..."
+    sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
+    sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
     yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 
     if [ $? -ne 0 ]; then
