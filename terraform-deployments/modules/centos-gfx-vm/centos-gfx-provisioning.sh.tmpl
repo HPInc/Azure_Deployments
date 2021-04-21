@@ -202,6 +202,13 @@ install_pcoip_agent() {
         log "--> Getting Teradici PCoIP agent repo..."
         wget --retry-connrefused --tries=3 --waitretry=5 -P /etc/yum.repos.d $PCOIP_AGENT_REPO_URL
 
+        log "--> Installing USB dependencies..."
+        retry "yum install -y usb-vhci"
+        if [ $? -ne 0 ]; then
+            log "--> Warning: Failed to install usb-vhci."
+        fi
+        log "--> usb-vhci successfully installed."
+
         log "--> Installing PCoIP graphics agent..."
         yum -y install pcoip-agent-graphics
         if [ $? -ne 0 ]; then
@@ -432,6 +439,8 @@ then
 
     if [ $IS_GUI_INSTALLED -eq 1 ]; then
         log "--> Retrying installation of Linux GUI ..."
+        sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
+        sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
         yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 
         if [ $? -ne 0 ]; then
