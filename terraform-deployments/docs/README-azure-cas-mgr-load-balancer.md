@@ -213,7 +213,7 @@ windows-std-internal-ip = {
 ### 7. Adding Workstations in CAS Manager
 To connect to workstations, they have to be added through CAS Manager. 
 1. In a browser, enter ```https://<cas-mgr-public-ip>```.
-    - The default username for CAS Manager is ```camAdmin```.
+    - The default username for CAS Manager is ```adminUser```.
 2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
 3. From the **Provider** dropdown, select **Private Cloud**.
 6. In the search box below, select Windows and CentOS workstations.
