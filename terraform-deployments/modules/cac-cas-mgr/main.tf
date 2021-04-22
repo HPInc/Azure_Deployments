@@ -45,19 +45,17 @@ module "cac-regional" {
   ad_service_account_password = var.ad_service_account_password
   domain_controller_ip        = var.domain_controller_ip
   domain_name                 = var.domain_name
-  domain_group                = var.domain_group
 
   ssl_key  = var.ssl_key
   ssl_cert = var.ssl_cert
 
-  cac_admin_user          = var.cac_admin_user
-  cac_admin_password      = var.cac_admin_password
-  application_id          = var.application_id
-  aad_client_secret       = var.aad_client_secret
-  pcoip_registration_code = var.pcoip_registration_code
-  key_vault_id            = var.key_vault_id
-  tenant_id               = var.tenant_id
-  ad_pass_secret_name     = var.ad_pass_secret_name
+  cac_admin_user      = var.cac_admin_user
+  cac_admin_password  = var.cac_admin_password
+  application_id      = var.application_id
+  aad_client_secret   = var.aad_client_secret
+  key_vault_id        = var.key_vault_id
+  tenant_id           = var.tenant_id
+  ad_pass_secret_name = var.ad_pass_secret_name
 
   storage_connection_string = var.storage_connection_string
   private_container_name    = var.private_container_name

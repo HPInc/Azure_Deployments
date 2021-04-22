@@ -91,12 +91,10 @@ get_credentials() {
     set +x
     if [[ -z "${tenant_id}" ]]; then
         log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
-        PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
         AD_SERVICE_ACCOUNT_PASSWORD=${ad_service_account_password}
     else
         log "Getting secrets from Azure Key Vault..."
         ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${application_id}&client_secret=${aad_client_secret}&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/${tenant_id}/oauth2/token | jq ".access_token" -r)
-        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${pcoip_registration_code}?api-version=2016-10-01" | jq -r '.value')
         AD_SERVICE_ACCOUNT_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${ad_service_account_password}?api-version=2016-10-01" | jq -r '.value')
     fi
     set -x
@@ -210,6 +208,13 @@ wait_for_lls() {
           "--> ERROR: Timed out trying to perform health check using endpoint $lls_health_check_url. Continuing..."
 }
 
+modify_netplan() {
+    log "--> Modifying netplan..."
+    sed -i '/eth0:/a\            nameservers:' /etc/netplan/50-cloud-init.yaml
+    sed -i '/nameservers:/a\                addresses: [${domain_controller_ip}]' /etc/netplan/50-cloud-init.yaml
+    netplan apply
+}
+
 install_cac() {
     log "--> Installing Cloud Access Connector..."
     local retries=10
@@ -222,11 +227,10 @@ install_cac() {
     log "  --sa-user <${ad_service_account_username}>"
     log "  --sa-password <ad_service_account_password>"
     log "  --domain ${domain_name}"
-    log "  --domain-group ${domain_group}"
-    log "  --reg-code <pcoip_registration_code>"
     log "  --retrieve-agent-state true"
     log "  --sync-interval 5"
     log "  --cam-url ${cas_mgr_url}"
+    log "  --external-pcoip-ip ${external_pcoip_ip}"
 
     # Set pipefail option to return status of the connector install command
     # set -o pipefail
@@ -242,20 +246,14 @@ install_cac() {
         args=$args"--ssl-key $PROVISIONING_DIR/${ssl_key} "
         args=$args"--ssl-cert $PROVISIONING_DIR/${ssl_cert} "
     else
-        log "  --insecure"
-        args=$args"--insecure "
+        log "  --self-signed"
+        args=$args"--self-signed "
     fi
 
     if [ "${cas_mgr_insecure}" ]
     then
         log "  --cam-insecure"
         args=$args"--cam-insecure "
-    fi
-
-    if [ "${external_pcoip_ip}" ]
-    then
-        log "  --external-pcoip-ip ${external_pcoip_ip}"
-        args=$args"--external-pcoip-ip ${external_pcoip_ip} "
     fi
 
     if [ "${lls_ip}" ]
@@ -273,10 +271,10 @@ install_cac() {
             --sa-user ${ad_service_account_username} \
             --sa-password "$AD_SERVICE_ACCOUNT_PASSWORD" \
             --domain ${domain_name} \
-            --domain-group "${domain_group}" \
-            --reg-code $PCOIP_REGISTRATION_CODE \
+            --retrieve-agent-state true \
             --sync-interval 5 \
             --cam-url ${cas_mgr_url} \
+            --external-pcoip-ip ${external_pcoip_ip} \
             $args \
             2>&1 | tee -a $CAC_INSTALL_LOG
 
@@ -333,6 +331,8 @@ then
 fi
 
 get_cac_token
+
+modify_netplan
 
 install_cac
 

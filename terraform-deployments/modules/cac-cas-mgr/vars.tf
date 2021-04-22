@@ -96,11 +96,6 @@ variable "domain_controller_ip" {
   type        = string
 }
 
-variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
-  default     = "Domain Admins"
-}
-
 variable "domain_name" {
   description = "Name of the domain to join"
   type        = string
@@ -131,11 +126,6 @@ variable "machine_type" {
 variable "network_security_group_ids" {
   description = "List of network security group ids"
   type        = list(string)
-}
-
-variable "pcoip_registration_code" {
-  description = "PCoIP Registration code"
-  type        = string
 }
 
 variable "prefix" {

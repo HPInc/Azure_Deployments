@@ -22,7 +22,7 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 resource "time_offset" "start" {
-  offset_minutes = 27
+  offset_minutes = 0
 }
 
 resource "time_offset" "expiry" {
@@ -261,8 +261,6 @@ resource "null_resource" "upload-provisioning-script" {
       ad_service_account_password = local.ad_admin_password
       domain_name                 = var.domain_name
       cas_mgr_url                 = var.cas_mgr_url
-      domain_group                = var.domain_group
-      pcoip_registration_code     = var.pcoip_registration_code
       ssl_key                     = local.ssl_key_filename
       ssl_cert                    = local.ssl_cert_filename
       application_id              = var.application_id
