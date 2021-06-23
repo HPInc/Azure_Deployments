@@ -34,6 +34,9 @@ resource "azurerm_network_interface" "windows-std-nic" {
 }
 
 resource "azurerm_storage_blob" "windows-std-script" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   name                   = local.windows_std_provisioning_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name

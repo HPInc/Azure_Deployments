@@ -16,3 +16,7 @@ output "network-interface-ids" {
 output "cac-vm-names" {
   value = azurerm_linux_virtual_machine.cac-vm.*.name
 }
+
+output "cac-subnet-ids" {
+  value = azurerm_subnet.cac.id
+}

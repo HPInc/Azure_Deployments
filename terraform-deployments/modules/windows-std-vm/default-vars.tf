@@ -5,6 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+variable "blob_depends_on" {
+  description = "Storage account that the storage blob requires as a dependency"
+  type        = any
+  default     = null
+}
+
 variable "windows_host_vm_depends_on" {
   description = "Value that internal module components can use as a dependency for externally created recources"
   type        = any
@@ -24,4 +30,9 @@ variable "minutes_idle_before_shutdown" {
 variable "minutes_cpu_polling_interval" {
   description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
   default     = 15
+}
+
+variable "is_aadds" {
+  description = "Value that determines whether or not the provisioning script used will be for AADDS (Azure Active Directory Domain Services) domains"
+  default = false
 }
