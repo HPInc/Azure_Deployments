@@ -86,6 +86,17 @@ variable "cas_mgr_url" {
   default     = "https://cas.teradici.com"
 }
 
+variable "fw_subnet_cidr" {
+  description = "CIDR for the subnet the firewall will be created in."
+  default     = ["10.0.8.0/24"]
+}
+
+
+variable "ws_subnet_cidr" {
+  description = "CIDRs of the workstation subnets"
+  default     =  ["10.0.4.0/24"]
+}
+
 variable "disk_size_gb" {
   description = "Disk size (GB) of the Cloud Access Connector"
   default     = "50"
@@ -94,11 +105,6 @@ variable "disk_size_gb" {
 variable "domain_controller_ip" {
   description = "Internal IP of the Domain Controller"
   type        = string
-}
-
-variable "domain_group" {
-  description = "Active Directory Distinguished Name for the User Group to log into the CAS Management Interface. Default is 'Domain Admins'. (eg, 'CN=CASM Admins,CN=Users,DC=example,DC=com')"
-  default     = "Domain Admins"
 }
 
 variable "domain_name" {
@@ -133,11 +139,6 @@ variable "network_security_group_ids" {
   type        = list(string)
 }
 
-variable "pcoip_registration_code" {
-  description = "PCoIP Registration code"
-  type        = string
-}
-
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
 }
@@ -155,4 +156,58 @@ variable "ssl_cert" {
 variable "tenant_id" {
   description = "The directory (tenant) ID of your app registration in AAD"
   type        = string
+}
+
+variable "aadds_resource_group" {
+  description = "Name of the resource group the AADDS belongs in"
+  default     = ""
+}
+
+variable "cac_depends_on" {
+  description = "Value that internal module components can use as a dependency for externally created recources"
+  type        = any
+  default     = null
+}
+
+variable "is_private" {
+  description = "Determines whether or not the CACs will be created with public IPs attached"
+  type        = bool
+  default     = false
+}
+
+variable "blob_depends_on" {
+  description = "Storage account that the storage blob requires as a dependency"
+  type        = any
+  default     = null
+}
+
+variable "cac_subnet_depends_on" {
+  description = "Modules that the subnet requires as a dependency"
+  type        = any
+  default     = null
+}
+
+
+variable "cas_mgr_internal_ip" {
+  description = "Internal IP of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_public_ip" {
+  description = "Public IP of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_cidr" {
+  description = "Internal CIDR of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_public_ip_id" {
+  description = "ID of the Public IP of the CAS manager"
+  type        = string
+  default     = ""
 }

@@ -124,7 +124,6 @@ module "cac" {
   prefix                = var.prefix
   domain_name           = "${var.active_directory_netbios_name}.dns.internal"
   domain_controller_ip  = module.dc-cac-network.dc-private-ip
-  domain_group          = var.domain_group
   storage_account_name  = azurerm_storage_account.storage.name
   private_container_url = azurerm_storage_container.private-container.id
 
@@ -141,7 +140,6 @@ module "cac" {
   tenant_id                   = var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
-  pcoip_registration_code     = var.pcoip_registration_code
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
 

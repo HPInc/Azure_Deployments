@@ -12,7 +12,7 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 locals {
-  windows_gfx_provisioning_script        = "windows-gfx-provisioning.ps1"
+  windows_gfx_provisioning_script        = var.is_aadds == true ? "windows-gfx-provisioning-aadds.ps1" : "windows-gfx-provisioning.ps1"
   windows_gfx_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${local.nvidia_driver_url} ${local.nvidia_driver_filename} ${var.application_id} ${var.aad_client_secret} ${var.enable_workstation_idle_shutdown} ${var.minutes_idle_before_shutdown} ${var.minutes_cpu_polling_interval} ${var.tenant_id}"
 
   nvidia_driver_url      = "https://go.microsoft.com/fwlink/?linkid=874181"

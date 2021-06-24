@@ -34,6 +34,9 @@ resource "azurerm_network_interface" "windows-gfx-nic" {
 }
 
 resource "azurerm_storage_blob" "windows-gfx-script" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   name                   = local.windows_gfx_provisioning_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name
@@ -42,7 +45,6 @@ resource "azurerm_storage_blob" "windows-gfx-script" {
 }
 
 resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
-
   for_each = var.workstations
 
   name                = each.value.prefix == "" ? "gwin-${each.value.index}" : "${each.value.prefix}-gwin-${each.value.index}"

@@ -47,6 +47,7 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 }
 
 resource "azurerm_subnet" "cas-mgr" {
+  depends_on           = [var.cas_mgr_subnet_depends_on]
   name                 = var.cas_mgr_subnet_name
   address_prefixes     = var.cas_mgr_subnet_cidr
   resource_group_name  = var.resource_group_name
@@ -79,6 +80,9 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
 }
 
 resource "azurerm_storage_blob" "cas-mgr-setup-script" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   name                   = local.cas_mgr_setup_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name

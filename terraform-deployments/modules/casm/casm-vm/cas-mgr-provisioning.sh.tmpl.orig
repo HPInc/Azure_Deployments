@@ -1,0 +1,246 @@
+# Copyright (c) 2021 Teradici Corporation
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+#!/bin/bash
+
+LOG_FILE="/var/log/teradici/provisioning.log"
+
+INSTALL_DIR="/root"
+CAS_MGR_DEPLOYMENT_KEY_NAME="terraform-key"
+CAS_MGR_DEPLOYMENT_NAME="terraform-deployment"
+CAS_MGR_INSTALL_LOG="/var/log/teradici/cas-mgr-install.log"
+cd $INSTALL_DIR
+
+log() {
+    local message="$1"
+    echo "[$(date)] $message"
+}
+
+install_prereqs() {
+    log "--> Installing dos2unix, python3..."
+    yum update -y --exclude=WALinuxAgent
+    yum install -y dos2unix python3
+
+    if [ $? -ne 0 ]
+    then
+        log "--> ERROR: Failed to install prerequisites. Exiting provisioning script..."
+        exit 1
+    fi
+
+    python3 -m pip install requests
+
+    if [ $? -ne 0 ]
+    then
+        log "--> ERROR: Failed to install Python modules. Exiting provisioning script..."
+        exit 1
+    fi
+}
+
+install_azcopy() {
+    wget https://aka.ms/downloadazcopy-v10-linux
+    tar -xvf downloadazcopy-v10-linux
+    sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+}
+
+get_credentials() {
+
+    set +x
+    if [[ -z "${tenant_id}" ]]; then
+        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
+
+        CAS_MGR_ADMIN_PASSWORD=${cas_mgr_admin_password}
+        PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
+    else
+        log "--> Installing epel-release.."
+        yum -y install epel-release
+        if [ $? -ne 0 ]; then
+            log "--> Failed to install epel-release"
+            exit 1
+        fi
+
+        log "--> Installing jq.."
+        yum install -y jq
+        if [ $? -ne 0 ]; then
+            log "Failed to install jq"
+        fi
+
+        log "Getting secrets from Azure Key Vault..."
+        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${application_id}&client_secret=${aad_client_secret}&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/${tenant_id}/oauth2/token | jq ".access_token" -r)
+        CAS_MGR_ADMIN_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${cas_mgr_admin_password}?api-version=2016-10-01" | jq -r '.value')
+        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${pcoip_registration_code}?api-version=2016-10-01" | jq -r '.value')
+    fi
+    set -x
+}
+
+check_required_vars() {
+    set +x
+    
+    if [[ -z "${pcoip_registration_code}" ]]
+    then
+        log "--> ERROR: Missing PCoIP Registration Code."
+        missing_vars="true"
+    fi
+
+    if [[ -z "${cas_mgr_admin_password}" ]]
+    then
+        log "--> ERROR: Missing CAS Manager GUI Administrator Password."
+        missing_vars="true"
+    fi
+    set -x
+
+    if [[ "$missing_vars" = "true" ]]
+    then
+        log "--> Exiting..."
+        exit 1
+    fi
+}
+
+add_cas_mgr_repo() {
+    log "--> Adding CAS Manager repo..."
+    curl -1sLf '${cas_mgr_add_repo_script}' | sudo -E distro=el codename=7 bash
+}
+
+config_selinux() {
+    log "--> Configuring SE Linux..."
+    yum install -y selinux-policy-base container-selinux
+    yum install -y https://github.com/k3s-io/k3s-selinux/releases/download/v0.2.stable.1/k3s-selinux-0.2-1.el7_8.noarch.rpm
+    yum install -y cas-manager-selinux
+}
+
+install_cas_mgr() {
+    log "--> Installing CAS Manager..."
+    # TODO: figure out the /dev/tty error
+    yum install -y cas-manager 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
+
+    # Install manually
+    /usr/local/bin/cas-manager install --preview --accept-policies --self-signed --manifest /tmp/jsonnet-stable.tar.gz --debug 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
+
+    if [ $? -ne 0 ]
+    then
+        log "--> ERROR: Failed to install CAS Manager..."
+        exit 1
+    fi
+}
+
+mongo_kv_setup() {
+    HOME_DIR = /home/${cas_mgr_username}
+    mv $HOME_DIR/mongodb-org-4.4.repo $INSTALL_DIR/
+    mv $HOME_DIR/mongod.conf $INSTALL_DIR/
+    mv $HOME_DIR/casm.conf $INSTALL_DIR/
+    mv $HOME_DIR/dbconf.mongo $INSTALL_DIR/
+
+    yum install openssl
+    openssl genrsa -out rootCA.key 4096
+    openssl req -newkey rsa:4096 \
+                -x509 \                                                                                                       
+                -sha256 \
+                -days 3650 \
+                -nodes \
+                -out $INSTALL_DIR/certificate.crt \
+                -keyout $INSTALL_DIR/secret.key \
+                -subj "/C=CA/ST=BC/L=Burnaby/O=Teradici/OU=Software Department/CN=www.teradici.com"
+
+    log "--> Configuring MongoDB and Keyvault..."
+    mv $INSTALL_DIR/mongodb-org-4.4.repo /etc/yum.repos.d/mongodb-org-4.4.repo
+    yum install -y mongodb-org
+    cat $INSTALL_DIR/mongod.conf >| /etc/mongod.conf
+    mkdir -p /var/lib/mongodb 
+    mongod --config /etc/mongod.conf
+    mongo < $INSTALL_DIR/dbconf.mongo
+    /usr/local/bin/cas-manager configure --config-file $INSTALL_DIR/casm.conf
+}
+
+cas_mgr_setup() {
+    local optional_args=""
+
+    wget -O $INSTALL_DIR/${cas_mgr_setup_script} ${cas_mgr_setup_script_url}
+
+    log "--> Running CAS Manager setup script..."
+
+    dos2unix $INSTALL_DIR/${cas_mgr_setup_script}
+    chmod +x $INSTALL_DIR/${cas_mgr_setup_script}
+
+    log "--> Running CAS Manager setup script with the following options:"
+    log "  --deployment_name $CAS_MGR_DEPLOYMENT_NAME"
+    log "  --key_file $INSTALL_DIR/${cas_mgr_deployment_sa_file}"
+    log "  --key_name $CAS_MGR_DEPLOYMENT_KEY_NAME"
+    log "  --password <CAS Manager GUI Administrator Password"
+    log "  --reg_code <PCoIP Registration Code>"
+    log "  $optional_args"
+
+    set +x
+    PYTHONWARNINGS="ignore:Unverified HTTPS request" \
+      $INSTALL_DIR/${cas_mgr_setup_script} \
+      --deployment_name $CAS_MGR_DEPLOYMENT_NAME \
+      --key_file $INSTALL_DIR/${cas_mgr_deployment_sa_file} \
+      --key_name $CAS_MGR_DEPLOYMENT_KEY_NAME \
+      --password $CAS_MGR_ADMIN_PASSWORD \
+      --reg_code $PCOIP_REGISTRATION_CODE \
+      $optional_args
+    set -x
+
+    if [ $? -ne 0 ]
+    then
+        log "--> ERROR: Failed to run CAS Manager setup script. Exiting provisioning script..."
+        exit 1
+    fi
+
+    if [ ! -f "$INSTALL_DIR/${cas_mgr_deployment_sa_file}" ]
+    then
+        log "--> ERROR: CAS Manager Deployment service account key not created. Exiting provisioning script..."
+        exit 1
+    fi
+}
+
+upload_dsa_key() {
+    local command="azcopy cp $INSTALL_DIR/${cas_mgr_deployment_sa_file} ${private_container_url}${sas_token} --check-length=false"
+    local log_message="--> Uploading Deployment Service Account Key ${cas_mgr_deployment_sa_file}..."
+    local timeout=1800
+    local interval=30
+
+    log $log_message
+
+    until $command
+    do
+        if [ $timeout -le 0 ]
+        then
+            log "--> Failed to upload key..."
+            break
+        fi
+
+        log "$log_message Retrying in $interval seconds... (Timeout in $timeout seconds)"
+
+        timeout=$((timeout-interval))
+        sleep $interval
+    done
+}
+
+if [[ ! -f "$LOG_FILE" ]]
+then
+    mkdir -p "$(dirname $LOG_FILE)"
+    touch "$LOG_FILE"
+    chmod +644 "$LOG_FILE"
+fi
+
+log "$(date)"
+
+# Print all executed commands to the terminal
+set -x
+
+# Redirect stdout and stderr to the log file
+exec &>>$LOG_FILE
+
+install_prereqs
+get_credentials
+check_required_vars
+add_cas_mgr_repo
+config_selinux
+install_cas_mgr
+mongo_kv_setup
+cas_mgr_setup
+install_azcopy
+upload_dsa_key
+
+log "--> Provisioning script completed successfully."

@@ -137,11 +137,6 @@ variable "network_security_group_id" {
   description = "The network security group id"
 }
 
-variable "pcoip_registration_code" {
-  description = "PCoIP Registration code"
-  type        = string
-}
-
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
 }
@@ -171,4 +166,9 @@ variable "storage_connection_string" {
 
 variable "private_container_name" {
   description = "Name of container which stores .json key file."
+}
+
+variable "aadds_resource_group" {
+  description = "Name of the resource group the AADDS belongs in"
+  default     = ""
 }
