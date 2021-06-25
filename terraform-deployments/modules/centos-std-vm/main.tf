@@ -48,7 +48,9 @@ resource "azurerm_network_interface" "centos-std-nic" {
 }
 
 resource "azurerm_linux_virtual_machine" "centos-std-vm" {
-
+  depends_on = [
+    var.centos_std_depends_on
+  ]
   for_each = var.workstations
 
   name                            = each.value.prefix == "" ? "scent-${each.value.index}" : "${each.value.prefix}-scent-${each.value.index}"

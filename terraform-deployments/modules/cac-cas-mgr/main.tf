@@ -71,7 +71,7 @@ module "cac-regional-private" {
 
   count = var.is_private == true ? local.num_regions : 0
   cac_subnet_depends_on = var.cac_subnet_depends_on
-
+  cac_nat_depends_on    = var.cac_nat_depends_on
   prefix = var.prefix
 
   location                  = var.locations[count.index]
@@ -107,11 +107,12 @@ module "cac-regional-private" {
 
   storage_connection_string = var.storage_connection_string
   private_container_name    = var.private_container_name
-  ws_subnet_cidr            = var.ws_subnet_cidr
-  fw_subnet_cidr            = var.fw_subnet_cidr
   aadds_resource_group      = var.aadds_resource_group
   cas_mgr_internal_ip       = var.cas_mgr_internal_ip
   cas_mgr_public_ip         = var.cas_mgr_public_ip
-  cas_mgr_cidr              = var.cas_mgr_cidr
   cas_mgr_public_ip_id      = var.cas_mgr_public_ip_id
+
+  fw_name       = var.fw_name
+  cac_fw_public = var.cac_fw_public
+  fw_internal   = var.fw_internal
 }

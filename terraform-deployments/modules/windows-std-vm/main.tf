@@ -45,7 +45,9 @@ resource "azurerm_storage_blob" "windows-std-script" {
 }
 
 resource "azurerm_windows_virtual_machine" "windows-std-vm" {
-
+  depends_on = [
+    var.windows_host_vm_depends_on
+  ]
   for_each = var.workstations
 
   name                = each.value.prefix == "" ? "swin-${each.value.index}" : "${each.value.prefix}-swin-${each.value.index}"

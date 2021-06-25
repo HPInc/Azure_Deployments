@@ -155,6 +155,40 @@ resource "azurerm_subnet" "workstation" {
   virtual_network_name = azurerm_virtual_network.network[count.index].name
 }
 
+resource "azurerm_firewall_network_rule_collection" "dc-fw-network" {
+  depends_on = [azurerm_firewall_nat_rule_collection.cac-dc-nat]
+  name                = "cac-fw-network-rule-dc"
+  azure_firewall_name = var.fw_name
+  resource_group_name = var.resource_group_name
+  priority            = 101
+  action              = "Allow"
+
+  rule {
+    name = "allow-external-dc"
+
+    source_addresses = [
+      azurerm_subnet.workstation[0].address_prefixes[0],
+      var.dc_subnet_cidr
+    ]
+
+    destination_addresses = [
+      "*"
+    ]
+
+    destination_ports = [
+      "*"
+    ]
+
+    protocols = [
+      "TCP",
+      "UDP",
+      "ICMP",
+      "Any"
+    ]
+  }
+}
+
+
 resource "azurerm_network_interface" "dc_nic" {
   name                = "${local.prefix}dc-primary"
   location            = var.locations[0]
@@ -164,18 +198,8 @@ resource "azurerm_network_interface" "dc_nic" {
     name                          = "primary"
     private_ip_address_allocation = "Static"
     private_ip_address            = var.dc_private_ip
-    public_ip_address_id          = azurerm_public_ip.dc_ip.id
     subnet_id                     = azurerm_subnet.dc.id
   }
-}
-
-resource "azurerm_public_ip" "dc_ip" {
-  name                    = "public-dc-ip"
-  location                = var.locations[0]
-  resource_group_name     = var.resource_group_name
-  allocation_method       = "Static"
-  idle_timeout_in_minutes = 30
-  sku                     = "Standard"
 }
 
 resource "azurerm_private_dns_zone" "dns" {
@@ -272,4 +296,30 @@ resource "azurerm_virtual_network_peering" "peering_to_main_location" {
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
   allow_gateway_transit        = false
+}
+
+resource "azurerm_firewall_nat_rule_collection" "cac-dc-nat" {
+  name                = "cac-fw-nat-dc-frontend"
+  azure_firewall_name = var.fw_name
+  resource_group_name = var.resource_group_name
+  priority            = 102
+  action              = "Dnat"
+  rule {
+      name = "private-dc-frontend"
+      source_addresses = [
+        chomp(data.http.myip.body)
+      ]
+      destination_ports = [
+        "5986",
+      ]
+
+      destination_addresses = [
+        var.dc_ip.ip_address
+      ]
+      translated_port = 5986
+      translated_address = azurerm_network_interface.dc_nic.ip_configuration[0].private_ip_address
+      protocols = [
+        "TCP"
+      ]
+  }
 }

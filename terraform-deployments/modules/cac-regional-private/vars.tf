@@ -10,19 +10,6 @@ variable "aad_client_secret" {
   type        = string
 }
 
-variable "cac_subnet_cidr" {
-  description = "Subnet for the region specific cac"
-}
-
-variable "ws_subnet_cidr" {
-  description = "Subnet for the region specific workstations"
-}
-
-variable "fw_subnet_cidr" {
-  description = "CIDR for the subnet the firewall will be created in."
-  default     = ["10.0.8.0/24"]
-}
-
 variable "ad_pass_secret_name" {
   description = "Name of ad admin password"
 }
@@ -53,6 +40,10 @@ variable "private_container_url" {
 variable "cac_admin_user" {
   description = "Username of the Cloud Access Connector Administrator"
   type        = string
+}
+
+variable "cac_subnet_cidr" {
+  description = "Subnet for the region specific cac"
 }
 
 variable "cac_admin_password" {
@@ -203,8 +194,23 @@ variable "cac_subnet_depends_on" {
   default     = null
 }
 
-
-variable "cas_mgr_cidr" {
-  description = "Internal CIDR of the CAS manager"
+variable "fw_name" {
+  description = "Name of the Azure firewall"
   type        = string
+}
+
+variable "cac_fw_public" {
+  description = "Public IPs of the Firewall which NAT to the internal CAC IPs"
+  type        = any
+}
+
+variable "fw_internal" {
+  description = "Internal IP of the firewall"
+  type = string  
+}
+
+
+variable "cac_nat_depends_on" {
+  type        = any
+  default     = null
 }

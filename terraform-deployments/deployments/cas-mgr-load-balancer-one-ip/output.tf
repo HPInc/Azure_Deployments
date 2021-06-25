@@ -13,10 +13,6 @@ output "domain-controller-internal-ip" {
   value = module.dc-cac-network.dc-private-ip
 }
 
-output "domain-controller-public-ip" {
-  value = module.dc-cac-network.dc-public-ip
-}
-
 output "windows-std-internal-ip" {
   value = {
     for i in range(length(module.workstation-map.windows-std-workstations)) :
@@ -46,5 +42,9 @@ output "centos-std-internal-ip" {
 }
 
 output "cas-mgr-public-ip" {
-  value = module.cas-mgr.public-ip
+  value = module.firewall.cas-fw-public
+}
+
+output "cac-load-balancer-ip" {
+  value = module.firewall.fw-frontend
 }

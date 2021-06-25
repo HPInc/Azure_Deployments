@@ -114,7 +114,8 @@ resource "azurerm_lb_rule" "allow_port_60443" {
   load_distribution              = "SourceIPProtocol"
 }
 
-resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
+resource "azurerm_firewall_nat_rule_collection" "lb-fw-nat" {
+  depends_on = [var.lb_nat_depends_on]
   name                = "cac-fw-nat-lb-frontend"
   azure_firewall_name = var.cac_fw_name
   resource_group_name = var.resource_group_name
@@ -138,5 +139,4 @@ resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
         "TCP"
       ]
   }
-
 }

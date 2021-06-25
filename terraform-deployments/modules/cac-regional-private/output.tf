@@ -5,10 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "cac-public-ip" {
-  value = azurerm_public_ip.cac.*.id
-}
-
 output "network-interface-ids" {
   value = azurerm_network_interface.cac-nic.*.id
 }
@@ -21,14 +17,10 @@ output "cac-subnet-ids" {
   value = azurerm_subnet.cac.id
 }
 
-output "cac-fw-name" {
-  value = azurerm_firewall.cac-fw.name
+output "cac-nat-rules" {
+  value = azurerm_firewall_nat_rule_collection.cac-fw-nat
 }
 
-output "cac-fw-frontend" {
-  value = azurerm_public_ip.fw-frontend.ip_address
-}
-
-output "cac-fw-internal" {
-  value = azurerm_firewall.cac-fw.ip_configuration[0].private_ip_address
+output "cac-fw-rules" {
+  value = azurerm_firewall_network_rule_collection.cac-fw-network
 }
