@@ -22,9 +22,9 @@ output "subnet-ids" {
 }
 
 output "cac-nat-rules" {
-  value = module.cac-regional-private[0].cac-nat-rules
+  value = var.is_private == false ? null : module.cac-regional-private[0].cac-nat-rules
 }
 
 output "cac-fw-rules" {
-  value = module.cac-regional-private[0].cac-fw-rules
+  value = var.is_private == false ? null : module.cac-regional-private[0].cac-fw-rules
 }

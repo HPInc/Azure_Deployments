@@ -192,17 +192,17 @@ module "load-balancer" {
   cac_fw_frontend           = module.firewall.fw-frontend
 }
 
-# module "route-table" {
-#   source               = "../../modules/network/route-table"
-#   resource_group_name  = azurerm_resource_group.main.name
-#   cac_subnet_ids       = module.cac.subnet-ids
-#   ws_subnet_ids        = module.dc-cac-network.subnet-workstation-ids
-#   dc_subnet_id         = module.dc-cac-network.subnet-dc-id
-#   cas_subnet_id        = module.cas-mgr.subnet-cas-id
-#   fw_public_ip         = module.firewall.fw-frontend
-#   fw_private_ip        = module.firewall.fw-internal
-#   locations            = module.workstation-map.virtual-network-locations
-# }
+module "route-table" {
+  source               = "../../modules/network/route-table"
+  resource_group_name  = azurerm_resource_group.main.name
+  cac_subnet_ids       = module.cac.subnet-ids
+  ws_subnet_ids        = module.dc-cac-network.subnet-workstation-ids
+  dc_subnet_id         = module.dc-cac-network.subnet-dc-id
+  cas_subnet_id        = module.cas-mgr.subnet-cas-id
+  fw_public_ip         = module.firewall.fw-frontend
+  fw_private_ip        = module.firewall.fw-internal
+  locations            = module.workstation-map.virtual-network-locations
+}
 
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
