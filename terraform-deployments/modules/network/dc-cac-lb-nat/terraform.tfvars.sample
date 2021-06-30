@@ -1,0 +1,15 @@
+resource_group_name = "sample-resource-group"
+
+// From workstation-map module output > virtual-network-locations
+locations = [
+    "westus2",
+] 
+
+// From workstation-map module output > virtual-network-peer-to-peer-links
+vnet_peer_to_peer_links = [] 
+
+prefix = "sampletest"
+active_directory_netbios_name = "sampletest"
+
+// Add Azure account Subscription ID here.
+subscriptionID = ""
