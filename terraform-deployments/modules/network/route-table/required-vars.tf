@@ -25,6 +25,17 @@ variable "ws_subnet_ids" {
   type        = list(string)
 }
 
+variable "dc_subnet_id" {
+  description = "Domain controller subnet id the route table will associate with"
+  type        = string
+}
+
+variable "cas_subnet_id" {
+  description = "CAS Manager subnet id the route table will associate with"
+  type        = string
+}
+
+
 variable "fw_public_ip"{
   description = "Public IP of the firewall for internet routing"
   type        = string
@@ -33,4 +44,8 @@ variable "fw_public_ip"{
 variable "fw_private_ip"{
   description = "Private IP of the firewall for internet routing"
   type        = string
+}
+
+variable "route_table_depends_on" {
+  type = any
 }

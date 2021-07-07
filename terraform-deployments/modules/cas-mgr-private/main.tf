@@ -12,11 +12,11 @@ locals {
 }
 
 resource "time_offset" "start" {
-  offset_minutes = 27
+  offset_days = -7
 }
 
 resource "time_offset" "expiry" {
-  offset_minutes = 35
+  offset_days = 7
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -26,6 +26,9 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   connection_string = var.storage_connection_string
   container_name    = var.private_container_name
   https_only        = true
@@ -59,14 +62,6 @@ resource "azurerm_subnet_network_security_group_association" "cac" {
   network_security_group_id = var.network_security_group_ids[0]
 }
 
-resource "azurerm_public_ip" "cas-mgr-public-ip" {
-  name                = "cas-mgr-public-ip"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
 resource "azurerm_network_interface" "cas-mgr-nic" {
   name                = "${var.host_name}-nic"
   location            = var.location
@@ -90,6 +85,9 @@ resource "azurerm_storage_blob" "cas-mgr-setup-script" {
 }
 
 resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
+  depends_on = [
+    azurerm_firewall_network_rule_collection.cas-fw-network
+  ]
   name                            = var.host_name
   resource_group_name             = var.resource_group_name
   location                        = var.location
@@ -148,3 +146,34 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   SETTINGS
 }
 
+resource "azurerm_firewall_network_rule_collection" "cas-fw-network" {
+  depends_on           = [var.cas_nat_depends_on]
+  name                = "cas-fw-network-rule-cac"
+  azure_firewall_name = var.fw_name
+  resource_group_name = var.resource_group_name
+  priority            = 102
+  action              = "Allow"
+
+  rule {
+    name = "allow-external-cas"
+
+    source_addresses = [
+      var.cas_mgr_subnet_cidr[0],
+    ]
+
+    destination_addresses = [
+      "*"
+    ]
+
+    destination_ports = [
+      "*"
+    ]
+
+    protocols = [
+      "TCP",
+      "UDP",
+      "ICMP",
+      "Any"
+    ]
+  }
+}

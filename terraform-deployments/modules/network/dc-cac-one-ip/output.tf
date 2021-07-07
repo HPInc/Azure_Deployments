@@ -12,7 +12,17 @@ output "dc-private-ip" {
 
 output "dc-public-ip" {
   description = "The domain controller public ip address"
-  value       = azurerm_public_ip.dc_ip.ip_address
+  value       = var.dc_ip.ip_address
+}
+
+output "dc-public-ip-id" {
+  description = "The domain controller public ip address id"
+  value       = var.dc_ip.id
+}
+
+output "dc-subnet-cidr" {
+  description = "The domain controller subnet CIDR"
+  value       = var.dc_subnet_cidr
 }
 
 output "dc-network-interface-id" {
@@ -66,13 +76,19 @@ output "all-output" {
   # Anything that refers to this output must wait until the actions for this module have completed first
   depends_on = [
     azurerm_network_interface.dc_nic,
-    azurerm_public_ip.dc_ip,
+    var.dc_ip,
     azurerm_network_security_group.nsg,
     azurerm_subnet.dc,
     azurerm_subnet.workstation,
     azurerm_subnet_network_security_group_association.network,
-    azurerm_virtual_network.network
+    azurerm_virtual_network.network,
+    azurerm_firewall_nat_rule_collection.cac-dc-nat,
+    azurerm_firewall_network_rule_collection.dc-fw-network
   ]
+}
+
+output "cac-dc-nat" {
+  value = azurerm_firewall_network_rule_collection.dc-fw-network
 }
 
 output "resource-group-name" {

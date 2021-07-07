@@ -31,3 +31,7 @@ variable "cac_network_interface_primary_config_name" {
   description = "List of cac network interface config names the load balancer will associate with"
   type        = list(string)
 }
+
+variable "instance_count" {
+  description = "Number of Cloud Access Connector instances to deploy in each zone"
+}

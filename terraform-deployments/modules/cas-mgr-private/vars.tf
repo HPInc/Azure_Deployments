@@ -140,3 +140,18 @@ variable "blob_depends_on" {
   type        = any
   default     =  null
 }
+
+variable "cas_mgr_public_ip" {
+  description = "Public IP of the CAS manager which will be used in the Firewall NAT"
+  type = any
+}
+
+variable "fw_name" {
+  description = "Name of the firewall"
+  type = string
+}
+
+variable "cas_nat_depends_on" {
+  type        = any
+  default     =  null
+}

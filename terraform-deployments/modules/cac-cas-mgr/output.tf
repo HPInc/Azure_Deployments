@@ -6,7 +6,7 @@
  */
 
 output "public-ip" {
-  value = var.is_private == false ? module.cac-regional[*].cac-public-ip : module.cac-regional-private[*].cac-public-ip 
+  value = var.is_private == false ? module.cac-regional[*].cac-public-ip : var.cac_fw_public[*].ip_address 
 }
 
 output "network-interface-nic-ids" {
@@ -21,14 +21,10 @@ output "subnet-ids" {
   value = var.is_private == false ? module.cac-regional[*].cac-subnet-ids : module.cac-regional-private[*].cac-subnet-ids
 }
 
-output "cac-fw-name" {
-  value = module.cac-regional-private[*].cac-fw-name
+output "cac-nat-rules" {
+  value = var.is_private == false ? null : module.cac-regional-private[0].cac-nat-rules
 }
 
-output "cac-fw-frontend" {
-  value = module.cac-regional-private[*].cac-fw-frontend
-}
-
-output "cac-fw-internal" {
-  value = module.cac-regional-private[*].cac-fw-internal
+output "cac-fw-rules" {
+  value = var.is_private == false ? null : module.cac-regional-private[0].cac-fw-rules
 }

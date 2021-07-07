@@ -6,6 +6,9 @@
  */
 
 resource "azurerm_route_table" "cac-rt" {
+  depends_on = [
+    var.route_table_depends_on
+  ]
   name                = "cac-routetable"
   location            = var.locations[0]
   resource_group_name = var.resource_group_name
@@ -31,5 +34,15 @@ resource "azurerm_subnet_route_table_association" "cac-subnet" {
 
 resource "azurerm_subnet_route_table_association" "ws-subnet" {
   subnet_id      = var.ws_subnet_ids[0]
+  route_table_id = azurerm_route_table.cac-rt.id
+}
+
+resource "azurerm_subnet_route_table_association" "dc-subnet" {
+  subnet_id      = var.dc_subnet_id
+  route_table_id = azurerm_route_table.cac-rt.id
+}
+
+resource "azurerm_subnet_route_table_association" "cas-subnet" {
+  subnet_id      = var.cas_subnet_id
   route_table_id = azurerm_route_table.cac-rt.id
 }

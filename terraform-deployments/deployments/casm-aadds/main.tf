@@ -1,0 +1,114 @@
+data "http" "myip" {
+  url = "https://ipinfo.io/ip"
+}
+
+resource "azurerm_resource_group" "main" {
+	name     = var.aadds_rg_name
+	location = var.aadds_location
+}
+
+resource "azurerm_virtual_network" "aadds_vnet" {
+	name                = var.aadds_vnet_name
+	address_space       = ["10.0.0.0/16"]
+	location            = azurerm_resource_group.main.location
+	resource_group_name = azurerm_resource_group.main.name
+       dns_servers         = [
+           "10.0.0.4",
+           "10.0.0.5"
+        ]
+}
+
+resource "azurerm_subnet" "aadds_subnet" {
+	name                 = "AADDS-Subnet"
+	resource_group_name = azurerm_resource_group.main.name
+	virtual_network_name = azurerm_virtual_network.aadds_vnet.name
+	address_prefixes     = ["10.0.0.0/24"]
+}
+
+resource "azurerm_network_security_group" "nsg" {
+  name                = "aadds-nsg-${azurerm_resource_group.main.location}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
+  name                       = "allow all vnet"
+  priority                   = 100
+  direction                  = "Inbound"
+  access                     = "Allow"
+  protocol                   = "*"
+  source_port_range          = "*"
+  destination_port_ranges    = ["1-65525"]
+  source_address_prefix      = "10.0.0.0/16"
+  destination_address_prefix = "*"
+  resource_group_name        = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+}
+
+# WinRM port used to upload scripts
+resource "azurerm_network_security_rule" "nsg_5985" {
+  name                        = "winrm port 5985"
+  priority                    = 201
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5985"
+  source_address_prefix       = chomp(data.http.myip.body)
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+}
+
+# AADDS Port
+resource "azurerm_network_security_rule" "nsg_5986" {
+  name                        = "winrm port 5986"
+  priority                    = 202
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5986"
+  source_address_prefix       = "AzureActiveDirectoryDomainServices"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+}
+
+# SSH port used to upload scripts
+resource "azurerm_network_security_rule" "nsg_22" {
+  name                        = "ssh port 22"
+  priority                    = 203
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = chomp(data.http.myip.body)
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+}
+
+resource "azurerm_subnet_network_security_group_association" "network" {
+  subnet_id                 = azurerm_subnet.aadds_subnet.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_template_deployment" "aadds" {
+  name                = "aadds_template"
+  resource_group_name = azurerm_resource_group.main.name
+  template_body       = file("template.json")
+  parameters = {
+    apiVersion              = "2017-06-01"
+    domainConfigurationType = "FullySynced"
+    domainName              = var.aadds_domain_name
+    filteredSync            = "Disabled"
+    location                = azurerm_resource_group.main.location
+    subnetName              = azurerm_subnet.aadds_subnet.name
+    vnetName                = azurerm_virtual_network.aadds_vnet.name
+    vnetResourceGroup       = azurerm_resource_group.main.name
+    #sku                     = "Standard"
+  }
+  deployment_mode = "Incremental"
+}

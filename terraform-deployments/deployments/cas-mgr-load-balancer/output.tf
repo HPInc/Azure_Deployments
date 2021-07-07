@@ -49,9 +49,3 @@ output "cas-mgr-public-ip" {
   value = module.cas-mgr.public-ip
 }
 
-output "cac-load-balancer-ip" {
-  value = {
-    for i in range(length(var.cac_location_list)) :
-    var.cac_location_list[i] => module.load-balancer[i].public-ip[0]
-  }
-}

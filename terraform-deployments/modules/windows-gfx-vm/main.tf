@@ -47,6 +47,8 @@ resource "azurerm_storage_blob" "windows-gfx-script" {
 resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
   for_each = var.workstations
 
+  depends_on = [var.windows_host_vm_depends_on]
+
   name                = each.value.prefix == "" ? "gwin-${each.value.index}" : "${each.value.prefix}-gwin-${each.value.index}"
   resource_group_name = var.resource_group_name
   location            = each.value.location

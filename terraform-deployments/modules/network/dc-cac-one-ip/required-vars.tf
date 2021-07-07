@@ -36,3 +36,13 @@ variable "application_id" {
   description = "The application (client) ID of your app registration in AAD"
   type        = string
 }
+
+variable "fw_name" {
+  description = "Name of the firewall associated with the Vnet"
+  type        = string
+}
+
+variable "dc_ip" {
+  description = "Public IP of the DC which will be translated through the firewall NAT"
+  type        = any
+}

@@ -86,17 +86,6 @@ variable "cas_mgr_url" {
   default     = "https://cas.teradici.com"
 }
 
-variable "fw_subnet_cidr" {
-  description = "CIDR for the subnet the firewall will be created in."
-  default     = ["10.0.8.0/24"]
-}
-
-
-variable "ws_subnet_cidr" {
-  description = "CIDRs of the workstation subnets"
-  default     =  ["10.0.4.0/24"]
-}
-
 variable "disk_size_gb" {
   description = "Disk size (GB) of the Cloud Access Connector"
   default     = "50"
@@ -181,6 +170,11 @@ variable "blob_depends_on" {
   default     = null
 }
 
+variable "cac_nat_depends_on" {
+  type        = any
+  default     = null
+}
+
 variable "cac_subnet_depends_on" {
   description = "Modules that the subnet requires as a dependency"
   type        = any
@@ -210,4 +204,34 @@ variable "cas_mgr_public_ip_id" {
   description = "ID of the Public IP of the CAS manager"
   type        = string
   default     = ""
+}
+
+variable "dc_subnet_cidr" {
+  description = "Internal CIDR of the domain controller"
+  type        = string
+  default     = ""
+}
+
+variable "dc_public_ip_id" {
+  description = "ID of the Public IP of the CAS domain controller"
+  type        = string
+  default     = ""
+}
+
+variable "fw_name" {
+  description = "Name of the Azure firewall"
+  type        = string
+  default = ""
+}
+
+variable "cac_fw_public" {
+  description = "Public IPs of the Firewall which NAT to the internal CAC IPs"
+  type        = any
+  default = []
+}
+
+variable "fw_internal" {
+  description = "Internal IP of the firewall"
+  type = string  
+  default = ""
 }

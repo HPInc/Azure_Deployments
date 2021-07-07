@@ -15,18 +15,12 @@ locals {
   cas_mgr_script          = "get-cac-token.py"
 }
 
-data "azurerm_key_vault_secret" "ad-pass" {
-  count        = var.key_vault_id != "" ? 1 : 0
-  name         = var.ad_pass_secret_name
-  key_vault_id = var.key_vault_id
-}
-
 resource "time_offset" "start" {
-  offset_minutes = 0
+  offset_days = -7
 }
 
 resource "time_offset" "expiry" {
-  offset_minutes = 32
+  offset_days = 7
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
@@ -39,9 +33,6 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 
   start  = time_offset.start.rfc3339
   expiry = time_offset.expiry.rfc3339
-
-  # TODO: fix IP address whitelist.
-  # ip_address = azurerm_public_ip.cac[count.index].ip_address
 
   permissions {
     read   = true
@@ -68,18 +59,6 @@ resource "azurerm_subnet_network_security_group_association" "cac" {
   network_security_group_id = var.network_security_group_id
 }
 
-
-resource "azurerm_public_ip" "cac" {
-
-  count = var.instance_count
-
-  name                    = "public-ip-cac-${var.location}-${count.index}"
-  location                = var.location
-  resource_group_name     = var.resource_group_name
-  allocation_method       = "Static"
-  idle_timeout_in_minutes = 30
-  sku                     = "Standard"
-}
 
 resource "azurerm_network_interface" "cac-nic" {
 
@@ -134,53 +113,12 @@ resource "azurerm_linux_virtual_machine" "cac-vm" {
   }
 }
 
-resource "azurerm_subnet" "fw-subnet" {
-  depends_on = [
-    azurerm_linux_virtual_machine.cac-vm
-  ]
-  name                 = "AzureFirewallSubnet"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-  address_prefixes     = var.fw_subnet_cidr
-}
-
-resource "azurerm_public_ip" "fw-frontend" {
-  name                    = "public-ip-cac-${var.location}-fw-frontend"
-  location                = var.location
-  resource_group_name     = var.resource_group_name
-  allocation_method       = "Static"
-  idle_timeout_in_minutes = 30
-  sku                     = "Standard"
-}
-
-resource "azurerm_firewall" "cac-fw" {
-  name                = "cac-fw"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-
-  ip_configuration {
-    name                 = "ip-config-fw-frontend"
-    subnet_id            = azurerm_subnet.fw-subnet.id
-    public_ip_address_id = azurerm_public_ip.fw-frontend.id
-  }
-
-  ip_configuration {
-    name                 = "ip-config-cas-frontend"
-    public_ip_address_id = var.cas_mgr_public_ip_id
-  }
-
-  dynamic "ip_configuration" {
-    for_each = { for idx, val in azurerm_public_ip.cac: idx => val}
-    content {
-      name                 = "ip-config-${ip_configuration.key}"
-      public_ip_address_id = ip_configuration.value.id
-    }
-  }
-}
-
 resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
+  depends_on = [
+    var.cac_nat_depends_on
+  ]
   name                = "cas-fw-nat-rules"
-  azure_firewall_name = azurerm_firewall.cac-fw.name
+  azure_firewall_name = var.fw_name
   resource_group_name = var.resource_group_name
   priority            = 100
   action              = "Dnat"
@@ -207,12 +145,12 @@ resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
   }
 
   dynamic "rule" {
-    for_each = { for idx, val in azurerm_public_ip.cac: idx => val}
+    for_each = { for idx, val in var.cac_fw_public: idx => val}
     content {
       name = "allow-cac-${rule.key}-ssh"
 
       source_addresses = [
-        "*"
+        chomp(data.http.myip.body)
       ]
 
       destination_ports = [
@@ -233,7 +171,7 @@ resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
   }
 
   dynamic "rule" {
-    for_each = { for idx, val in azurerm_public_ip.cac: idx => val}
+    for_each = { for idx, val in var.cac_fw_public: idx => val}
     content {
       name = "allow-cac-${rule.key}-pcoip"
 
@@ -259,22 +197,78 @@ resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
     }
   }
 
+  dynamic "rule" {
+    for_each = { for idx, val in var.cac_fw_public: idx => val}
+    content {
+      name = "allow-cac-${rule.key}-http"
+
+      source_addresses = [
+        "*"
+      ]
+
+      destination_ports = [
+        "80",
+      ]
+
+      destination_addresses = [
+        rule.value.ip_address
+      ]
+
+      translated_port = 80
+
+      translated_address = azurerm_linux_virtual_machine.cac-vm[rule.key].private_ip_address
+      protocols = [
+        "TCP",
+        "UDP",
+      ]
+    }
+  }
+
+    dynamic "rule" {
+    for_each = { for idx, val in var.cac_fw_public: idx => val}
+    content {
+      name = "allow-cac-${rule.key}-https"
+
+      source_addresses = [
+        "*"
+      ]
+
+      destination_ports = [
+        "443",
+      ]
+
+      destination_addresses = [
+        rule.value.ip_address
+      ]
+
+      translated_port = 443
+
+      translated_address = azurerm_linux_virtual_machine.cac-vm[rule.key].private_ip_address
+      protocols = [
+        "TCP",
+        "UDP",
+      ]
+    }
+  }
+
 }
 
 resource "azurerm_firewall_network_rule_collection" "cac-fw-network" {
-  name                = "cac-fw-network-rules"
-  azure_firewall_name = azurerm_firewall.cac-fw.name
+  depends_on = [
+    var.cac_nat_depends_on,
+    azurerm_firewall_nat_rule_collection.cac-fw-nat
+  ]
+  name                = "cac-fw-network-rule-cac"
+  azure_firewall_name = var.fw_name
   resource_group_name = var.resource_group_name
   priority            = 100
   action              = "Allow"
 
   rule {
-    name = "allow-external"
+    name = "allow-external-cac"
 
     source_addresses = [
-      var.cac_subnet_cidr[0],
-      var.ws_subnet_cidr[0],
-      var.cas_mgr_cidr
+      var.cac_subnet_cidr[0]
     ]
 
     destination_addresses = [
@@ -383,7 +377,7 @@ resource "null_resource" "upload-ssl" {
     type     = "ssh"
     user     = var.cac_admin_user
     password = local.cac_admin_password
-    host     = azurerm_public_ip.cac[count.index].ip_address
+    host     = var.cac_fw_public[count.index].ip_address
     port     = "22"
   }
 
@@ -412,7 +406,7 @@ resource "null_resource" "upload-provisioning-script" {
     type     = "ssh"
     user     = var.cac_admin_user
     password = local.cac_admin_password
-    host     = azurerm_public_ip.cac[count.index].ip_address
+    host     = var.cac_fw_public[count.index].ip_address
     port     = "22"
   }
 
@@ -434,10 +428,10 @@ resource "null_resource" "upload-provisioning-script" {
       aad_client_secret           = var.aad_client_secret
       tenant_id                   = var.tenant_id
       lls_ip                      = var.lls_ip
-      external_pcoip_ip           = azurerm_public_ip.cac[count.index].ip_address,
+      external_pcoip_ip           = var.cac_fw_public[count.index].ip_address,
       sas_token                   = data.azurerm_storage_account_blob_container_sas.token[count.index].sas
       private_container_url       = var.private_container_url,
-      fw_private_ip               = azurerm_firewall.cac-fw.ip_configuration[0].private_ip_address
+      fw_private_ip               = var.fw_internal
     })
     destination = "/home/${var.cac_admin_user}/cac-provisioning.sh"
   }
@@ -457,7 +451,7 @@ resource "null_resource" "run-cac-provisioning-script" {
     type     = "ssh"
     user     = var.cac_admin_user
     password = local.cac_admin_password
-    host     = azurerm_public_ip.cac[count.index].ip_address
+    host     = var.cac_fw_public[count.index].ip_address
     port     = "22"
   }
 

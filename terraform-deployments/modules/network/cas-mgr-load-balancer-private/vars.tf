@@ -36,3 +36,7 @@ variable "cac_fw_frontend" {
   description = "Frontend public firewall IP that will NAT to the private load balancer"
   type        = string
 }
+
+variable "lb_nat_depends_on" {
+  type        = any
+}
