@@ -48,6 +48,10 @@ resource "azurerm_network_interface" "centos-gfx-nic" {
 
 resource "azurerm_linux_virtual_machine" "centos-gfx-vm" {
 
+  depends_on = [
+    var.centos_gfx_depends_on
+  ]
+
   for_each = var.workstations
 
   name                            = each.value.prefix == "" ? "gcent-${each.value.index}" : "${each.value.prefix}-gcent-${each.value.index}"

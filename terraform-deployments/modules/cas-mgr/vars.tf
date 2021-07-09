@@ -40,6 +40,12 @@ variable "cas_mgr_deployment_sa_file" {
   type        = string
 }
 
+variable "cas_mgr_subnet_depends_on" {
+  description = "Subnet dependencies"
+  type        = any
+  default = null
+}
+
 variable "machine_type" {
   description = "Instance type for the CAS Manager (min 8 GB RAM, 4 vCPUs)"
   # default   = "Standard_F4s_v2"
@@ -127,4 +133,10 @@ variable "storage_connection_string" {
 
 variable "private_container_name" {
   description = "Name of container which stores .json key file."
+}
+
+variable "blob_depends_on" {
+  description = "Storage account that the storage blob requires as a dependency"
+  type        = any
+  default     =  null
 }

@@ -12,7 +12,7 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 locals {
-  windows_std_provisioning_script        = "windows-std-provisioning.ps1"
+  windows_std_provisioning_script        = var.is_aadds == true ? "windows-std-provisioning-aadds.ps1" : "windows-std-provisioning.ps1"
   windows_std_provisioning_script_params = "${var.pcoip_registration_code} ${var.domain_name} ${var.ad_service_account_username} ${local.ad_admin_password} ${var.application_id} ${var.aad_client_secret} ${var.enable_workstation_idle_shutdown} ${var.minutes_idle_before_shutdown} ${var.minutes_cpu_polling_interval} ${var.tenant_id}"
 
   deploy_script_file_destination = "C:/Temp/${local.windows_std_provisioning_script}"

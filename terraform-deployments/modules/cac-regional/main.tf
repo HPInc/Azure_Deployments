@@ -22,11 +22,11 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 resource "time_offset" "start" {
-  offset_minutes = 0
+  offset_days = -7
 }
 
 resource "time_offset" "expiry" {
-  offset_minutes = 32
+  offset_days = 7
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
@@ -56,7 +56,7 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 resource "azurerm_subnet" "cac" {
   name                 = "${var.cac_subnet_name}-${var.location}"
   address_prefixes     = var.cac_subnet_cidr
-  resource_group_name  = var.resource_group_name
+  resource_group_name  = var.aadds_resource_group == "" ? var.resource_group_name : var.aadds_resource_group
   virtual_network_name = var.virtual_network_name
 }
 

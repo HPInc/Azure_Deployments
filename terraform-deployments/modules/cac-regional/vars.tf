@@ -167,3 +167,8 @@ variable "storage_connection_string" {
 variable "private_container_name" {
   description = "Name of container which stores .json key file."
 }
+
+variable "aadds_resource_group" {
+  description = "Name of the resource group the AADDS belongs in"
+  default     = ""
+}

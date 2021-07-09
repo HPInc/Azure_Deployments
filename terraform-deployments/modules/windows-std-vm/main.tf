@@ -34,6 +34,9 @@ resource "azurerm_network_interface" "windows-std-nic" {
 }
 
 resource "azurerm_storage_blob" "windows-std-script" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   name                   = local.windows_std_provisioning_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name
@@ -42,7 +45,9 @@ resource "azurerm_storage_blob" "windows-std-script" {
 }
 
 resource "azurerm_windows_virtual_machine" "windows-std-vm" {
-
+  depends_on = [
+    var.windows_host_vm_depends_on
+  ]
   for_each = var.workstations
 
   name                = each.value.prefix == "" ? "swin-${each.value.index}" : "${each.value.prefix}-swin-${each.value.index}"

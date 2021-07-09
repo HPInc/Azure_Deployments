@@ -146,3 +146,92 @@ variable "tenant_id" {
   description = "The directory (tenant) ID of your app registration in AAD"
   type        = string
 }
+
+variable "aadds_resource_group" {
+  description = "Name of the resource group the AADDS belongs in"
+  default     = ""
+}
+
+variable "cac_depends_on" {
+  description = "Value that internal module components can use as a dependency for externally created recources"
+  type        = any
+  default     = null
+}
+
+variable "is_private" {
+  description = "Determines whether or not the CACs will be created with public IPs attached"
+  type        = bool
+  default     = false
+}
+
+variable "blob_depends_on" {
+  description = "Storage account that the storage blob requires as a dependency"
+  type        = any
+  default     = null
+}
+
+variable "cac_nat_depends_on" {
+  type        = any
+  default     = null
+}
+
+variable "cac_subnet_depends_on" {
+  description = "Modules that the subnet requires as a dependency"
+  type        = any
+  default     = null
+}
+
+
+variable "cas_mgr_internal_ip" {
+  description = "Internal IP of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_public_ip" {
+  description = "Public IP of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_cidr" {
+  description = "Internal CIDR of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "cas_mgr_public_ip_id" {
+  description = "ID of the Public IP of the CAS manager"
+  type        = string
+  default     = ""
+}
+
+variable "dc_subnet_cidr" {
+  description = "Internal CIDR of the domain controller"
+  type        = string
+  default     = ""
+}
+
+variable "dc_public_ip_id" {
+  description = "ID of the Public IP of the CAS domain controller"
+  type        = string
+  default     = ""
+}
+
+variable "fw_name" {
+  description = "Name of the Azure firewall"
+  type        = string
+  default = ""
+}
+
+variable "cac_fw_public" {
+  description = "Public IPs of the Firewall which NAT to the internal CAC IPs"
+  type        = any
+  default = []
+}
+
+variable "fw_internal" {
+  description = "Internal IP of the firewall"
+  type = string  
+  default = ""
+}
