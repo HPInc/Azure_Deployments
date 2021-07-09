@@ -275,7 +275,8 @@ resource "azurerm_lb_nat_rule" "dc_nat" {
 }
 
 resource "azurerm_network_interface_nat_rule_association" "dc_association" {
+  depends_on = [azurerm_network_interface.dc_nic, var.lb_id, azurerm_lb_nat_rule.dc_nat]
   network_interface_id  = azurerm_network_interface.dc_nic.id
-  ip_configuration_name = "dc_access"
+  ip_configuration_name = "primary"
   nat_rule_id           = azurerm_lb_nat_rule.dc_nat.id
 }

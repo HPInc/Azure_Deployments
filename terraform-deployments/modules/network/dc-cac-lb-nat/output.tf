@@ -81,7 +81,7 @@ output "all-output" {
     azurerm_subnet.dc,
     azurerm_subnet.workstation,
     azurerm_subnet_network_security_group_association.network,
-    azurerm_virtual_network.network
+    azurerm_virtual_network.network,
   ]
 }
 
@@ -93,4 +93,8 @@ output "resource-group-name" {
 output "virtual-network-name" {
   description = "Name of the virtual network"
   value       = azurerm_virtual_network.network[0].name
+}
+
+output "dc-association-id" {
+  value = azurerm_network_interface_nat_rule_association.dc_association.id
 }

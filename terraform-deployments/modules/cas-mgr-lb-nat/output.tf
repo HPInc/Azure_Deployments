@@ -21,3 +21,11 @@ output "subnet-cas-id" {
   description = "The CAS Manager network subnet id"
   value       = azurerm_subnet.cas-mgr.id
 }
+
+# output "public-ip" {
+#   value = azurerm_public_ip.cas-mgr-public.ip_address
+# }
+
+# output "cas-association-id" {
+#   value = azurerm_network_interface_nat_rule_association.cas_association.id
+# }

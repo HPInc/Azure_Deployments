@@ -1,23 +1,24 @@
-# CAS Manager (Single-Connector) Deployment
+# CAS Manager (Load Balancer NAT Single IP) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CAS Manager load balancer single IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - **[CAS Manager Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)**
+  - **[CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)**
+  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
   - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
+  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
   - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
-  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
-  - [CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
   - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+  - [CAS Manager (Multi Region Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
-1. [CAS Manager Single-Connector Architecture](#1-cas-manager-single-connector-architecture)
+1. [CAS Manager Load Balancer Single IP Architecture](#1-cas-manager-load-balancer-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
@@ -29,29 +30,27 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 
-### 1. CAS Manager Single-Connector Architecture
+### 1. CAS Manager Load Balancer NAT Single IP Architecture
 
-The Cloud Access Software (CAS) Manager Single-Connector deployment creates a Virtual Network with 3 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
+The Cloud Access Software (CAS) Manager Load Balancer single IP deployment creates a Virtual Network with 5 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
 - ```subnet-dc```: for the Domain Controller
-- ```subnet-cac```: for the Connector
+- ```subnet-cac```: for the Connector and Load Balancer
 - ```subnet-ws```: for the workstations
 - ```subnet-cas-mgr```: for the CAS Manager
 
-Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
+Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes. Additional virtual networks will be created for each unique region.
 
 A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a ```domain_users_list``` CSV file is specified. The Domain Controller is given a static IP (configurable).
 
-A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
+Cloud Access Connectors are created and register themselves with the CAS Manager. This deployment is configured for CAS Manager version 21.03.
 
-Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the ```workstations``` variable. This is a list of objects where each object defines a workstation.
+Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the ```workstations``` variable. This is a list of objects where each object defines a workstation. These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-Note: Since this is a single region deployment, please make sure that all ```location``` values in the ```workstations``` parameter are all identical.
+The Public Load Balancer distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the Load Balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the Load Balancer which have NAT rules set up to route into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
 
-These workstations are automatically domain-joined and have the PCoIP Agent installed.
+This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the public Load Balancer NAT, whose rules are preconfigured.
 
-The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
-
-![cas manager single-connector diagram](/terraform-deployments/docs/png/cas-mgr-single-deployment.png)
+NOTE: Currently, only single region deployments are supported for this deployment. Make sure that all workstations are in the same region and only one location is configured in the location list. Multi-region support to come at a later date.
 
 ### 2. Requirements
 - Access to a subscription on Azure. 
@@ -148,13 +147,12 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 Before deploying, ```terraform.tfvars``` must be complete. 
 1. Clone the repository into your Azure Cloud Shell (ACS) environment.
   - ```git clone https://github.com/teradici/Azure_Deployments```
-2. Change directory into: ```/terraform-deployments/deployments/single-connector```.
-  - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer```.
+2. Change directory into: ```/terraform-deployments/deployments/cas-mgr-load-balancer-one-ip```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-load-balancer-one-ip```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
     - To include optional variables, uncomment the line by removing preceding ```#```.
-    - Make sure the locations of the connectors and work stations are identical.
     
     ```terraform.tfvars``` variables:
 
@@ -163,7 +161,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
             -   Must be a max of 5 characters to avoid name cropping. Can be left blank.
         - ```location```: location of the workstation. **westus** machines will be placed in the West US region. 
             -   Possible values: [Regions](https://azure.microsoft.com/en-us/global-infrastructure/geographies/). 
-            -   e.g. West US 2 will be inputted as **westus2**. Central US as **centralus**.
+            -   **Note:** Ensure that there is only one location and this location matches the location of the workstations.
         - ```workstation_os```: Operating system of the workstation.
             -   Possible values: **windows** or **linux**
         - ```vm_size```: Size of the virtual machine. 
@@ -182,49 +180,35 @@ Before deploying, ```terraform.tfvars``` must be complete.
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
+6. Answer ```yes``` to start provisioning the CAS Manager load balancer infrastructure. 
 
-A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
+A typical deployment should take around 50-60 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
-Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 112 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-cac-public-ip = [
-  [
-    "public_ip" = "52.109.24.176"
-  ],
-]
-cas-mgr-public-ip = "52.109.24.178"
-centos-graphics-workstations = [
-  {
-    "name" = "gcent-0"
-    "private_ip" = "10.0.4.5"
-  },
-]
-centos-standard-workstations = [
-  {
-    "name" = "scent-0"
-    "private_ip" = "10.0.4.6"
-  },
-]
-domain-controller-private-ip = "10.0.1.4"
-domain-controller-public-ip = "52.109.24.161"
-resource_group = "single_connector_deployment_c4fe3"
-windows-standard-workstations = [
-  {
-    "name" = "swin-0"
-    "private_ip" = "10.0.4.4"
-  },
-]
-windows-graphics-workstations = [
-  {
-    "name" = "gwin-0"
-    "private_ip" = "10.0.4.7"
-  },
-]
+cac-load-balancer-ip = {
+  "westus2" = "123.345.678.91"
+}
+cas-mgr-public-ip = "123.345.678.92"
+centos-gfx-internal-ip = {
+  "gcent-0" = "10.0.4.5"
+}
+centos-std-internal-ip = {
+  "scent-0" = "10.0.4.4"
+}
+domain-controller-internal-ip = "10.0.1.4"
+domain-controller-public-ip = "123.345.678.93"
+resource_group = "cas_mgr_load_balancer_2c8482"
+windows-gfx-internal-ip = {
+  "gwin-0" = "10.0.4.6"
+}
+windows-std-internal-ip = {
+  "swin-0" = "10.1.4.7"
+}
 ```
     
 ### 7. Adding Workstations in CAS Manager
@@ -244,8 +228,7 @@ Note that it may take a 5-10 minutes for the workstation to show up in the **Sel
 Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
-    - **Note**: If the ```public_ip``` of the ```cac-public-ip``` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine ```[prefix]-cac-vm-0``` and the **Public IP address** will be shown.
+2. Enter the public frontend IP address of the public load balancer and enter a name for this connection. 
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5. 
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
@@ -257,35 +240,19 @@ Terraform is a declarative language to describe the desired state of resources. 
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
 ### 11. Troubleshooting
-- If the console looks frozen, try pressing Enter to unfreeze it.
+- If the console is frozen, try pressing Enter to unfreeze it. If freezing persists, a fresh deployment must be performed.
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
-- If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
-- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
-    - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine ```[prefix]-cac-vm-0```, and the **Public IP address** will be shown on the top right.
+- If trying to run a fresh deployment and have been running into errors, delete ```terraform.tfstate```. This file stores the state of the current infrastructure and configuration. Remember to also delete the previous deployment on the [Azure Portal](http://portal.azure.com/) if it's no longer being used.
+- If for any reason there are no outputs displaying on ACS the IP address of the load balancer can be found by going onto the [Azure Portal](http://portal.azure.com/). Go into the deployment's resource group, select the Load Balancer, load balancer public frontend IP can be found under the "Public IP Configuration" of the load balancer settings.
 
 Information about connecting to virtual machines for investigative purposes:
-- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
+- All resources in this deployment do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) public IP address that is assigned to the public load balancer.
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
-    1. RDP into the Domain Controller virtual machine. 
-    
-    ```
-    Computer: <domain-controller-public-ip>
-    User: cas_admin
-    Password: <ad_admin_password from terraform.tfvars>
-    ```
-   2. From inside the Domain Controller, RDP into the Windows workstation. 
-    
-    ```
-    Computer: <win-internal-ip>
-    User: windows_admin
-    Password: <ad_admin_password from terraform.tfvars>
-    ```
-   3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**.
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

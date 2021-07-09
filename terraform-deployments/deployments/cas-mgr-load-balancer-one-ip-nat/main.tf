@@ -12,6 +12,7 @@ module "workstation-map" {
 
 module "load-balancer" {
   source = "../../modules/network/cas-mgr-load-balancer-lb-nat"
+  load_balancer_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-vm.dc-machine-type]#, module.cas-mgr.cas-association-id]
   
   instance_count            = var.cac_count_list[0]
   prefix                    = var.prefix
@@ -21,7 +22,6 @@ module "load-balancer" {
 
 module "dc-cac-network" {
   source = "../../modules/network/dc-cac-lb-nat"
-
   resource_group_name     = azurerm_resource_group.main.name
   locations               = var.cac_location_list
   vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
@@ -59,7 +59,8 @@ module "active-directory-domain-service" {
   dc_vm_setup_depends_on = [
     module.dc-cac-network.all-output,
     module.active-directory-domain-vm.domain-controller-name,
-    module.active-directory-domain-vm.domain-controller-id
+    module.active-directory-domain-vm.domain-controller-id,
+    module.dc-cac-network.dc-association-id
   ]
 
   domain_controller_virtual_machine_name      = module.active-directory-domain-vm.domain-controller-name
@@ -97,6 +98,7 @@ module "cas-mgr" {
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
   cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
+  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id]
 
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
@@ -129,6 +131,7 @@ module "cac" {
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
   cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured]
   cac_count_list = var.cac_count_list
+  cac_nat_depends_on = [module.dc-cac-network.dc-association-id]
 
   cas_mgr_url                = "https://${module.cas-mgr.internal-ip}"
   cas_mgr_insecure           = true

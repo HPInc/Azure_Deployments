@@ -193,6 +193,7 @@ module "load-balancer" {
 }
 
 module "route-table" {
+  route_table_depends_on = [module.cac.cac-nat-rules, module.cac.cac-fw-rules]
   source               = "../../modules/network/route-table"
   resource_group_name  = azurerm_resource_group.main.name
   cac_subnet_ids       = module.cac.subnet-ids

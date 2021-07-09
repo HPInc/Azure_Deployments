@@ -275,6 +275,8 @@ install_cac() {
             --sync-interval 5 \
             --cam-url ${cas_mgr_url} \
             --external-pcoip-ip ${external_pcoip_ip} \
+            --external-client-cidr 0.0.0.0/0 \
+            --internal-client-cidr 127.0.0.1/32 \
             $args \
             2>&1 | tee -a $CAC_INSTALL_LOG
 

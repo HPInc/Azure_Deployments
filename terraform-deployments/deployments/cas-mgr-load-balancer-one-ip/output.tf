@@ -42,7 +42,7 @@ output "centos-std-internal-ip" {
 }
 
 output "cas-mgr-public-ip" {
-  value = module.firewall.cas-fw-public
+  value = module.firewall.cas-fw-public.ip_address
 }
 
 output "cac-load-balancer-ip" {

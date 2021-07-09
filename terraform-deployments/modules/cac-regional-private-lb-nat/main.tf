@@ -115,10 +115,10 @@ resource "azurerm_linux_virtual_machine" "cac-vm" {
 
 resource "azurerm_lb_nat_rule" "cac_nat" {
   count = var.instance_count
-
+  depends_on = [var.cac_nat_depends_on]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
-  name                           = "PCoIP"
+  name                           = "PCoIP-cac-${count.index}"
   protocol                       = "Tcp"
   frontend_port                  = 4172
   backend_port                   = 4172
@@ -127,18 +127,18 @@ resource "azurerm_lb_nat_rule" "cac_nat" {
 
 resource "azurerm_network_interface_nat_rule_association" "cac_association" {
   count = var.instance_count
-  
+  depends_on = [var.cac_nat_depends_on]
   network_interface_id  = azurerm_network_interface.cac-nic[count.index].id
-  ip_configuration_name = "pcoip_access-${count.index}"
+  ip_configuration_name = "primary"
   nat_rule_id           = azurerm_lb_nat_rule.cac_nat[count.index].id
 }
 
 resource "azurerm_lb_nat_rule" "cac_nat_udp" {
   count = var.instance_count
-
+  depends_on = [azurerm_network_interface_nat_rule_association.cac_association]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
-  name                           = "PCoIP_UDP"
+  name                           = "PCoIP_UDP-cac-${count.index}"
   protocol                       = "Udp"
   frontend_port                  = 4172
   backend_port                   = 4172
@@ -146,19 +146,20 @@ resource "azurerm_lb_nat_rule" "cac_nat_udp" {
 }
 
 resource "azurerm_network_interface_nat_rule_association" "cac_association_udp" {
+  depends_on = [azurerm_network_interface_nat_rule_association.cac_association]
   count = var.instance_count
   
   network_interface_id  = azurerm_network_interface.cac-nic[count.index].id
-  ip_configuration_name = "pcoip_access-${count.index}-udp"
+  ip_configuration_name = "primary"
   nat_rule_id           = azurerm_lb_nat_rule.cac_nat_udp[count.index].id
 }
 
 resource "azurerm_lb_nat_rule" "cac_nat_ssh" {
   count = var.instance_count
-
+  depends_on = [azurerm_network_interface_nat_rule_association.cac_association_udp]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
-  name                           = "ssh"
+  name                           = "ssh-cac-${count.index}"
   protocol                       = "Tcp"
   frontend_port                  = 22
   backend_port                   = 22
@@ -167,10 +168,10 @@ resource "azurerm_lb_nat_rule" "cac_nat_ssh" {
 
 resource "azurerm_network_interface_nat_rule_association" "cac_association_ssh" {
   count = var.instance_count
-  
+  depends_on = [azurerm_network_interface_nat_rule_association.cac_association_udp]
   network_interface_id  = azurerm_network_interface.cac-nic[count.index].id
-  ip_configuration_name = "pcoip_access-${count.index}-ssh"
-  nat_rule_id           = azurerm_lb_nat_rule.cac_nat[count.index].id
+  ip_configuration_name = "primary"
+  nat_rule_id           = azurerm_lb_nat_rule.cac_nat_ssh[count.index].id
 }
 
 resource "azurerm_lb_backend_address_pool" "main" {
@@ -183,7 +184,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
   count = var.instance_count
 
   network_interface_id    = azurerm_network_interface.cac-nic[count.index].id
-  ip_configuration_name   = "cac-config-${count.index}"
+  ip_configuration_name   = "primary"
   backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
 }
 

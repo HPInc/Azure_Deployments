@@ -48,4 +48,5 @@ variable "fw_private_ip"{
 
 variable "route_table_depends_on" {
   type = any
+  default = null
 }
