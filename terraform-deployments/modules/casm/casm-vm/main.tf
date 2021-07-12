@@ -25,7 +25,84 @@ data "azurerm_key_vault_secret" "ad-pass" {
   key_vault_id = var.key_vault_id
 }
 
+resource "azurerm_key_vault" "casm_keyvault" {
+  name                        = var.key_vault_name
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  enabled_for_disk_encryption = true
+  tenant_id                   = var.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = false
+
+  sku_name = "standard"
+
+  access_policy {
+    tenant_id = var.tenant_id
+    object_id = var.object_id
+    application_id = var.application_id
+
+    certificate_permissions = [
+      "create",
+      "delete",
+      "deleteissuers",
+      "get",
+      "getissuers",
+      "import",
+      "list",
+      "listissuers",
+      "managecontacts",
+      "manageissuers",
+      "setissuers",
+      "update",
+    ]
+
+    key_permissions = [
+      "backup",
+      "create",
+      "decrypt",
+      "delete",
+      "encrypt",
+      "get",
+      "import",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "sign",
+      "unwrapKey",
+      "update",
+      "verify",
+      "wrapKey",
+    ]
+
+    secret_permissions = [
+      "backup",
+      "delete",
+      "get",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "set",
+    ]
+
+    storage_permissions = [
+      "backup",
+      "delete",
+      "get",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "set",
+      "update"
+    ]
+  }
+}
+
+
 data "azurerm_storage_account_blob_container_sas" "token" {
+  depends_on = [var.blob_depends_on]
   connection_string = var.storage_connection_string
   container_name    = var.private_container_name
   https_only        = true
@@ -47,6 +124,7 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 }
 
 resource "azurerm_subnet" "cas-mgr" {
+  depends_on = [var.casm_subnet_depends_on]
   name                 = var.cas_mgr_subnet_name
   address_prefixes     = var.cas_mgr_subnet_cidr
   resource_group_name  = var.aadds_resource_group == "" ? var.resource_group_name : var.aadds_resource_group
@@ -79,7 +157,7 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
 }
 
 resource "azurerm_storage_blob" "cas-mgr-setup-script" {
-  depends_on = [var.casm_depends_on]
+  depends_on = [var.casm_depends_on, var.blob_depends_on]
   name                   = local.cas_mgr_setup_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name
@@ -144,8 +222,23 @@ resource "null_resource" "upload-casm-config" {
   provisioner "file" {
     content = templatefile("${path.module}/casm.conf.tmpl", {
       vm_private_ip = azurerm_network_interface.cas-mgr-nic.private_ip_address,
+      azure_client_id = var.application_id,
+      azure_client_secret = var.aad_client_secret,
+      azure_tenant_id = var.tenant_id,
+      key_vault_url = azurerm_key_vault.casm_keyvault.vault_uri,
+      db_username = var.db_username,
+      db_password = var.db_password
     })
     destination = "/home/${var.ad_service_account_username}/casm.conf"
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/dbconf.mongo.tmpl", {
+      vm_private_ip = azurerm_network_interface.cas-mgr-nic.private_ip_address,
+      db_username = var.db_username,
+      db_password = var.db_password
+    })
+    destination = "/home/${var.ad_service_account_username}/dbconf.mongo"
   }
 }
 

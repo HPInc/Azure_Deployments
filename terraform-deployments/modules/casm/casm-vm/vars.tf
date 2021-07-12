@@ -20,10 +20,10 @@ variable "tenant_id" {
   type        = string
 }
 
-# variable "object_id" {
-#   description = "Object ID of the app registration in AAD"
-#   type        = string
-# }
+variable "object_id" {
+  description = "Object ID of the app registration in AAD"
+  type        = string
+}
 
 variable "private_container_url" {
   description = "URL of the private container storage."
@@ -142,19 +142,31 @@ variable "casm_depends_on" {
   default     = null
 }
 
-# variable "key_vault_name" {
-#   description = "Name of created Azure Keyvault, must be globally unique."
-#   type        = string
-# }
+variable "casm_subnet_depends_on" {
+  type        = any
+  default     =  null
+}
 
-# variable "db_username" {
-#   description = "Username of the Mongodb user."
-#   type        = string
-#   default     = "db_admin" 
-# }
+variable "blob_depends_on" {
+  type        = any
+  default     =  null
+}
 
-# variable "db_password" {
-#   description = "Password of the Mongodb user."
-#   type        = string
-#   default     = "Password!234"
-# }
+
+
+variable "key_vault_name" {
+  description = "Name of created Azure Keyvault, must be globally unique."
+  type        = string
+}
+
+variable "db_username" {
+  description = "Username of the Mongodb user."
+  type        = string
+  default     = "db_admin" 
+}
+
+variable "db_password" {
+  description = "Password of the Mongodb user."
+  type        = string
+  default     = "Password!234"
+}
