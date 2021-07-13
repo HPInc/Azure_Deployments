@@ -124,7 +124,7 @@ mongo_kv_setup() {
     cat $INSTALL_DIR/mongod.conf >| /etc/mongod.conf
     mkdir -p /var/lib/mongodb 
     mongod --config /etc/mongod.conf
-    #mongo < $INSTALL_DIR/dbconf.mongo
+    mongo < $INSTALL_DIR/dbconf.mongo
     /usr/local/bin/cas-manager configure --config-file $INSTALL_DIR/casm.conf
 }
 

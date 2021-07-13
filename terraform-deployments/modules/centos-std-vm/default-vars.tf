@@ -25,3 +25,9 @@ variable "minutes_cpu_polling_interval" {
   description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
   default     = 15
 }
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}

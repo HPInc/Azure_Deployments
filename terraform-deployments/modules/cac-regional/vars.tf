@@ -172,3 +172,9 @@ variable "aadds_resource_group" {
   description = "Name of the resource group the AADDS belongs in"
   default     = ""
 }
+
+variable "cac_subnet_depends_on" {
+  description = "Value that internal module components can use as a dependency for externally created recources"
+  type        = any
+  default     = null
+}

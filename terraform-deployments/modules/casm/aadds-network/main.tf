@@ -14,6 +14,25 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = var.resource_group_name
 }
 
+# resource "azurerm_virtual_network" "aadds_vnet" {
+# 	name                = "test-vnet"
+# 	address_space       = ["10.1.0.0/16"]
+# 	location            = var.locations[0]
+# 	resource_group_name = var.aadds_vnet_rg
+#        dns_servers         = [
+#            "10.1.0.4",
+#            "10.1.0.5"
+#         ]
+# }
+
+# resource "azurerm_subnet" "aadds_subnet" {
+# 	name                 = "AADDS-Subnet"
+# 	resource_group_name = var.aadds_vnet_rg
+# 	virtual_network_name = azurerm_virtual_network.aadds_vnet.name
+# 	address_prefixes     = ["10.1.0.0/24"]
+# }
+
+
 resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   count = 1
 
@@ -24,7 +43,7 @@ resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   protocol                   = "*"
   source_port_range          = "*"
   destination_port_ranges    = ["1-65525"]
-  source_address_prefix      = "10.${local.network_security_rule_prefixes[count.index][0]}.0.0/16"
+  source_address_prefix      = "10.0.0.0/16"
   destination_address_prefix = "*"
   resource_group_name        = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[
@@ -82,6 +101,24 @@ resource "azurerm_network_security_rule" "nsg_5986" {
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name
 }
 
+# WinRM port used to upload scripts
+resource "azurerm_network_security_rule" "nsg_5986_aadds" {
+  count = 1
+
+  name                        = "winrm port 5986"
+  priority                    = 202
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5986"
+  source_address_prefix       = "AzureActiveDirectoryDomainServices"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg[count.index].name
+}
+
+
 # SSH port used to upload scripts
 resource "azurerm_network_security_rule" "nsg_22" {
   count = 1
@@ -93,7 +130,7 @@ resource "azurerm_network_security_rule" "nsg_22" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "*"#chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.body)
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name
@@ -121,11 +158,10 @@ resource "azurerm_network_security_rule" "nsg_3389" {
 # One workstation subnet per region
 resource "azurerm_subnet" "workstation" {
   count = 1
-
-  name                 = "${var.workstation_subnet_name}-${var.locations[count.index]}-${var.resource_group_name}"
-  address_prefixes     = ["10.${count.index}.${count.index + 6}.0/24"]
+  name                 = "${var.workstation_subnet_name}-${var.locations[0]}-${var.resource_group_name}"
+  address_prefixes     = ["10.0.6.0/24"]
   resource_group_name  = var.aadds_vnet_rg
-  virtual_network_name = var.aadds_vnet_name
+  virtual_network_name = var.aadds_vnet_name#azurerm_virtual_network.aadds_vnet.name
 }
 
 # Nat per location
@@ -189,3 +225,8 @@ resource "azurerm_subnet_network_security_group_association" "workstation" {
   subnet_id                 = azurerm_subnet.workstation[count.index].id
   network_security_group_id = azurerm_network_security_group.nsg[count.index].id
 }
+
+# resource "azurerm_subnet_network_security_group_association" "aadds" {
+#   subnet_id                 = azurerm_subnet.aadds_subnet.id
+#   network_security_group_id = azurerm_network_security_group.nsg[0].id
+# }

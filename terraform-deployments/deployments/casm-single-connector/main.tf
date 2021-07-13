@@ -39,7 +39,7 @@ module "casm" {
   storage_account_name         = azurerm_storage_account.storage.name
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
-  azurerm_virtual_network_name = data.azurerm_virtual_network.aadds_vnet.name
+  azurerm_virtual_network_name = data.azurerm_virtual_network.aadds_vnet.name#module.aadds-network.aadds_vnet_name#
   network_security_group_ids   = module.aadds-network.network-security-group-ids
 
   application_id              = var.application_id
@@ -62,8 +62,8 @@ module "casm" {
 
 
 module "cac" {
-  source = "../../modules/cac-cas-mgr"
-
+  source = "../../modules/cac-cas-mgr-aadds"
+  cac_subnet_depends_on = module.aadds-network.all-output
   cac_count_list = [var.cac_instance_count]
 
   cas_mgr_url                = "https://${module.casm.internal-ip}"
@@ -71,7 +71,7 @@ module "cac" {
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
 
   network_security_group_ids    = module.aadds-network.network-security-group-ids
-  azurerm_virtual_network_names = [data.azurerm_virtual_network.aadds_vnet.name]
+  azurerm_virtual_network_names = [data.azurerm_virtual_network.aadds_vnet.name]#[module.aadds-network.aadds_vnet_name]#
 
   prefix                = var.prefix
   domain_name           = var.aadds_domain_name
@@ -89,7 +89,6 @@ module "cac" {
   aad_client_secret           = var.aad_client_secret
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
-  tenant_id                   = ""
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   ssl_key                     = var.ssl_key
@@ -115,7 +114,6 @@ module "windows-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -142,7 +140,6 @@ module "windows-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -169,7 +166,6 @@ module "centos-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -195,7 +191,6 @@ module "centos-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name

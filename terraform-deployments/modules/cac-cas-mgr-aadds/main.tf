@@ -33,7 +33,7 @@ module "cac-regional" {
   instance_count            = var.cac_count_list[count.index]
   virtual_network_name      = var.azurerm_virtual_network_names[count.index]
   network_security_group_id = var.network_security_group_ids[count.index]
-  cac_subnet_cidr           = ["10.${count.index}.3.0/24"]
+  cac_subnet_cidr           = ["10.0.3.0/24"]
 
   cas_mgr_setup_script_url   = azurerm_storage_blob.get-cac-token-script.url
   cas_mgr_deployment_sa_file = var.cas_mgr_deployment_sa_file

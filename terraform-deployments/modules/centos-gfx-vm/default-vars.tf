@@ -30,3 +30,9 @@ variable "nvidia_driver_url" {
   description = "URL of NVIDIA Grid driver"
   default     = "https://download.microsoft.com/download/1/a/5/1a537cae-5b52-4348-acd2-2f210fc412b0/NVIDIA-Linux-x86_64-430.46-grid.run"
 }
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default = ""
+}
