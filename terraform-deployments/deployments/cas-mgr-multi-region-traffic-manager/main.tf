@@ -87,6 +87,7 @@ module "cas-mgr" {
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
   private_container_url      = azurerm_storage_container.private-container.id
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   storage_account_name         = azurerm_storage_account.storage.name
   resource_group_name          = azurerm_resource_group.main.name
@@ -111,6 +112,7 @@ module "cac" {
   source = "../../modules/cac-cas-mgr"
 
   cac_count_list = var.cac_count_list
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   cas_mgr_url                = "https://${module.cas-mgr.internal-ip}"
   cas_mgr_insecure           = true
@@ -161,6 +163,7 @@ module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
   windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -188,6 +191,7 @@ module "windows-gfx-vm" {
   source = "../../modules/windows-gfx-vm"
 
   windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name

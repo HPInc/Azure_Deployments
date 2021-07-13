@@ -36,3 +36,9 @@ variable "is_aadds" {
   description = "Value that determines whether or not the provisioning script used will be for AADDS (Azure Active Directory Domain Services) domains"
   default = false
 }
+
+variable "tenant_id" {
+  description = "The directory (tenant) ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}

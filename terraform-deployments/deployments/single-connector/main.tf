@@ -189,6 +189,7 @@ module "windows-std-vm" {
   windows_host_vm_depends_on = [
     module.cac-vm.cac-vm-ids,
   ]
+  blob_depends_on = [azurerm_storage_account.windows-script-storage, azurerm_storage_container.windows-script-blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -219,6 +220,7 @@ module "windows-gfx-vm" {
   windows_host_vm_depends_on = [
     module.cac-vm.cac-vm-ids,
   ]
+  blob_depends_on = [azurerm_storage_account.windows-script-storage, azurerm_storage_container.windows-script-blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name

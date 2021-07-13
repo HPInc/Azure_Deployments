@@ -45,30 +45,8 @@ install_azcopy() {
 get_credentials() {
 
     set +x
-    if [[ -z "${tenant_id}" ]]; then
-        log "Not getting secrets from Azure Key Vault. Exiting get_credentials..."
-
-        CAS_MGR_ADMIN_PASSWORD=${cas_mgr_admin_password}
-        PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
-    else
-        log "--> Installing epel-release.."
-        yum -y install epel-release
-        if [ $? -ne 0 ]; then
-            log "--> Failed to install epel-release"
-            exit 1
-        fi
-
-        log "--> Installing jq.."
-        yum install -y jq
-        if [ $? -ne 0 ]; then
-            log "Failed to install jq"
-        fi
-
-        log "Getting secrets from Azure Key Vault..."
-        ACCESS_TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${application_id}&client_secret=${aad_client_secret}&resource=https%3A%2F%2Fvault.azure.net" https://login.microsoftonline.com/${tenant_id}/oauth2/token | jq ".access_token" -r)
-        CAS_MGR_ADMIN_PASSWORD=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${cas_mgr_admin_password}?api-version=2016-10-01" | jq -r '.value')
-        PCOIP_REGISTRATION_CODE=$(curl -X GET -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" --url "${pcoip_registration_code}?api-version=2016-10-01" | jq -r '.value')
-    fi
+    CAS_MGR_ADMIN_PASSWORD=${cas_mgr_admin_password}
+    PCOIP_REGISTRATION_CODE=${pcoip_registration_code}
     set -x
 }
 
@@ -123,9 +101,12 @@ install_cas_mgr() {
 }
 
 mongo_kv_setup() {
-    mv /home/${cas_mgr_username}/mongodb-org-4.4.repo $INSTALL_DIR/
-    mv /home/${cas_mgr_username}/mongod.conf $INSTALL_DIR/
-    mv /home/${cas_mgr_username}/casm.conf $INSTALL_DIR/
+    HOME_DIR = /home/${cas_mgr_username}
+    mv $HOME_DIR/mongodb-org-4.4.repo $INSTALL_DIR/
+    mv $HOME_DIR/mongod.conf $INSTALL_DIR/
+    mv $HOME_DIR/casm.conf $INSTALL_DIR/
+    mv $HOME_DIR/dbconf.mongo $INSTALL_DIR/
+
     yum install openssl
     openssl genrsa -out rootCA.key 4096
     openssl req -newkey rsa:4096 \
@@ -143,6 +124,7 @@ mongo_kv_setup() {
     cat $INSTALL_DIR/mongod.conf >| /etc/mongod.conf
     mkdir -p /var/lib/mongodb 
     mongod --config /etc/mongod.conf
+    mongo < $INSTALL_DIR/dbconf.mongo
     /usr/local/bin/cas-manager configure --config-file $INSTALL_DIR/casm.conf
 }
 

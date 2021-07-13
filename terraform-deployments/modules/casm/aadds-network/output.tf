@@ -37,7 +37,8 @@ output "all-output" {
   # Anything that refers to this output must wait until the actions for this module have completed first
   depends_on = [
     azurerm_network_security_group.nsg,
-    azurerm_subnet.workstation
+    azurerm_subnet.workstation,
+    #azurerm_subnet_network_security_group_association.aadds
   ]
 }
 
@@ -45,3 +46,8 @@ output "resource-group-name" {
   description = "Name of the resource group"
   value       = var.resource_group_name
 }
+
+# output "aadds_vnet_name" {
+#   description = "Name of the VNET"
+#   value = azurerm_virtual_network.aadds_vnet.name
+# }

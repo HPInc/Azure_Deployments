@@ -198,6 +198,7 @@ module "load-balancer" {
   cac_configuration                         = var.cac_configuration
   cac_network_interface_ids                 = module.cac-network.cac-network-interface-ids
   cac_network_interface_primary_config_name = module.cac-network.cac-network-interface-primary-config-name
+  instance_count                            = 1
 }
 
 module "windows-std-vm" {
@@ -206,6 +207,7 @@ module "windows-std-vm" {
   windows_host_vm_depends_on = [
     module.cac-vm.cac-vm-ids,
   ]
+  blob_depends_on = [azurerm_storage_account.windows-script-storage, azurerm_storage_container.windows-script-blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -236,6 +238,7 @@ module "windows-gfx-vm" {
   windows_host_vm_depends_on = [
     module.cac-vm.cac-vm-ids,
   ]
+  blob_depends_on = [azurerm_storage_account.windows-script-storage, azurerm_storage_container.windows-script-blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name

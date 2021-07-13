@@ -59,11 +59,6 @@ variable "application_id" {
   type        = string
 }
 
-variable "tenant_id" {
-  description = "The directory (tenant) ID of your app registration in AAD"
-  type        = string
-}
-
 variable "aad_client_secret" {
   description = "The client secret of your app registration in AAD"
   type        = string

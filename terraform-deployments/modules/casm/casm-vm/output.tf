@@ -12,3 +12,7 @@ output "internal-ip" {
 output "public-ip" {
   value = azurerm_public_ip.cas-mgr-public-ip.ip_address
 }
+
+output "subnet" {
+  value = azurerm_subnet.cas-mgr
+}

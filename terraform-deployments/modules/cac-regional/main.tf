@@ -54,6 +54,7 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 }
 
 resource "azurerm_subnet" "cac" {
+  depends_on           = [var.cac_subnet_depends_on]
   name                 = "${var.cac_subnet_name}-${var.location}"
   address_prefixes     = var.cac_subnet_cidr
   resource_group_name  = var.aadds_resource_group == "" ? var.resource_group_name : var.aadds_resource_group
