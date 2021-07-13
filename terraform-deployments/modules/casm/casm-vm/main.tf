@@ -26,7 +26,7 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 resource "azurerm_key_vault" "casm_keyvault" {
-  name                        = var.key_vault_name
+  name                        = var.key_vault_name == "" ? "kv-${var.resource_group_name}" : var.key_vault_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = true
@@ -125,7 +125,7 @@ data "azurerm_storage_account_blob_container_sas" "token" {
 
 resource "azurerm_subnet" "cas-mgr" {
   depends_on = [var.casm_subnet_depends_on]
-  name                 = var.cas_mgr_subnet_name
+  name                 = "${var.cas_mgr_subnet_name}-${var.resource_group_name}"
   address_prefixes     = var.cas_mgr_subnet_cidr
   resource_group_name  = var.aadds_resource_group == "" ? var.resource_group_name : var.aadds_resource_group
   virtual_network_name = var.azurerm_virtual_network_name

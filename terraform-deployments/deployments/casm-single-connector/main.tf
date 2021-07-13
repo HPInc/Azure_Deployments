@@ -39,7 +39,7 @@ module "casm" {
   storage_account_name         = azurerm_storage_account.storage.name
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
-  azurerm_virtual_network_name = data.azurerm_virtual_network.aadds_vnet.name#module.aadds-network.aadds_vnet_name#
+  azurerm_virtual_network_name = data.azurerm_virtual_network.aadds_vnet.name
   network_security_group_ids   = module.aadds-network.network-security-group-ids
 
   application_id              = var.application_id
@@ -63,7 +63,7 @@ module "casm" {
 
 module "cac" {
   source = "../../modules/cac-cas-mgr-aadds"
-  cac_subnet_depends_on = module.aadds-network.all-output
+  cac_subnet_depends_on = [module.aadds-network.all-output, module.casm.subnet]
   cac_count_list = [var.cac_instance_count]
 
   cas_mgr_url                = "https://${module.casm.internal-ip}"
@@ -71,7 +71,7 @@ module "cac" {
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
 
   network_security_group_ids    = module.aadds-network.network-security-group-ids
-  azurerm_virtual_network_names = [data.azurerm_virtual_network.aadds_vnet.name]#[module.aadds-network.aadds_vnet_name]#
+  azurerm_virtual_network_names = [data.azurerm_virtual_network.aadds_vnet.name]
 
   prefix                = var.prefix
   domain_name           = var.aadds_domain_name

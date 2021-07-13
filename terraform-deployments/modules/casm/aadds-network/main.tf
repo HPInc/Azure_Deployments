@@ -14,23 +14,6 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = var.resource_group_name
 }
 
-# resource "azurerm_virtual_network" "aadds_vnet" {
-# 	name                = "test-vnet"
-# 	address_space       = ["10.1.0.0/16"]
-# 	location            = var.locations[0]
-# 	resource_group_name = var.aadds_vnet_rg
-#        dns_servers         = [
-#            "10.1.0.4",
-#            "10.1.0.5"
-#         ]
-# }
-
-# resource "azurerm_subnet" "aadds_subnet" {
-# 	name                 = "AADDS-Subnet"
-# 	resource_group_name = var.aadds_vnet_rg
-# 	virtual_network_name = azurerm_virtual_network.aadds_vnet.name
-# 	address_prefixes     = ["10.1.0.0/24"]
-# }
 
 
 resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
@@ -96,23 +79,6 @@ resource "azurerm_network_security_rule" "nsg_5986" {
   source_port_range           = "*"
   destination_port_range      = "5986"
   source_address_prefix       = chomp(data.http.myip.body)
-  destination_address_prefix  = "*"
-  resource_group_name         = var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.nsg[count.index].name
-}
-
-# WinRM port used to upload scripts
-resource "azurerm_network_security_rule" "nsg_5986_aadds" {
-  count = 1
-
-  name                        = "winrm port 5986"
-  priority                    = 202
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "5986"
-  source_address_prefix       = "AzureActiveDirectoryDomainServices"
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name

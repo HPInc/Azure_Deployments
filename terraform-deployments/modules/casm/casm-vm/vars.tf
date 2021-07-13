@@ -157,6 +157,7 @@ variable "blob_depends_on" {
 variable "key_vault_name" {
   description = "Name of created Azure Keyvault, must be globally unique."
   type        = string
+  default     = ""
 }
 
 variable "db_username" {
