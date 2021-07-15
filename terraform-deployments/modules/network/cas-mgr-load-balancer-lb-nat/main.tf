@@ -60,10 +60,10 @@ resource "azurerm_lb" "main" {
     public_ip_address_id = azurerm_public_ip.loadbalancer_public_ip.id
   }
 
-  # frontend_ip_configuration {
-  #   name                 = "ip-config-cas-frontend"
-  #   public_ip_address_id = azurerm_public_ip.cas-mgr-public-ip.id
-  # }
+  frontend_ip_configuration {
+    name                 = "ip-config-cas-frontend"
+    public_ip_address_id = azurerm_public_ip.cas-mgr-public-ip.id
+  }
 
   frontend_ip_configuration {
     name                 = "ip-config-dc-frontend"

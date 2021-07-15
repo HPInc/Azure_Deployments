@@ -70,7 +70,7 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
     name                          = "cas-mgr-ipconfig"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.cas-mgr.id
-    public_ip_address_id          = var.cas_mgr_public_ip.id
+    #public_ip_address_id          = var.cas_mgr_public_ip.id
   }
 }
 
@@ -113,9 +113,35 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
   }
 }
 
+resource "azurerm_lb_backend_address_pool" "cas-mgr" {
+  loadbalancer_id = var.lb_id
+  name            = "cas-mgr-pool"
+}
+
+# Optional load balancer vm association
+resource "azurerm_network_interface_backend_address_pool_association" "cas-association" {
+  network_interface_id    = azurerm_network_interface.cas-mgr-nic.id
+  ip_configuration_name   = "cas-mgr-ipconfig"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
+}
+
+resource "azurerm_lb_outbound_rule" "cas_outbound" {
+  depends_on = [azurerm_network_interface_backend_address_pool_association.cas-association]
+  resource_group_name     = var.resource_group_name
+  loadbalancer_id         = var.lb_id
+  name                    = "cas-outbound"
+  protocol                = "Tcp"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
+
+  frontend_ip_configuration {
+    name = "ip-config-cas-frontend"
+  }
+}
+
+
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 
-  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script]#, azurerm_network_interface_nat_rule_association.cas_association_http]
+  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, azurerm_lb_outbound_rule.cas_outbound]#, azurerm_network_interface_nat_rule_association.cas_association_http]
 
   name                 = azurerm_linux_virtual_machine.cas-mgr-vm.name
   virtual_machine_id   = azurerm_linux_virtual_machine.cas-mgr-vm.id
@@ -144,36 +170,19 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   SETTINGS
 }
 
-# resource "azurerm_lb_nat_rule" "cas_nat" {
-#   depends_on = [var.cas_nat_depends_on]
-#   resource_group_name            = var.resource_group_name
-#   loadbalancer_id                = var.lb_id
-#   name                           = "HTTPSAccess"
-#   protocol                       = "Tcp"
-#   frontend_port                  = 443
-#   backend_port                   = 443
-#   frontend_ip_configuration_name = "ip-config-cas-frontend"
-# }
+resource "azurerm_lb_nat_rule" "cas_nat" {
+  depends_on = [var.cas_nat_depends_on]
+  resource_group_name            = var.resource_group_name
+  loadbalancer_id                = var.lb_id
+  name                           = "HTTPSAccess"
+  protocol                       = "Tcp"
+  frontend_port                  = 443
+  backend_port                   = 443
+  frontend_ip_configuration_name = "ip-config-cas-frontend"
+}
 
-# resource "azurerm_network_interface_nat_rule_association" "cas_association" {
-#   network_interface_id  = azurerm_network_interface.cas-mgr-nic.id
-#   ip_configuration_name = "cas-mgr-ipconfig"
-#   nat_rule_id           = azurerm_lb_nat_rule.cas_nat.id
-# }
-
-# resource "azurerm_lb_nat_rule" "cas_nat_http" {
-#   depends_on = [var.cas_nat_depends_on]
-#   resource_group_name            = var.resource_group_name
-#   loadbalancer_id                = var.lb_id
-#   name                           = "HTTPAccess"
-#   protocol                       = "Tcp"
-#   frontend_port                  = 80
-#   backend_port                   = 80
-#   frontend_ip_configuration_name = "ip-config-cas-frontend"
-# }
-
-# resource "azurerm_network_interface_nat_rule_association" "cas_association_http" {
-#   network_interface_id  = azurerm_network_interface.cas-mgr-nic.id
-#   ip_configuration_name = "cas-mgr-ipconfig"
-#   nat_rule_id           = azurerm_lb_nat_rule.cas_nat_http.id
-# }
+resource "azurerm_network_interface_nat_rule_association" "cas_association" {
+  network_interface_id  = azurerm_network_interface.cas-mgr-nic.id
+  ip_configuration_name = "cas-mgr-ipconfig"
+  nat_rule_id           = azurerm_lb_nat_rule.cas_nat.id
+}

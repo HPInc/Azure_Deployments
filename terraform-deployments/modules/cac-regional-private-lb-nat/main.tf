@@ -190,6 +190,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
 
 
 resource "azurerm_lb_rule" "allow_port_443" {
+  depends_on                     = [var.cac_nat_depends_on, azurerm_network_interface_backend_address_pool_association.main, azurerm_network_interface_nat_rule_association.cac_association_ssh]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
   name                           = "allow-https-${var.location}"

@@ -1,9 +1,0 @@
-{
-  "db-connection-string": "mongodb://${db_username}:${db_password}@${vm_private_ip}:27017/casm_db",
-  "db-enable-tls": false,
-  "vault-type": "azure",
-  "key-vault-url": ${key_vault_url},
-  "azure-client-id": ${azure_client_id},
-  "azure-client-secret": ${azure_client_secret},
-  "azure-tenant-id": ${azure_tenant_id}
-}
