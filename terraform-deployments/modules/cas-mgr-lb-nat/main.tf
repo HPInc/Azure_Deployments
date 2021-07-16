@@ -171,7 +171,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 }
 
 resource "azurerm_lb_nat_rule" "cas_nat" {
-  depends_on = [var.cas_nat_depends_on]
+  depends_on = [var.cas_nat_depends_on,azurerm_lb_outbound_rule.cas_outbound]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
   name                           = "HTTPSAccess"
