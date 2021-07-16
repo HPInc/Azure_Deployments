@@ -26,6 +26,6 @@ output "subnet-cas-id" {
 #   value = azurerm_public_ip.cas-mgr-public.ip_address
 # }
 
-# output "cas-association-id" {
-#   value = azurerm_network_interface_nat_rule_association.cas_association.id
-# }
+output "cas-association-id" {
+  value = azurerm_network_interface_nat_rule_association.cas_association.id
+}

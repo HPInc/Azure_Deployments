@@ -129,9 +129,9 @@ module "cac" {
   source = "../../modules/cac-cas-mgr-lb-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id]
+  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id, module.cas-mgr.cas-association-id]
   cac_count_list = var.cac_count_list
-  cac_nat_depends_on = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id]
+  cac_nat_depends_on = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id, module.cas-mgr.cas-association-id]
 
   cas_mgr_url                = "https://${module.cas-mgr.internal-ip}"
   cas_mgr_insecure           = true

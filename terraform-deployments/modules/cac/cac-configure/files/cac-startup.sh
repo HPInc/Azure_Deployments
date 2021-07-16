@@ -185,7 +185,7 @@ install_cac() {
     log "  --sync-interval 5"
 
     # Set pipefail option to return status of the connector install command
-    set -o pipefail
+    # yset -o pipefail
 
     if [ "${ssl_key}" ]
     then
