@@ -14,5 +14,5 @@ output "public-ip" {
 }
 
 output "subnet" {
-  value = azurerm_subnet.cas-mgr
+  value = [azurerm_subnet.cas-mgr, azurerm_subnet_network_security_group_association.cas]
 }

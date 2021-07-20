@@ -114,6 +114,7 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
 }
 
 resource "azurerm_lb_backend_address_pool" "cas-mgr" {
+  depends_on = [var.cas_nat_depends_on]
   loadbalancer_id = var.lb_id
   name            = "cas-mgr-pool"
 }

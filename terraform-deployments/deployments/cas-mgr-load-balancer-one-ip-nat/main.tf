@@ -98,7 +98,7 @@ module "cas-mgr" {
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
   cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
-  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id]
+  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id]
 
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password

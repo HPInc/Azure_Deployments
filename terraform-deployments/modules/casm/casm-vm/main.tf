@@ -131,7 +131,7 @@ resource "azurerm_subnet" "cas-mgr" {
   virtual_network_name = var.azurerm_virtual_network_name
 }
 
-resource "azurerm_subnet_network_security_group_association" "cac" {
+resource "azurerm_subnet_network_security_group_association" "cas" {
   subnet_id                 = azurerm_subnet.cas-mgr.id
   network_security_group_id = var.network_security_group_ids[0]
 }

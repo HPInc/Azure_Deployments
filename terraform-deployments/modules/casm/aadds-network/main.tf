@@ -125,7 +125,7 @@ resource "azurerm_network_security_rule" "nsg_3389" {
 resource "azurerm_subnet" "workstation" {
   count = 1
   name                 = "${var.workstation_subnet_name}-${var.locations[0]}-${var.resource_group_name}"
-  address_prefixes     = ["10.0.6.0/24"]
+  address_prefixes     = var.ws_subnet_cidr#["10.0.6.0/24"]
   resource_group_name  = var.aadds_vnet_rg
   virtual_network_name = var.aadds_vnet_name#azurerm_virtual_network.aadds_vnet.name
 }
