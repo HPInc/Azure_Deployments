@@ -177,7 +177,7 @@ module "cac" {
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.cac.network-interface-nic-ids]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
@@ -260,7 +260,7 @@ module "centos-std-vm" {
 module "centos-gfx-vm" {
   source = "../../modules/centos-gfx-vm"
 
-  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.cac.network-interface-nic-ids]
+  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name
