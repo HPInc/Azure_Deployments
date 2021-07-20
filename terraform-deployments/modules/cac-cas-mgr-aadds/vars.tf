@@ -201,6 +201,11 @@ variable "cas_mgr_cidr" {
   default     = ""
 }
 
+variable "cac_subnet_cidr" {
+  description = "Internal CIDR of the CAS manager"
+  default     = ["10.0.3.0/24"]
+}
+
 variable "cas_mgr_public_ip_id" {
   description = "ID of the Public IP of the CAS manager"
   type        = string

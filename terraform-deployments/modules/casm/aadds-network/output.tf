@@ -38,7 +38,7 @@ output "all-output" {
   depends_on = [
     azurerm_network_security_group.nsg,
     azurerm_subnet.workstation,
-    #azurerm_subnet_network_security_group_association.aadds
+    azurerm_subnet_network_security_group_association.workstation
   ]
 }
 

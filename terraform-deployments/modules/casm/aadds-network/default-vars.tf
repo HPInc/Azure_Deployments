@@ -47,3 +47,9 @@ variable "create_debug_rdp_access" {
   default     = false
 }
 
+variable "ws_subnet_cidr" {
+  description = "CIDR for subnet containing the Workstations"
+  default     = ["10.0.1.0/24"]
+}
+
+
