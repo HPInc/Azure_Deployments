@@ -67,7 +67,7 @@ module "cac-regional" {
 }
 
 module "cac-regional-private" {
-  source = "../cac-regional-private"
+  source = "../cac-regional-private-lb-nat"
 
   count = var.is_private == true ? local.num_regions : 0
   cac_subnet_depends_on = var.cac_subnet_depends_on
@@ -112,7 +112,7 @@ module "cac-regional-private" {
   cas_mgr_public_ip         = var.cas_mgr_public_ip
   cas_mgr_public_ip_id      = var.cas_mgr_public_ip_id
 
-  fw_name       = var.fw_name
-  cac_fw_public = var.cac_fw_public
-  fw_internal   = var.fw_internal
+  cac_public                = var.cac_public
+  probe_id                  = var.probe_id
+  lb_id                     = var.lb_id
 }

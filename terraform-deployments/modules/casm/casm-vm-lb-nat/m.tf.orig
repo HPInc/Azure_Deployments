@@ -12,11 +12,11 @@ locals {
 }
 
 resource "time_offset" "start" {
-  offset_days = -7
+  offset_minutes = 27
 }
 
 resource "time_offset" "expiry" {
-  offset_days = 7
+  offset_minutes = 35
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -26,9 +26,6 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
-  depends_on = [
-    var.blob_depends_on
-  ]
   connection_string = var.storage_connection_string
   container_name    = var.private_container_name
   https_only        = true
@@ -49,17 +46,99 @@ data "azurerm_storage_account_blob_container_sas" "token" {
   }
 }
 
+# resource "azurerm_key_vault" "casm_keyvault" {
+#   name                        = var.key_vault_name
+#   location                    = var.location
+#   resource_group_name         = var.resource_group_name
+#   enabled_for_disk_encryption = true
+#   tenant_id                   = var.tenant_id
+#   soft_delete_retention_days  = 7
+#   purge_protection_enabled    = false
+
+#   sku_name = "standard"
+
+#   access_policy {
+#     tenant_id = var.tenant_id
+#     object_id = var.object_id
+#     application_id = var.application_id
+
+#     certificate_permissions = [
+#       "create",
+#       "delete",
+#       "deleteissuers",
+#       "get",
+#       "getissuers",
+#       "import",
+#       "list",
+#       "listissuers",
+#       "managecontacts",
+#       "manageissuers",
+#       "setissuers",
+#       "update",
+#     ]
+
+#     key_permissions = [
+#       "backup",
+#       "create",
+#       "decrypt",
+#       "delete",
+#       "encrypt",
+#       "get",
+#       "import",
+#       "list",
+#       "purge",
+#       "recover",
+#       "restore",
+#       "sign",
+#       "unwrapKey",
+#       "update",
+#       "verify",
+#       "wrapKey",
+#     ]
+
+#     secret_permissions = [
+#       "backup",
+#       "delete",
+#       "get",
+#       "list",
+#       "purge",
+#       "recover",
+#       "restore",
+#       "set",
+#     ]
+
+#     storage_permissions = [
+#       "backup",
+#       "delete",
+#       "get",
+#       "list",
+#       "purge",
+#       "recover",
+#       "restore",
+#       "set",
+#       "update"
+#     ]
+#   }
+# }
+
 resource "azurerm_subnet" "cas-mgr" {
-  depends_on           = [var.cas_mgr_subnet_depends_on]
   name                 = var.cas_mgr_subnet_name
   address_prefixes     = var.cas_mgr_subnet_cidr
-  resource_group_name  = var.resource_group_name
+  resource_group_name  = var.aadds_resource_group == "" ? var.resource_group_name : var.aadds_resource_group
   virtual_network_name = var.azurerm_virtual_network_name
 }
 
 resource "azurerm_subnet_network_security_group_association" "cac" {
   subnet_id                 = azurerm_subnet.cas-mgr.id
   network_security_group_id = var.network_security_group_ids[0]
+}
+
+resource "azurerm_public_ip" "cas-mgr-public-ip" {
+  name                = "cas-mgr-public-ip"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "cas-mgr-nic" {
@@ -70,14 +149,12 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
     name                          = "cas-mgr-ipconfig"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.cas-mgr.id
-    #public_ip_address_id          = var.cas_mgr_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.cas-mgr-public-ip.id
   }
 }
 
 resource "azurerm_storage_blob" "cas-mgr-setup-script" {
-  depends_on = [
-    var.blob_depends_on
-  ]
+  depends_on = [var.casm_depends_on]
   name                   = local.cas_mgr_setup_script
   storage_account_name   = var.storage_account_name
   storage_container_name = var.storage_account_name
@@ -113,36 +190,58 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
   }
 }
 
-resource "azurerm_lb_backend_address_pool" "cas-mgr" {
-  depends_on = [var.cas_nat_depends_on]
-  loadbalancer_id = var.lb_id
-  name            = "cas-mgr-pool"
-}
+resource "null_resource" "upload-casm-config" {
 
-# Optional load balancer vm association
-resource "azurerm_network_interface_backend_address_pool_association" "cas-association" {
-  network_interface_id    = azurerm_network_interface.cas-mgr-nic.id
-  ip_configuration_name   = "cas-mgr-ipconfig"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
-}
+  depends_on = [
+    azurerm_linux_virtual_machine.cas-mgr-vm
+  ]
 
-resource "azurerm_lb_outbound_rule" "cas_outbound" {
-  depends_on = [azurerm_network_interface_backend_address_pool_association.cas-association, azurerm_linux_virtual_machine.cas-mgr-vm]
-  resource_group_name     = var.resource_group_name
-  loadbalancer_id         = var.lb_id
-  name                    = "cas-outbound"
-  protocol                = "Tcp"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
-
-  frontend_ip_configuration {
-    name = "ip-config-cas-frontend"
+  connection {
+    type     = "ssh"
+    user     = var.ad_service_account_username
+    password = local.cas_mgr_admin_password
+    host     = azurerm_public_ip.cas-mgr-public-ip.ip_address
+    port     = "22"
   }
-}
 
+  provisioner "file" {
+    source = "${path.module}/mongodb-org-4.4.repo"
+    destination = "/home/${var.ad_service_account_username}/mongodb-org-4.4.repo"
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/mongod.conf.tmpl", {
+      vm_private_ip = azurerm_network_interface.cas-mgr-nic.private_ip_address,
+    })
+    destination = "/home/${var.ad_service_account_username}/mongod.conf"
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/casm.conf.tmpl", {
+      vm_private_ip = azurerm_network_interface.cas-mgr-nic.private_ip_address,
+      azure_client_id = var.application_id,
+      azure_client_secret = var.aad_client_secret,
+      azure_tenant_id = var.tenant_id,
+      #key_vault_url = azurerm_key_vault.casm_keyvault.vault_uri,
+      db_username = var.db_username,
+      db_password = var.db_password
+    })
+    destination = "/home/${var.ad_service_account_username}/casm.conf"
+  }
+
+  # provisioner "file" {
+  #   content = templatefile("${path.module}/dbconf.mongo.tmpl", {
+  #     vm_private_ip = azurerm_network_interface.cas-mgr-nic.private_ip_address,
+  #     db_username = var.db_username,
+  #     db_password = var.db_password
+  #   })
+  #   destination = "/home/${var.ad_service_account_username}/dbconf.mongo"
+  # }
+}
 
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 
-  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, azurerm_lb_outbound_rule.cas_outbound]#, azurerm_network_interface_nat_rule_association.cas_association_http]
+  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, null_resource.upload-casm-config]
 
   name                 = azurerm_linux_virtual_machine.cas-mgr-vm.name
   virtual_machine_id   = azurerm_linux_virtual_machine.cas-mgr-vm.id
@@ -153,6 +252,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.cas_mgr_provisioning_script}.tmpl", {
+  cas_mgr_username           = var.ad_service_account_username
   cas_mgr_add_repo_script    = var.cas_mgr_add_repo_script,
   cas_mgr_deployment_sa_file = var.cas_mgr_deployment_sa_file,
   cas_mgr_admin_password     = var.cas_mgr_admin_password,
@@ -171,20 +271,3 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   SETTINGS
 }
 
-resource "azurerm_lb_nat_rule" "cas_nat" {
-  depends_on = [var.cas_nat_depends_on,azurerm_lb_outbound_rule.cas_outbound, azurerm_linux_virtual_machine.cas-mgr-vm]
-  resource_group_name            = var.resource_group_name
-  loadbalancer_id                = var.lb_id
-  name                           = "HTTPSAccess"
-  protocol                       = "Tcp"
-  frontend_port                  = 443
-  backend_port                   = 443
-  frontend_ip_configuration_name = "ip-config-cas-frontend"
-}
-
-resource "azurerm_network_interface_nat_rule_association" "cas_association" {
-  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm]
-  network_interface_id  = azurerm_network_interface.cas-mgr-nic.id
-  ip_configuration_name = "cas-mgr-ipconfig"
-  nat_rule_id           = azurerm_lb_nat_rule.cas_nat.id
-}

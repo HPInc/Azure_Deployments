@@ -113,5 +113,5 @@ module "cac-regional-private" {
   cas_mgr_public_ip_id      = var.cas_mgr_public_ip_id
   cac_public                = var.cac_public
   probe_id                  = var.probe_id
-  lb_id       = var.lb_id
+  lb_id                     = var.lb_id
 }

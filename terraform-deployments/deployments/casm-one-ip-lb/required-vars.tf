@@ -41,26 +41,6 @@ variable "safe_mode_admin_password" {
 }
 
 
-variable "aadds_vnet_name" {
-  description = "Name of VNET that the AADDS belongs in"
-  type        = string
-}
-
-variable "aadds_vnet_rg" {
-  description = "Name of resource group that the AADDS belongs in"
-  type        = string
-}
-
-variable "aadds_domain_name" {
-  description = "Name of the AADDS domain"
-  type        = string
-}
-
-variable "aadds_domain_ip" {
-  description = "IP address of the AADDS"
-  type        = string
-}
-
 variable "workstations" {
   description = "List of workstation types to create"
   type = list(object({
@@ -75,7 +55,7 @@ variable "workstations" {
   }))
 }
 
-variable "cac_count" {
-  description = "Number of Cloud Access Connector instances to deploy"
-  type        = number
+variable "aadds_domain_name" {
+  description = "Name of the AADDS domain"
+  type        = string
 }

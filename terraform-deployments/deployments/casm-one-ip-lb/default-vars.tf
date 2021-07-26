@@ -72,12 +72,6 @@ variable "ad_domain_users_list_file" {
   default     = ""
 }
 
-variable "object_id" {
-  description = "The object ID of your app registration in AAD"
-  type        = string
-  default     = ""
-}
-
 variable "create_debug_rdp_access" {
   description = "Debug flag to create RDP access to the domain controller"
   type        = bool
@@ -102,6 +96,18 @@ variable "tenant_id" {
   default     = ""
 }
 
+variable "key_vault_name" {
+  description = "Name of the Azure Keyvault that is created. Must be globally unique."
+  type        = string
+  default     = ""
+}
+
+variable "object_id" {
+  description = "The object ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
   default     = ""
@@ -122,8 +128,25 @@ variable "minutes_cpu_polling_interval" {
   default     = 15
 }
 
-variable "key_vault_name" {
-  description = "Name of the Azure Keyvault that is created. Must be globally unique."
+variable "aadds_domain_ip" {
+  description = "IP address of the AADDS"
   type        = string
-  default     = "keyvault-casm-test"
+  default     = "10.0.0.4"
+  }
+
+variable "aadds_vnet_name" {
+  description = "Name of VNET that the AADDS belongs in"
+  type        = string
+  default     = "AAD_DS_TeraVNet"
+}
+
+variable "aadds_vnet_rg" {
+  description = "Name of resource group that the AADDS belongs in"
+  type        = string
+  default     = "BY-AAD_DS_Teradici"
+}
+
+variable "existing_casm_count" {
+  description = "Number of existing CASM Deployments in the AADDS VNET"
+  default     = 0
 }

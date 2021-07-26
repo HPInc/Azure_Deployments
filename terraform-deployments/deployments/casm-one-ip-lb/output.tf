@@ -38,9 +38,9 @@ output "centos-std-internal-ip" {
 }
 
 output "casm-public-ip" {
-  value = module.casm.public-ip
+  value = module.load-balancer.cas-public.ip_address
 }
 
-output "cac-public-ip" {
-  value = module.cac.public-ip
+output "cac-load-balancer-ip" {
+  value = module.load-balancer.public-ip
 }

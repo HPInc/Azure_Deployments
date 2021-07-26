@@ -29,3 +29,4 @@ output "subnet-cas-id" {
 output "cas-association-id" {
   value = azurerm_network_interface_nat_rule_association.cas_association.id
 }
+
