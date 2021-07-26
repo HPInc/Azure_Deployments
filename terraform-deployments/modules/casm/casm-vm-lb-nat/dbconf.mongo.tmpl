@@ -1,0 +1,16 @@
+use casm_db
+db.createUser(
+  {
+    user: ${db_username},
+    pwd: ${db_password}, // or cleartext password
+    roles: [ {db: "casm_db", role:"readWrite"} ], // user only needs readWrite Access to casm DB,
+    authenticationRestrictions: [
+        {
+          clientSource: [
+            ${vm_private_ip} // IP address of the CASM Host
+          ],
+          serverAddress: [${vm_private_ip}] // IP for the MongoDB server
+        }
+     ],
+  }
+)

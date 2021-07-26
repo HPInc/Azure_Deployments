@@ -6,7 +6,7 @@
  */
 
 locals {
-  resource_group_name        = var.resource_group_name != "" ? var.resource_group_name : "BY-casm_lb1ip_${random_id.string.hex}"
+  resource_group_name        = var.resource_group_name != "" ? var.resource_group_name : "casm_lb_one_ip_${random_id.string.hex}"
   cas_mgr_deployment_sa_file = "az-sa-key.json"
 }
 
@@ -34,14 +34,12 @@ resource "azurerm_storage_account" "storage" {
 }
 
 resource "azurerm_storage_container" "blob" {
-  depends_on = [azurerm_storage_account.storage]
   name                  = azurerm_storage_account.storage.name
   storage_account_name  = azurerm_storage_account.storage.name
   container_access_type = "blob"
 }
 
 resource "azurerm_storage_container" "private-container" {
-  depends_on = [azurerm_storage_account.storage]
   name                  = "privatecontainer${random_id.string.hex}"
   storage_account_name  = azurerm_storage_account.storage.name
   container_access_type = "private"
