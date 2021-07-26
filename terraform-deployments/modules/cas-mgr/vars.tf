@@ -69,7 +69,7 @@ variable "cas_mgr_admin_password" {
 
 variable "cas_mgr_add_repo_script" {
   description = "Location of script to add repo for CAS Manager"
-  default     = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/setup.rpm.sh"
+  default     = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
 }
 
 variable "cas_mgr_subnet_cidr" {

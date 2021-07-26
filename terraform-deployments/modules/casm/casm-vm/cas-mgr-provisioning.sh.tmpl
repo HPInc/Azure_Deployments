@@ -112,7 +112,7 @@ mongo_kv_setup() {
     openssl req -newkey rsa:4096 \
                 -x509 \                                                                                                       
                 -sha256 \
-                -days 3650 \
+                -days 365 \
                 -nodes \
                 -out $INSTALL_DIR/certificate.crt \
                 -keyout $INSTALL_DIR/secret.key \
