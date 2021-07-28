@@ -26,8 +26,11 @@
         "vnetResourceGroup": {
             "type": "string"
         },
+        "pfxCert64": {
+            "type": "string"
+        },
         "sku": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "Standard"
           }
     },
@@ -48,6 +51,12 @@
                     "notifyGlobalAdmins": "Enabled",
                     "notifyDcAdmins": "Enabled",
                     "additionalRecipients": []
+                    },
+                "ldapsSettings": {
+                    "ldaps": "Enabled",
+                    "pfxCertificate": "[parameters('pfxCert64')]",
+                    "pfxCertificatePassword": "Password!234",
+                    "externalAccess": "Enabled"
                     }
             }
         }

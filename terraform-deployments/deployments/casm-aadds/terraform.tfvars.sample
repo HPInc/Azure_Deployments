@@ -1,0 +1,15 @@
+#ID of the subscription that the AADDS will be deployed in
+subscription_id = <from section 2>
+
+#Select a name for the resource group and VNet of the AADDS.
+aadds_rg_name = "AAD_DS_Teradici"
+aadds_vnet_name = "AAD_DS_TeraVNet"
+
+#Domain name of the AADDS. Must be either a domain name that your organization owns or a globally unique *.onmicrosoft.com domain
+aadds_domain_name = "example.onmicrosoft.com"
+
+#Must match the location that the workstations will be deployed in
+aadds_location = "westus2"
+
+#Password of the PFX certificate created for LDAPS communication. Must be at least 4 characters.
+pfx_cert_password = "Password!234"

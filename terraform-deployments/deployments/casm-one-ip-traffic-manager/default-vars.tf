@@ -143,10 +143,11 @@ variable "aadds_vnet_name" {
 variable "aadds_vnet_rg" {
   description = "Name of resource group that the AADDS belongs in"
   type        = string
-  default     = "BY-AAD_DS_Teradici"
+  default     = "AAD_DS_Teradici"
 }
 
-variable "existing_casm_count" {
-  description = "Number of existing CASM Deployments in the AADDS VNET"
-  default     = 0
+variable "aadds_vnet_cidr" {
+  description = "CIDR for the VNET that the AADDS belongs in"
+  type = string
+  default = ""
 }

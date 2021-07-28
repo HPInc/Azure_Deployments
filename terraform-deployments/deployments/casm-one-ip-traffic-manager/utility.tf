@@ -8,11 +8,20 @@
 locals {
   resource_group_name        = var.resource_group_name != "" ? var.resource_group_name : "casm_tf_one_ip_${random_id.string.hex}"
   cas_mgr_deployment_sa_file = "az-sa-key.json"
+  prefixCounts = sort([ for r in data.azurerm_virtual_network.vnet_peerings: split(".","${r.address_space[0]}")[1]])
+  prefix       = [for x in range(255): tostring(x) if !contains(local.prefixCounts, tostring(x)) && split(".","${data.azurerm_virtual_network.aadds_vnet.address_space[0]}")[1] != tostring(x)]
+  vnet_cidr    = var.aadds_vnet_cidr == "" ? "10.${local.prefix[0]}.0.0/16" : var.aadds_vnet_cidr
 }
 
 data "azurerm_virtual_network" "aadds_vnet" {
   name                 = var.aadds_vnet_name
   resource_group_name  = var.aadds_vnet_rg
+}
+
+data "azurerm_virtual_network" "vnet_peerings" {
+   for_each = data.azurerm_virtual_network.aadds_vnet.vnet_peerings
+   name = split("/", each.value)[index(split("/", each.value), "virtualNetworks") + 1]
+   resource_group_name = split("/", each.value)[index(split("/", each.value), "resourceGroups") + 1]
 }
 
 resource "azurerm_resource_group" "main" {

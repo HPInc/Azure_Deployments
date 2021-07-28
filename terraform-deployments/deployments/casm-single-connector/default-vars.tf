@@ -33,7 +33,7 @@ variable "centos_admin_username" {
 
 variable "cac_instance_count" {
   description = "Number of Cloud Access Connector instances to deploy in each zone"
-  default     = 1
+  default     = 2
 }
 
 variable "cas_mgr_url" {
@@ -99,7 +99,7 @@ variable "tenant_id" {
 variable "key_vault_name" {
   description = "Name of the Azure Keyvault that is created. Must be globally unique."
   type        = string
-  default     = "keyvault-casm-test"
+  default     = ""
 }
 
 variable "object_id" {
@@ -126,4 +126,28 @@ variable "minutes_idle_before_shutdown" {
 variable "minutes_cpu_polling_interval" {
   description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
   default     = 15
+}
+
+variable "aadds_domain_ip" {
+  description = "IP address of the AADDS"
+  type        = string
+  default     = "10.1.0.4"
+  }
+
+variable "aadds_vnet_name" {
+  description = "Name of VNET that the AADDS belongs in"
+  type        = string
+  default     = "AAD_DS_TeraVNet"
+}
+
+variable "aadds_vnet_rg" {
+  description = "Name of resource group that the AADDS belongs in"
+  type        = string
+  default     = "AAD_DS_Teradici"
+}
+
+variable "aadds_vnet_cidr" {
+  description = "CIDR for the VNET that the AADDS belongs in"
+  type = string
+  default = ""
 }

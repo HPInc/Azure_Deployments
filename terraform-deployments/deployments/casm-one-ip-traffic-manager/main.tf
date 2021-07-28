@@ -43,10 +43,12 @@ module "aadds-network" {
   prefix                        = var.prefix
   application_id                = var.application_id
   aad_client_secret             = var.aad_client_secret
+  main_vnet_name                = "vnet_${azurerm_resource_group.main.location}"
   aadds_vnet_name               = var.aadds_vnet_name
   aadds_vnet_rg                 = var.aadds_vnet_rg
   aadds_domain_name             = var.aadds_domain_name
-  ws_subnet_cidr                = ["10.0.${(var.existing_casm_count + 1) * 3 + 0}.0/24"]
+  ws_subnet_cidr                = [cidrsubnet(local.vnet_cidr, 8, 0)]
+  vnet_cidr                     = local.vnet_cidr
   # Debug flag
   create_debug_rdp_access = var.create_debug_rdp_access
 }
@@ -65,7 +67,7 @@ module "casm" {
   storage_account_name         = azurerm_storage_account.storage.name
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
-  azurerm_virtual_network_name = data.azurerm_virtual_network.aadds_vnet.name
+  azurerm_virtual_network_name = module.aadds-network.vnet_name
   network_security_group_ids   = module.aadds-network.network-security-group-ids
 
   application_id              = var.application_id
@@ -78,10 +80,10 @@ module "casm" {
   pcoip_registration_code     = var.pcoip_registration_code
   object_id                   = var.object_id
   key_vault_name              = var.key_vault_name == "" ? "kv-${random_id.string.hex}" : var.key_vault_name
-  cas_mgr_subnet_cidr         = ["10.0.${(var.existing_casm_count + 1) * 3 + 1}.0/24"]
+  cas_mgr_subnet_cidr         = [cidrsubnet(local.vnet_cidr, 8, 1)]
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
-  aadds_resource_group      = var.aadds_vnet_rg
+  aadds_resource_group      = var.resource_group_name
   cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
   cas_mgr_public_ip         = module.load-balancer.cas-public
   lb_id                     = module.load-balancer.load-balancer-ids[0]
@@ -94,13 +96,13 @@ module "cac" {
   cac_nat_depends_on = [module.load-balancer.probe-id, module.casm.cas-association-id]
 
   cac_count_list = [var.cac_instance_count]
-  cac_subnet_cidr = ["10.0.${(var.existing_casm_count + 1) * 3 + 2}.0/24"]
+  cac_subnet_cidr = [cidrsubnet(local.vnet_cidr, 8, 2)]
   cas_mgr_url                = "https://${module.casm.internal-ip}"
   cas_mgr_insecure           = true
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
 
   network_security_group_ids    = module.aadds-network.network-security-group-ids
-  azurerm_virtual_network_names = [data.azurerm_virtual_network.aadds_vnet.name]
+  azurerm_virtual_network_names = [module.aadds-network.vnet_name]
 
   prefix                = var.prefix
   domain_name           = var.aadds_domain_name
@@ -123,7 +125,7 @@ module "cac" {
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
 
-  aadds_resource_group      = var.aadds_vnet_rg
+  aadds_resource_group      = var.resource_group_name
 
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
@@ -223,7 +225,7 @@ module "centos-gfx-vm" {
   admin_name                   = var.centos_admin_username
   admin_password               = var.ad_admin_password
   pcoip_registration_code      = var.pcoip_registration_code
-  domain_name                  = "${var.active_directory_netbios_name}.dns.internal"
+  domain_name                  = var.aadds_domain_name
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id

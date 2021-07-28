@@ -6,4 +6,5 @@
 *.svg
 *.used
 *.hcl
+*.pfx
 **__pycache__

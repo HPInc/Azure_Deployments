@@ -40,7 +40,8 @@ output "all-output" {
     azurerm_subnet.workstation,
     azurerm_subnet_network_security_group_association.workstation,
     azurerm_virtual_network.main_vnet,
-    azurerm_virtual_network_peering.aadds_peering
+    azurerm_virtual_network_peering.aadds_peering,
+    azurerm_virtual_network_peering.aadds_peering_2
   ]
 }
 
