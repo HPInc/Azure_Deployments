@@ -1,10 +1,15 @@
-variable "application_id" {
-  description = "The application (client) ID of your app registration in AAD"
-  type        = string
-}
+# variable "application_id" {
+#   description = "The application (client) ID of your app registration in AAD"
+#   type        = string
+# }
 
-variable "aad_client_secret" {
-  description = "The client secret of your app registration in AAD"
+# variable "aad_client_secret" {
+#   description = "The client secret of your app registration in AAD"
+#   type        = string
+# }
+
+variable "subscription_id" {
+  description = "Subscription ID of the directory the AADDS will be deployed in"
   type        = string
 }
 
@@ -26,4 +31,9 @@ variable "aadds_location" {
 variable "aadds_domain_name" {
     description = "Domain name of the AADDS"
     type        = string
+}
+
+variable "pfx_cert_password" {
+  description = "Password of the PFX certificate"
+  type        = string
 }

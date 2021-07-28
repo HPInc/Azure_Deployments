@@ -41,6 +41,6 @@ output "casm-public-ip" {
   value = module.load-balancer.cas-public.ip_address
 }
 
-output "cac-load-balancer-ip" {
-  value = module.load-balancer.public-ip
+output "traffic-manager-dns-name" {
+  value = var.traffic_manager_dns_name
 }

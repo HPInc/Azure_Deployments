@@ -34,7 +34,10 @@ output "all-output" {
   depends_on = [
     azurerm_network_security_group.nsg,
     azurerm_subnet.workstation,
-    azurerm_subnet_network_security_group_association.workstation
+    azurerm_subnet_network_security_group_association.workstation,
+    azurerm_virtual_network.main_vnet,
+    azurerm_virtual_network_peering.aadds_peering,
+    azurerm_virtual_network_peering.aadds_peering_2
   ]
 }
 
@@ -43,7 +46,7 @@ output "resource-group-name" {
   value       = var.resource_group_name
 }
 
-# output "aadds_vnet_name" {
-#   description = "Name of the VNET"
-#   value = azurerm_virtual_network.aadds_vnet.name
-# }
+output "vnet_name" {
+  description = "Name of the VNET"
+  value = azurerm_virtual_network.main_vnet.name
+}

@@ -62,15 +62,8 @@
 # Debug flag to RDP into the DC VM.
 # create_debug_rdp_access       = false
 
-# Full path to the domain users list .csv file.
-# ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector/domain_users_list.csv"
-
 # Active directory administrator username.
 # ad_admin_username       = "cas_admin"
-
-# Active Directory NetBIOS name
-# e.g: "tera" will create the domain name "tera.dns.internal"
-# active_directory_netbios_name = "tera"
 
 # (Optional) Specify SSL certificate for Connector
 # ssl_key  = "~/clouddrive/privkey.pem"
@@ -82,13 +75,9 @@ ad_admin_password             = "Password!234"
 safe_mode_admin_password      = "Password!234"
 cas_mgr_admin_password        = "Password!234"
 pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
+mongodb_admin_password        = "Password!234"
 
 # Used for authentication and allows Terraform to manage resources.
 application_id                = "<from section 3 step 4>"
 aad_client_secret             = "<from section 3 step 5-6>"
-
-# Only fill these when using Azure Key Vault secrets.
-# Examples and tips can be found in section 4 of the documentation.
-# tenant_id                     = "<from section 3 step 4>"
-# key_vault_id                  = "<found in key vault properties under Resource ID>"
-# ad_pass_secret_name           = "<variable name used for ad pass secret>"
+tenant_id                     = "<from section 3 step 4>"

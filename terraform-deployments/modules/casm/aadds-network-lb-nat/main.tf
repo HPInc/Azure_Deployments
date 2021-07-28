@@ -14,7 +14,32 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = var.resource_group_name
 }
 
+resource "azurerm_virtual_network" "main_vnet" {
+	name                = var.main_vnet_name
+	address_space       = [var.vnet_cidr]
+	location            = var.locations[0]
+	resource_group_name = var.resource_group_name
+  dns_servers         = data.azurerm_virtual_network.aadds_vnet.dns_servers
+}
 
+data "azurerm_virtual_network" "aadds_vnet" {
+  name                 = var.aadds_vnet_name
+  resource_group_name  = var.aadds_vnet_rg
+}
+
+resource "azurerm_virtual_network_peering" "aadds_peering" {
+  name                      = "peer_aadds"
+  resource_group_name       = var.resource_group_name
+  virtual_network_name      = azurerm_virtual_network.main_vnet.name
+  remote_virtual_network_id = data.azurerm_virtual_network.aadds_vnet.id
+}
+
+resource "azurerm_virtual_network_peering" "aadds_peering_2" {
+  name                      = "peer_${var.resource_group_name}"
+  resource_group_name       = var.aadds_vnet_rg
+  virtual_network_name      = var.aadds_vnet_name
+  remote_virtual_network_id = azurerm_virtual_network.main_vnet.id
+}
 
 resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   count = 1
@@ -26,7 +51,7 @@ resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   protocol                   = "*"
   source_port_range          = "*"
   destination_port_ranges    = ["1-65525"]
-  source_address_prefix      = "10.0.0.0/16"
+  source_address_prefix      = "10.0.0.0/8"
   destination_address_prefix = "*"
   resource_group_name        = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[
@@ -125,9 +150,9 @@ resource "azurerm_network_security_rule" "nsg_3389" {
 resource "azurerm_subnet" "workstation" {
   count = 1
   name                 = "${var.workstation_subnet_name}-${var.locations[0]}-${var.resource_group_name}"
-  address_prefixes     = var.ws_subnet_cidr#["10.0.6.0/24"]
-  resource_group_name  = var.aadds_vnet_rg
-  virtual_network_name = var.aadds_vnet_name#azurerm_virtual_network.aadds_vnet.name
+  address_prefixes     = var.ws_subnet_cidr
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.main_vnet.name
 }
 
 resource "azurerm_subnet_network_security_group_association" "workstation" {

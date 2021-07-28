@@ -47,3 +47,7 @@ variable "aadds_domain_name" {
   description = "Name of the AADDS domain"
   type        = string
 }
+
+variable "vnet_cidr" {
+  type    = string
+}
