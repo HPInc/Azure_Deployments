@@ -12,7 +12,7 @@ module "workstation-map" {
 
 module "load-balancer" {
   source = "../../modules/network/cas-mgr-load-balancer-lb-nat"
-  load_balancer_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-vm.dc-machine-type]#, module.cas-mgr.cas-association-id]
+  load_balancer_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-vm.dc-machine-type]
   
   instance_count            = var.cac_count_list[0]
   prefix                    = var.prefix
@@ -25,6 +25,7 @@ module "dc-cac-network" {
   resource_group_name     = azurerm_resource_group.main.name
   locations               = var.cac_location_list
   vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
+  dc_nat_depends_on       = [module.load-balancer.probe-id]
 
   prefix                        = var.prefix
   application_id                = var.application_id

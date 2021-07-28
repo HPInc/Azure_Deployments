@@ -265,6 +265,7 @@ resource "azurerm_virtual_network_peering" "peering_to_main_location" {
 }
 
 resource "azurerm_lb_nat_rule" "dc_nat" {
+  depends_on                     = [var.dc_nat_depends_on]
   resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
   name                           = "WinRMAccess"

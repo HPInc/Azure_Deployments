@@ -46,3 +46,9 @@ variable "create_debug_rdp_access" {
   type        = bool
   default     = false
 }
+
+variable "dc_nat_depends_on" {
+  description = "DC NAT Association dependencies"
+  type        = any
+  default     = null
+}
