@@ -53,31 +53,36 @@
 ]
 
 # Name of resource group for deployment resources. Name must be unique.
-# Leaving this commented will result in the name: 'cas_mgr_single_connector_[random_id]'
+# Leaving this commented will result in the name: 'casm_single_connector_[random_id]'
 # resource_group_name           = ""
 
 # Prefix for DC and CAC machines.
-# prefix                        = ""
+prefix                        = ""
 
 # Debug flag to RDP into the DC VM.
 # create_debug_rdp_access       = false
 
 # Active directory administrator username.
-# ad_admin_username       = "cas_admin"
+ad_admin_username       = <username of user account in Azure Active Directory>
+
+#Azure Active Directory Domain Services parameters.
+aadds_vnet_name               = "AAD_DS_TeraVNet"
+aadds_vnet_rg                 = "AAD_DS_Teradici"
+aadds_domain_name             = "example.onmicrosoft.com"
 
 # (Optional) Specify SSL certificate for Connector
 # ssl_key  = "~/clouddrive/privkey.pem"
 # ssl_cert = "~/clouddrive/fullchain.pem"
 
-# (Encryption is optional) Following 4 values and cac_token from cac_configuration can be encrypted. 
-# To encrypt follow section 4 of the documentation.
-ad_admin_password             = "Password!234"
+ad_admin_password             = <password of user account in Azure Active Directory>
 safe_mode_admin_password      = "Password!234"
 cas_mgr_admin_password        = "Password!234"
-pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 mongodb_admin_password        = "Password!234"
+pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 
 # Used for authentication and allows Terraform to manage resources.
+#Teradicidev
 application_id                = "<from section 3 step 4>"
 aad_client_secret             = "<from section 3 step 5-6>"
 tenant_id                     = "<from section 3 step 4>"
+object_id                     = "4913cc14-2c26-4054-9d98-faea1e34203b"

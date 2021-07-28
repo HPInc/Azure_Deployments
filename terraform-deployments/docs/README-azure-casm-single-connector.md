@@ -1,4 +1,4 @@
-# Single-Connector Deployment
+# CASM-Single-Connector Deployment
 
 **Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
@@ -23,7 +23,6 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 ## Table of Contents
 1. [Single-Connector Architecture](#1-single-connector-architecture)
 2. [Requirements](#2-requirements)
-3. [Connect Azure to CAS Manager](#3-connect-azure-to-cas-manager)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying the Single-Connector via Terraform](#6-deploying-the-single-connector-via-terraform)
@@ -33,16 +32,14 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 
-### 1. Single-Connector Architecture
+### 1. CASM-Single-Connector Architecture
 
-The Single-Connector deployment creates a Virtual Network with 3 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
-- ```subnet-dc```: for the Domain Controller
+The Single-Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
 - ```subnet-cac```: for the Connector
+- ```subnet-cas```: for the CASM
 - ```subnet-ws```: for the workstations
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
-
-A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a ```domain_users_list``` CSV file is specified. The Domain Controller is given a static IP (configurable).
 
 A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
@@ -52,21 +49,23 @@ Multiple domain-joined workstations and Cloud Access Connectors can be optionall
 
 The ```workstation_os``` property in the ```workstations``` parameter can be used to define the respective workstation's operating system (use 'linux' or 'windows'). 
 
-Note: Please make sure that the ```location``` property in the ```workstations``` parameter is in sync with the ```location``` property defined in the ```cac_configuration``` parameter. 
+This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, go to the CASM-AADDS document to deploy/configure an AADDS before continuing if an AADDS has not yet been configured.
 
 Each workstation can be configured with a graphics agent by using the ```isGFXHost``` property of the ```workstations``` parameter.
 
-These workstations are automatically domain-joined and have the PCoIP Agent installed.
+These workstations are automatically domain-joined to the AADDS and have the PCoIP Agent installed.
 
-The following diagram shows a single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. 
-
-![single-connector diagram](/terraform-deployments/docs/png/single-connector-azure.PNG)
-
+Note: Please make sure that the following variables are synced from the previous AADDS Deployment:
+```location``` property in the ```workstations``` parameter is in sync with the ```aadds_location``` property defined in the AADDS deployment, or with the existing AADDS location. 
+```aadds_vnet_name``` property is in sync with the ```aadds_vnet_name``` property defined in the AADDS deployment, or with the existing AADDS Virtual Network Name.
+```aadds_vnet_rg``` property is in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
+```aadds_domain_name``` property is in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
 - a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
+- An existing AADDS deployment (see the CASM-AADDS documentation).
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
@@ -108,28 +107,7 @@ To interact directly with remote workstations, an Azure Account must be connecte
         ]
     ```
 
-### 4. (Optional) Storing Secrets on Azure Key Vault
-
-**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
-
-As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key, and connector token, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
-
-1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
-    1. Select the same region as the deployment.
-    2. Click next to go to the Access policy page.
-    3. Click **+ Add Access Policy**.
-        1. Under **Configure from template** select **Secret Management**.
-        2. Under **Select principal** click on **None selected**.
-        3. Find the application from [section 3](#3-connect-azure-to-cas-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
-        4. Click **Review + create** and then **Create**.
-2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
-3. To create **AD safe mode admin password**, **AD admin password**, **PCoIP registration key**, and **connector token** as secrets follow these steps for each value:
-    1. Click **+ Generate/Import**.
-    2. Enter the name of the secret.
-    3. Input the secret value.
-    4. Click **Create**.
-    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**. 
-      - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
+### 4. 
 5. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
 ```
 ...

@@ -175,6 +175,7 @@ resource "azurerm_network_interface_nat_rule_association" "cac_association_ssh" 
 }
 
 resource "azurerm_lb_backend_address_pool" "main" {
+  depends_on = [azurerm_network_interface_nat_rule_association.cac_association_ssh]
   loadbalancer_id = var.lb_id
   name            = "backend-address-pool"
 }
