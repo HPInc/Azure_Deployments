@@ -19,7 +19,7 @@ retry() {
     local retries=0
     local max_retries=3
     until [[ $retries -ge $max_retries ]]
-    do  
+    do
     # Break if command succeeds, or log then retry if command fails.
         $@ && break || {
 
@@ -330,7 +330,7 @@ join_domain()
         while true
         do
             echo $AD_SERVICE_ACCOUNT_PASSWORD | realm join --user="${ad_service_account_username}@${domain_name}" "${domain_name}" --verbose >&2
-            
+
             local rc=$?
             if [[ $rc -eq 0 ]]
             then
@@ -398,8 +398,10 @@ fi
 # Print all executed commands to the terminal
 set -x
 
-# Redirect stdout and stderr to the log file
-exec &>>$DETAILED_LOG_FILE
+
+# Redirect stdout and stderr to the log file, while keeping the outputs in the terminal.
+# Also, avoids commands and sensitive information from leaking to the log files.
+exec &> >(tee -a "$DETAILED_LOG_FILE")
 
 if [[ $RE_ENTER -eq 0 ]]
 then
@@ -413,7 +415,7 @@ then
     fi
 
     yum install -y wget
-    
+
     get_credentials
 
     log "--> Installing Linux GUI ..."
@@ -450,7 +452,7 @@ then
     fi
 
     yum update -y --exclude=WALinuxAgent
-    
+
     exit_and_restart
 
 else
@@ -466,7 +468,7 @@ else
     install_idle_shutdown
 
     log "--> Installation is complete!"
-    
+
     sed -i '$ d' /etc/rc.local
 
     exit_and_restart
