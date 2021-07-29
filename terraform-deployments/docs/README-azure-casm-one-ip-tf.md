@@ -98,9 +98,6 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
 
 ---IMPORTANT NOTE: All AADDS Deployments require login credentials from an account in the Azure Active Directory of the tenant the deployment is taking place in. These credentials are entered in the tfvars file as detailed below. In order for accounts in the Azure Active Directory to sync with the AADDS, the accounts' password must either be changed or reset AFTER the AADDS has finished deploying and provisioning. For reasons on why this is, refer to (https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization). Failure to do so will result in the deployment failing due to failed login attempts and the Active Directory user account being locked. Therefore, only enter the ad_admin_password below AFTER it has been changed following the AADDS deployment.---
 
-
-# (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
-# To encrypt follow section 4 of the documentation.
 ad_admin_username             = "aadds_user"
 ad_admin_password             = "AADDS_Password1!"
 safe_mode_admin_password      = "Password!234"
@@ -112,7 +109,6 @@ aadds_vnet_name               = "AAD_DS_TeraVNet"
 aadds_vnet_rg                 = "AAD_DS_Teradici"
 aadds_domain_name             = "example.onmicrosoft.com"
 
-# Used for authentication and allows Terraform to manage resources.
 application_id                = "4928a0xd-e1re-592l-9321-5f114953d88c"
 aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
@@ -184,8 +180,6 @@ A typical deployment should take around 40-50 minutes. When finished, the script
 Example output:
 ```
 Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
-
-Outputs:
 
 Outputs:
 
@@ -262,24 +256,6 @@ Information about connecting to virtual machines for investigative purposes:
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
-    
-- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
-    1. RDP into the Domain Controller virtual machine. 
-    
-    ```
-    Computer: <domain-controller-public-ip>
-    User: cas_admin
-    Password: <ad_admin_password from terraform.tfvars>
-    ```
-   2. From inside the Domain Controller, RDP into the Windows workstation. 
-    
-    ```
-    Computer: <win-internal-ip>
-    User: windows_admin
-    Password: <ad_admin_password from terraform.tfvars>
-    ```
-   3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

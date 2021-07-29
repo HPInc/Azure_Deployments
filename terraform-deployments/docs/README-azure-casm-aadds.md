@@ -77,7 +77,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
 
 A typical deployment should take around 30-40 minutes. When finished, the AADDS will need a further 30-40 minutes to provision, which can be monitored by going to the resource group and selecting the AADDS resource which is named after the configured domain, where the message shown below should be displayed:
 
-![aadds_provision_message](/terraform-deployments/docs/png/aadds-provisioning.png)
+![aadds_provision_message](/terraform-deployments/docs/png/aadds-provision.png)
 
 After this is finished, the AADDS may still need a few more hours to sync the Azure AD users depending on the size of the directory.
 
