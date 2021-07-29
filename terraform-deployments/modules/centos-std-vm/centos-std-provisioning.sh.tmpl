@@ -1,4 +1,4 @@
-  
+
 # Copyright (c) 2021 Teradici Corporation
 #
 # This source code is licensed under the MIT license found in the
@@ -20,7 +20,7 @@ retry() {
     local retries=0
     local max_retries=3
     until [[ $retries -ge $max_retries ]]
-    do  
+    do
     # Break if command succeeds, or log then retry if command fails.
         $@ && break || {
 
@@ -203,7 +203,7 @@ join_domain()
         while true
         do
             echo $AD_SERVICE_ACCOUNT_PASSWORD | realm join --user="${ad_service_account_username}@${domain_name}" "${domain_name}" --verbose >&2
-            
+
             local rc=$?
             if [[ $rc -eq 0 ]]
             then
@@ -271,8 +271,11 @@ then
     chmod +644 "$DETAILED_LOG_FILE"
 fi
 
-# Redirect stdout and stderr to the log file
-exec &>>$DETAILED_LOG_FILE
+
+# Redirect stdout and stderr to the log file, while keeping the outputs in the terminal.
+# Also, avoids commands and sensitive information from leaking to the log files.
+exec &> >(tee -a "$DETAILED_LOG_FILE")
+
 
 # install dnf to replace yum based installations
 log "Installing dnf"
@@ -316,7 +319,7 @@ install_pcoip_agent
 
 install_idle_shutdown
 
-if [[ $IS_GUI_INSTALLED -eq 1 ]] 
+if [[ $IS_GUI_INSTALLED -eq 1 ]]
 then
     log "--> Retrying installation of Linux GUI ..."
     sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
