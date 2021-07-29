@@ -85,6 +85,6 @@ pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 application_id                = "<from section 3 step 4>"
 aad_client_secret             = "<from section 3 step 5-6>"
 tenant_id                     = "<from section 3 step 4>"
-object_id                     = "4913cc14-2c26-4054-9d98-faea1e34203b"
+object_id                     = "<from section 3 step 4>"
 
 traffic_manager_dns_name = "teradici-aadds-example"
