@@ -53,7 +53,7 @@
 ]
 
 # Name of resource group for deployment resources. Name must be unique.
-# Leaving this commented will result in the name: 'casm_single_connector_[random_id]'
+# Leaving this commented will result in the name: 'casm_lb_one_ip[random_id]'
 # resource_group_name           = ""
 
 # Prefix for DC and CAC machines.
