@@ -125,6 +125,7 @@ object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
     5. ```aadds_vnet_name``` is the VNet Name of the previously configured AADDS deployment, the property must be in in sync with the ```aadds_vnet_name``` property defined in the AADDS deployment, or with the existing AADDS Virtual Network Name.
     6. ```aadds_vnet_rg``` is the Resource Group Name of the previously configured AADDS deployment, the property must be in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
     7. ```aadds_domain_name``` is the Domain Name of the previously configured AADDS deployment, property must be in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
+    8. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
     
 ### 5. (Optional) Assigning a SSL Certificate
 
