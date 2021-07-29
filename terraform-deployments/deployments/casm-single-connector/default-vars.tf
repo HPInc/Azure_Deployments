@@ -33,7 +33,7 @@ variable "centos_admin_username" {
 
 variable "cac_instance_count" {
   description = "Number of Cloud Access Connector instances to deploy in each zone"
-  default     = 2
+  default     = 1
 }
 
 variable "cas_mgr_url" {
