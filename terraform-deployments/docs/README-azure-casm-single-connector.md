@@ -95,10 +95,10 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 
 ### 4. Variable Assignment
-Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
-
 ---IMPORTANT NOTE: All AADDS Deployments require login credentials from an account in the Azure Active Directory of the tenant the deployment is taking place in. These credentials are entered in the tfvars file as detailed below. In order for accounts in the Azure Active Directory to sync with the AADDS, the accounts' password must either be changed or reset AFTER the AADDS has finished deploying and provisioning. For reasons on why this is, refer to (https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization). Failure to do so will result in the deployment failing due to failed login attempts and the Active Directory user account being locked. Therefore, only enter the ad_admin_password below AFTER it has been changed following the AADDS deployment.---
 
+Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+```
 ad_admin_username             = "aadds_user"
 ad_admin_password             = "AADDS_Password1!"
 safe_mode_admin_password      = "Password!234"
