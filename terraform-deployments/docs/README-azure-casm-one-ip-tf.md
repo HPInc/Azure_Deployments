@@ -94,10 +94,10 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 
 ### 4. Variable Assignment
-4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
-
 ---IMPORTANT NOTE: All AADDS Deployments require login credentials from an account in the Azure Active Directory of the tenant the deployment is taking place in. These credentials are entered in the tfvars file as detailed below. In order for accounts in the Azure Active Directory to sync with the AADDS, the accounts' password must either be changed or reset AFTER the AADDS has finished deploying and provisioning. For reasons on why this is, refer to (https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization). Failure to do so will result in the deployment failing due to failed login attempts and the Active Directory user account being locked. Therefore, only enter the ad_admin_password below AFTER it has been changed following the AADDS deployment.---
 
+4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+```
 ad_admin_username             = "aadds_user"
 ad_admin_password             = "AADDS_Password1!"
 safe_mode_admin_password      = "Password!234"
@@ -114,6 +114,8 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
 object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
 
+traffic_manager_dns_name = "teradici-aadds-example"
+
 ```
 - Tips for finding these variables:
     1. ```application_id```, ```tenant_id```, and ```object_id``` are from [section 3](#3-service-principal-authentication) step 4.
@@ -123,7 +125,8 @@ object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
     5. ```aadds_vnet_name``` is the VNet Name of the previously configured AADDS deployment, the property must be in in sync with the ```aadds_vnet_name``` property defined in the AADDS deployment, or with the existing AADDS Virtual Network Name.
     6. ```aadds_vnet_rg``` is the Resource Group Name of the previously configured AADDS deployment, the property must be in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
     7. ```aadds_domain_name``` is the Domain Name of the previously configured AADDS deployment, property must be in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
-    8. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
+    8. ```traffic_manager_dns_name``` is the DNS name of the traffic manager which users will connect to. Must be globally unique.
+    9. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
 
 ### 5. (Optional) Assigning a SSL Certificate
 
