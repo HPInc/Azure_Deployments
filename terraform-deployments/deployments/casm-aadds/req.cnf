@@ -1,0 +1,16 @@
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+C = CA
+ST = BC
+L = Burnaby
+O = Teradici
+OU = Software
+CN = ${ENV::domainName}
+
+[v3_req] 
+keyUsage = critical, digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth

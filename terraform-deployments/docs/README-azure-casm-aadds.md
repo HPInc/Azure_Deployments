@@ -47,6 +47,10 @@ The terraform assumes a fresh deployment with no existing AADDS in the current t
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
 ### 3. Deploying the AADDS via Terraform
+This deployment requires an account with the Global Administrator and Billing Administrator roles in the tenant, and the Contributor role in the subscription. To check a users' tenant roles, search "Azure Active Directory" and navigate to the users pane. Find the user account that is being used for this deployment and navigate to "Assigned Roles", and ensure Global Administrator and Billing Administrator are both assigned. To check subscription roles, search "Subscriptions" and a list of all subscriptions in the directory will show up. Ensure that for the subscription this deployment is taking place in, the users' account is assigned at least a "Contributor" role. The "Owner" role has also been verified to work. 
+
+If the user is missing any of these roles, contact the administrator of the Azure tenant.
+
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide.
 
 Before deploying, ```terraform.tfvars``` must be complete. 
@@ -90,7 +94,9 @@ If a certificate has not been configured, navigate to ```/terraform-deployments/
 Any conflicts with existing rules will need to be handled on a case by case basis.
 
 ### 5. Deleting the deployment
-Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. All existing CASM deployments must first be destroyed before destroying the AADDS.
+Run ```terraform destroy -force``` to remove all resources created by Terraform.
+Terraform destroy will not work completely with this deployment as additional cleanup needs to happen on the Azure side for the destroy to finish. As terraform does not have formal support for the AADDS, terraform is unable to detect this. After running terraform destroy, the user will see a message some time later stating that some resources cannot be destroyed. Navigate to the AADDS resource and a message will appear on the top stating that the AADDS is being deleted. After this process is done, you can then destroy the resource group through Azure. Make sure to clean up the terraform state by typing ```rm *.tfstate*``` in ths directory before proceeding to re-deploy the AADDS.
+
 
 ### 6. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.

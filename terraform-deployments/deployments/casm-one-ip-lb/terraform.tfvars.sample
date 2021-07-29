@@ -86,3 +86,6 @@ application_id                = "<from section 3 step 4>"
 aad_client_secret             = "<from section 3 step 5-6>"
 tenant_id                     = "<from section 3 step 4>"
 object_id                     = "4913cc14-2c26-4054-9d98-faea1e34203b"
+
+# Specify VNet CIDR (Must not conflict with any other CASM deployments)
+# aadds_vnet_cidr = "10.1.0.0/16"

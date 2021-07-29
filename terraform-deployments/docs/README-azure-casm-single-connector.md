@@ -128,7 +128,8 @@ object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
     5. ```aadds_vnet_name``` is the VNet Name of the previously configured AADDS deployment, the property must be in in sync with the ```aadds_vnet_name``` property defined in the AADDS deployment, or with the existing AADDS Virtual Network Name.
     6. ```aadds_vnet_rg``` is the Resource Group Name of the previously configured AADDS deployment, the property must be in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
     7. ```aadds_domain_name``` is the Domain Name of the previously configured AADDS deployment, property must be in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
-    
+    8. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
+        
 ### 5. (Optional) Assigning a SSL Certificate
 
 **Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).

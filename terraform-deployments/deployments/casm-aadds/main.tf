@@ -139,7 +139,7 @@ data "local_file" "pfxfile" {
 }
 
 resource "azurerm_template_deployment" "aadds" {
-  depends_on          = [null_resource.generate_pfx_ps, null_resource.generate_pfx_bash]
+  depends_on          = [null_resource.generate_pfx_ps, null_resource.generate_pfx_bash, azurerm_network_security_rule.nsg_5986, azurerm_subnet_network_security_group_association.network]
   name                = "aadds_template"
   resource_group_name = azurerm_resource_group.main.name
   template_body       = file("template.json")
