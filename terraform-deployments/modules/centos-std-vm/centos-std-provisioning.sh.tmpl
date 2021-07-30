@@ -272,10 +272,8 @@ then
 fi
 
 
-# Redirect stdout and stderr to the log file, while keeping the outputs in the terminal.
-# Also, avoids commands and sensitive information from leaking to the log files.
-exec &> >(tee -a "$DETAILED_LOG_FILE")
-
+# Redirect stdout and stderr to the log file
+exec &>>$DETAILED_LOG_FILE
 
 # install dnf to replace yum based installations
 log "Installing dnf"
