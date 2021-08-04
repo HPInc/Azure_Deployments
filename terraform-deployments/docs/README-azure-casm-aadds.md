@@ -46,10 +46,18 @@ The terraform assumes a fresh deployment with no existing AADDS in the current t
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
-### 3. Deploying the AADDS via Terraform
+### 3. AADDS Deployment Steps
+
 This deployment requires an account with the Global Administrator and Billing Administrator roles in the tenant, and the Contributor role in the subscription. To check a users' tenant roles, search "Azure Active Directory" and navigate to the users pane. Find the user account that is being used for this deployment and navigate to "Assigned Roles", and ensure Global Administrator and Billing Administrator are both assigned. To check subscription roles, search "Subscriptions" and a list of all subscriptions in the directory will show up. Ensure that for the subscription this deployment is taking place in, the users' account is assigned at least a "Contributor" role. The "Owner" role has also been verified to work. 
 
 If the user is missing any of these roles, contact the administrator of the Azure tenant.
+
+ The steps to deploy a workstation will go as follows:
+ 1. Fill out AADDS terraform.tfvars file, and deploy the AADDS
+ 2. Wait for it to finish provisioning and syncing
+ 3. Enter AADDS information and other variables in the workstation deployment terraform.tfvars file, and deploy the workstations
+ 4. Configure CASM through the browser, test connections.
+
 
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide.
 
@@ -70,18 +78,19 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```aadds_domain_name```: Domain name of the AADDS. Must be either a domain that the user owns, or a *.onmicrosoft.com domain (e.g. teradici.onmicrosoft.com). *.onmicrosoft.com domains must be globally unique.
         - ```aadds_location```: Location of the AADDS. As the AADDS is region-locked, this location must match the location of the workstations that the user plans to deploy. 
         - ```pfx_cert_password```: Password of the PFX certificate that will be generated to configure the AADDS for LDAPS communication. Must be at least 4 characters.
+```
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the AADDS. 
-```
+
 A typical deployment should take around 30-40 minutes. When finished, the AADDS will need a further 30-40 minutes to provision, which can be monitored by going to the resource group and selecting the AADDS resource which is named after the configured domain, where the message shown below should be displayed:
 
 ![aadds_provision_message](/terraform-deployments/docs/png/aadds-provision.png)
 
 After this is finished, the AADDS may still need a few more hours to sync the Azure AD users depending on the size of the directory.
 
-IMPORTANT NOTE: For all cloud users in the Azure Active directory, each accounts' password must be either reset or changed following the deployment in order to sync with the AADDS due to the way AADDS handles legacy password hashes. Failure to do so will mean that the account will be unavailable for use through the AADDS. More information on how the password sync works and why the reset is required here: https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization
+IMPORTANT NOTE: For all cloud users in the Azure Active directory, each accounts' password must be either reset or changed following the deployment in order to sync with the AADDS due to the way AADDS handles password hashes. Failure to do so will mean that the account will be unavailable for use through the AADDS. More information on how the password sync works and why the reset is required here: https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization
     
 ### 4. Configuring an existing AADDS
 This section goes over how to set up an existing AADDS deployment. If the AADDS was deployed with terraform as per the instructions in section 3, the AADDS should be ready and this section can be skipped. The rules and configurations below are required in being able to deploy CASM workstation deployments successfully. This list is not exhaustive, but covers the key configurations required in order for the AADDS to work with future deployments.
