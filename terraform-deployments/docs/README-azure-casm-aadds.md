@@ -62,7 +62,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
     - To configure: ```code terraform.tfvars```
     
     ```terraform.tfvars``` variables:
-
+```
     AADDS configuration:
         - ```Subscrpition ID```: ID of the subscription the AADDS will be deployed in. Found by searching "Subscriptions", going to the subscriptions page and copying the "Subscription ID"
         - ```aadds_rg_name```: Name of the resource group that the AADDS will be deployed in. Limit 50 characters.
@@ -74,7 +74,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the AADDS. 
-
+```
 A typical deployment should take around 30-40 minutes. When finished, the AADDS will need a further 30-40 minutes to provision, which can be monitored by going to the resource group and selecting the AADDS resource which is named after the configured domain, where the message shown below should be displayed:
 
 ![aadds_provision_message](/terraform-deployments/docs/png/aadds-provision.png)
@@ -84,20 +84,36 @@ After this is finished, the AADDS may still need a few more hours to sync the Az
 IMPORTANT NOTE: For all cloud users in the Azure Active directory, each accounts' password must be either reset or changed following the deployment in order to sync with the AADDS due to the way AADDS handles legacy password hashes. Failure to do so will mean that the account will be unavailable for use through the AADDS. More information on how the password sync works and why the reset is required here: https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization
     
 ### 4. Configuring an existing AADDS
-This section goes over how to set up an existing AADDS deployment. If the AADDS was deployed with terraform as per the instructions in section 3, the AADDS should be ready and this section can be skipped.
+This section goes over how to set up an existing AADDS deployment. If the AADDS was deployed with terraform as per the instructions in section 3, the AADDS should be ready and this section can be skipped. The rules and configurations below are required in being able to deploy CASM workstation deployments successfully. This list is not exhaustive, but covers the key configurations required in order for the AADDS to work with future deployments.
 1. Go to the the resource group the AADDS belongs in and make note of the following variables: the resource group name, the name of the VNET the AADDS resides in, the location of the AADDS, and the domain name. These will be entered into CASM workstation deployments.
 2. Navigate to the "Secure LDAP" pane in the AADDS resource, and check if a certificate has been configured for LDAPS as per the settings below:
 ![secure_ldap](/terraform-deployments/docs/png/secure-ldap.png)
-If a certificate has not been configured, navigate to ```/terraform-deployments/deployments/casm-aadds``` and run either generate_pfx.ps1 (Windows) or generate_pfx.sh (Linux or Mac). The scripts take two arguments: argument 1 is the domain name, and argument 2 will be the password. An example of how to run the scripts (when inside the casm-aadds diretory): "./generate_pfx.sh teradici.onmicrosoft.com Password!234"
+If a certificate has not been configured, navigate to ```/terraform-deployments/deployments/casm-aadds``` and run either generate_pfx.ps1 (Windows) or generate_pfx.sh (Linux or Mac). The scripts take two arguments: argument 1 is the domain name, and argument 2 will be the password. An example of how to run the scripts (when inside the casm-aadds directory): "./generate_pfx.sh teradici.onmicrosoft.com Password!234"
 3. Create a NSG attached to the subnet the AADDS is attached to (if one does not already exist). After it has been created or if one already exists, navigate to it and click on "Inbound Security Rules" and click "Add". Add the following rules (or equivalent):
  ![inbound_security_rules](/terraform-deployments/docs/png/inbound-security.png)
 Any conflicts with existing rules will need to be handled on a case by case basis.
+4. Ensure that custom DNS servers are set up. Navigate to the virtual network the AADDS resides in and click on the "DNS Servers" pane. The resulting configuration should look similar to below: 
+![aadds_dns](/terraform-deployments/docs/png/aadds_dns.png)
+Make sure that the following 2 addresses point to the private addresses of the AADDS NICs found in the AADDS resource group, which are highlighted below:
+![aadds-nic](/terraform-deployments/docs/png/aadds-nic.png)
 
+5. If the Virtual Network does NOT have a cidr with 16 or more prefix bits, navigate to the peerings section of the virtual network settings and choose an address space for the following workstation deployment that does not conflict with an existing peering. If it does have 16 or more prefix bits, manually choosing an address space should not be 
+necessary as the terraform deployment should be able to find one by default.
+
+After these rules have been configured, the AADDS should be ready for future workstation deployments.
 ### 5. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform.
 Terraform destroy will not work completely with this deployment as additional cleanup needs to happen on the Azure side for the destroy to finish. As terraform does not have formal support for the AADDS, terraform is unable to detect this. After running terraform destroy, the user will see a message some time later stating that some resources cannot be destroyed. Navigate to the AADDS resource and a message will appear on the top stating that the AADDS is being deleted. After this process is done, you can then destroy the resource group through Azure. Make sure to clean up the terraform state by typing ```rm *.tfstate*``` in ths directory before proceeding to re-deploy the AADDS.
 
+### 6. Common issues during deployment
+Here are some common issues that might pop up during or after the deployment. 
 
-### 6. Troubleshooting
+1. Forgetting to reset the password of your AAD service account during deployment - the deployment actually usually finishes and succeeds after a long time but nothing will be working correctly, but the bigger issue here is that since the deployment tries to log in with the credentials and fails, the user will be locked out of their account for a few hours or up to a day depending on the Azure AD settings from the failed login attempts. There is no way to fix this other than to create a new account or wait for the account to unlock.
+
+2. Conflicting VNET CIDRs - The user might find that they have conflicting virtual network address spaces with other CASM deployments, which leads to a failed deployment. How it is currently set up is that each workstation deployment has vnet peering set up to connect to the AADDS, which means that each of the deployments requires a unique vnet address space. By default, the terraform deployment will try to find a non-conflicting address space but if the user decides to set it themselves they'll need to make sure theres no conflicts. Another issue can be that you run out but that will be much less common, since assuming a 16 bit vnet prefix you'll have 255 free address spaces to work with. 
+
+3. The PFX certificate which is set up for LDAPS communication can expire, causing issues in connecting to the AADDS. The PFX certificate is currently set to expire after a year (it can be configured to be longer), in order to refresh it, see the Secure LDAP section to generate a new certificate.
+
+### 7.. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If the user encounters permission issues during deployment, ensure that the users' account is correctly assigned all the necessary roles.
