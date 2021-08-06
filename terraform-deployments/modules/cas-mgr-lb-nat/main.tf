@@ -142,7 +142,7 @@ resource "azurerm_lb_outbound_rule" "cas_outbound" {
 
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 
-  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, azurerm_lb_outbound_rule.cas_outbound]#, azurerm_network_interface_nat_rule_association.cas_association_http]
+  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, azurerm_lb_outbound_rule.cas_outbound, azurerm_network_interface_nat_rule_association.cas_association]
 
   name                 = azurerm_linux_virtual_machine.cas-mgr-vm.name
   virtual_machine_id   = azurerm_linux_virtual_machine.cas-mgr-vm.id
