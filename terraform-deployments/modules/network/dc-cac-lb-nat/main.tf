@@ -281,3 +281,31 @@ resource "azurerm_network_interface_nat_rule_association" "dc_association" {
   ip_configuration_name = "primary"
   nat_rule_id           = azurerm_lb_nat_rule.dc_nat.id
 }
+
+
+resource "azurerm_lb_backend_address_pool" "dc" {
+  depends_on = [azurerm_network_interface_nat_rule_association.dc_association]
+  loadbalancer_id = var.lb_id
+  name            = "dc-pool"
+}
+
+# Optional load balancer vm association
+resource "azurerm_network_interface_backend_address_pool_association" "dc-association" {
+  network_interface_id    = azurerm_network_interface.dc_nic.id
+  ip_configuration_name   = "primary"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.dc.id
+}
+
+resource "azurerm_lb_outbound_rule" "dc_outbound" {
+  depends_on = [azurerm_network_interface_nat_rule_association.dc_association]
+  resource_group_name     = var.resource_group_name
+  loadbalancer_id         = var.lb_id
+  name                    = "dc-outbound"
+  protocol                = "Tcp"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.dc.id
+
+  frontend_ip_configuration {
+    name = "ip-config-dc-frontend"
+  }
+}
+
