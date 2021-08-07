@@ -189,6 +189,22 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
   backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
 }
 
+resource "azurerm_lb_outbound_rule" "cac_outbound" {
+  count = var.instance_count
+  depends_on = [azurerm_network_interface_backend_address_pool_association.main, azurerm_lb_nat_rule.cac_nat]
+  resource_group_name     = var.resource_group_name
+  loadbalancer_id         = var.lb_id
+  name                    = "cac-outbound-${count.index}"
+  protocol                = "Tcp"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.main.id
+
+  frontend_ip_configuration {
+    name = "ip-config-cac-${count.index}"
+  }
+}
+
+
+
 
 resource "azurerm_lb_rule" "allow_port_443" {
   depends_on                     = [var.cac_nat_depends_on, azurerm_network_interface_backend_address_pool_association.main, azurerm_network_interface_nat_rule_association.cac_association_ssh, azurerm_linux_virtual_machine.cac-vm]
@@ -354,7 +370,8 @@ resource "null_resource" "run-cac-provisioning-script" {
 
   depends_on = [
     null_resource.upload-provisioning-script,
-    azurerm_network_interface_nat_rule_association.cac_association_ssh
+    azurerm_network_interface_nat_rule_association.cac_association_ssh,
+    azurerm_lb_outbound_rule.cac_outbound
   ]
 
   count = var.instance_count
