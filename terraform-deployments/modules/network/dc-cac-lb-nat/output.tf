@@ -82,6 +82,7 @@ output "all-output" {
     azurerm_subnet.workstation,
     azurerm_subnet_network_security_group_association.network,
     azurerm_virtual_network.network,
+    azurerm_lb_outbound_rule.dc_outbound
   ]
 }
 
