@@ -77,7 +77,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```aadds_vnet_name```: Name of the VNet that the AADDS will be deployed in. Limit 50 characters.
         - ```aadds_domain_name```: Domain name of the AADDS. Must be either a domain that the user owns, or a *.onmicrosoft.com domain (e.g. teradici.onmicrosoft.com). *.onmicrosoft.com domains must be globally unique.
         - ```aadds_location```: Location of the AADDS. As the AADDS is region-locked, this location must match the location of the workstations that the user plans to deploy. 
-        - ```pfx_cert_password```: Password of the PFX certificate that will be generated to configure the AADDS for LDAPS communication. Must be at least 4 characters.
+        - ```pfx_cert_password```: Password of the PFX certificate that will be generated to configure the AADDS for LDAPS communication. Must be between 4-12 characters.
 ```
 4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
 5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
