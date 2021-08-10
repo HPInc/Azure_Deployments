@@ -102,6 +102,33 @@ module "cac" {
   private_container_name    = azurerm_storage_container.private-container.name
 }
 
+module "aadds-mgmt-vm" {
+  source = "../../modules/aadds-mgmt-vm"
+  location                     = azurerm_resource_group.main.location
+
+  windows_host_vm_depends_on = [module.aadds-network.subnet-workstation-ids[0]]
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
+  workstations                 = module.workstation-map.windows-std-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.windows_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = var.aadds_domain_name
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  storage_account_name         = azurerm_storage_account.storage.name
+  workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
+  workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
+}
+
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 

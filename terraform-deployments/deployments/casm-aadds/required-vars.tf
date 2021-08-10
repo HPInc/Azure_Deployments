@@ -1,13 +1,3 @@
-# variable "application_id" {
-#   description = "The application (client) ID of your app registration in AAD"
-#   type        = string
-# }
-
-# variable "aad_client_secret" {
-#   description = "The client secret of your app registration in AAD"
-#   type        = string
-# }
-
 variable "subscription_id" {
   description = "Subscription ID of the directory the AADDS will be deployed in"
   type        = string
