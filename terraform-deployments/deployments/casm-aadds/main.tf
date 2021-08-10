@@ -130,7 +130,7 @@ resource "null_resource" "generate_pfx_ps" {
 resource "null_resource" "generate_pfx_bash" {
   count = local.check == "Windows" ? 0 : 1
   provisioner "local-exec" {
-    command = "./generate_pfx.sh ${var.aadds_domain_name} ${var.pfx_cert_password}"
+    command = "chmod +x ./generate_pfx.sh && ./generate_pfx.sh ${var.aadds_domain_name} ${var.pfx_cert_password}"
   }
 }
 
