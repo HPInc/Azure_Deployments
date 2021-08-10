@@ -1,23 +1,39 @@
 # Teradici CAS Deployments on Azure
-Teradici is the creator of the PCoIP remoting protocol technology and Cloud Access Software. Teradici's Cloud Access Software enables highly-scalable and cost-effective deployments by managing cloud compute costs and brokering PCoIP connections to remote Windows or Linux workstations. The Cloud Access Manager solution is comprised of two main components – the CAS Manager service, which is a service offered by Teradici to manage Cloud Access Manager deployments, and the Cloud Access Connector, which is the portion of the Cloud Access Manager solution that resides in the customer environment.  To learn more about Cloud Access Manager, visit https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/
+Teradici is the creator of the PCoIP remoting protocol technology and Cloud Access Software. Teradici's Cloud Access Software enables highly-scalable and cost-effective deployments by managing cloud compute costs and brokering PCoIP connections to remote Windows or Linux workstations. The Cloud Access Manager solution is comprised of two main components – the CAS Manager service, which is a service offered by Teradici to manage Cloud Access Manager deployments, and the Cloud Access Connector, which is the portion of the Cloud Access Manager solution that resides in the customer environment.  To learn more about Cloud Access Manager (CAS-M), please visit https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/
 
-This repository contains a collection of Terraform scripts for demonstrating how to deploy Cloud Access Connectors in a user's Azure cloud environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
+This repository contains a collection of Terraform scripts for demonstrating how to deploy Cloud Access Connectors in a user's Azure environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
 
-# Documentation
-- **Microsoft Azure:**
+![single-connector diagram](/terraform-deployments/docs/png/CASMArchitecture.png)
+
+# CAS-M Azure Architectures 
+  ## Introduction 
+  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
+  - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
+    
+  ## CAS-M As A Service
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+
+  ## CAS-M Stand Alone
+  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
   - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
+
+
   - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
   - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
-  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+
+
   - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
   - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
   - [CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+
+  ## FAQ: How to install AAD DS and Local License Server
+  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
+  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
+
+# AWS & GCP Architectures
+
 - [Amazon Web Services](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [Google Cloud Platform](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
