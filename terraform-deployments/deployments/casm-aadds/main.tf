@@ -35,6 +35,7 @@ resource "azurerm_subnet" "aadds_subnet" {
 	address_prefixes     = ["10.0.0.0/24"]
 }
 
+
 resource "azurerm_network_security_group" "nsg" {
   name                = "aadds-nsg-${azurerm_resource_group.main.location}"
   location            = azurerm_resource_group.main.location
