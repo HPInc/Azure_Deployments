@@ -5,20 +5,20 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
 ![single-connector diagram](/terraform-deployments/docs/png/CASMArchitecture.png)
 
-# CAS-M Azure Architectures 
-  ## Introduction 
+# CAS-Management Azure Architectures 
+  ## QuickStart with single connector (CAC) 
   - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
     
-  ## CAS Manager  As A Service
+  ## CAS Manager As A Service
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
-  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
-  ## CAS-M Stand Alone
-  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [CAS Manager with Load Balancer Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+  ## CAS Manager Stand Alone
+  - [CAS-M Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
+  - [CAS-M Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
+  - [CAS Manager Multi Region Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
 
 
   ## FAQ: How to install AAD DS and Local License Server
