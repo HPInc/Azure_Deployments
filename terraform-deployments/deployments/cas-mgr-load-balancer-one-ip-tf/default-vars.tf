@@ -82,7 +82,7 @@ variable "tenant_id" {
 
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
-  default     = ""
+  default     = "tera"
 }
 
 variable "enable_workstation_idle_shutdown" {
