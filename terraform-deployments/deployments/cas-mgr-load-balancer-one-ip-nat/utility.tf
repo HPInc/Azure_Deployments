@@ -6,7 +6,7 @@
  */
 
 locals {
-  resource_group_name        = var.resource_group_name != "" ? var.resource_group_name : "cas_mgr_load_balancer_nat${random_id.string.hex}"
+  resource_group_name        = var.resource_group_name != "" ? var.resource_group_name : "cas_mgr_lb_nat${random_id.string.hex}"
   cas_mgr_deployment_sa_file = "az-sa-key.json"
 }
 
