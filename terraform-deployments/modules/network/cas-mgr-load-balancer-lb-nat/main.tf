@@ -50,7 +50,7 @@ resource "azurerm_public_ip" "cas-mgr-public-ip" {
 
 resource "azurerm_lb" "main" {
 
-  name                = "${var.prefix}-loadbalancer"
+  name                = "${var.prefix}-loadbalancer-${var.location}"
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Standard"
