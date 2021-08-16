@@ -6,7 +6,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
 ![single-connector diagram](/terraform-deployments/docs/png/CASMArchitecture.png)
 
 # CAS-Management Azure Architectures 
-  ## QuickStart with single connector (CAC) 
+  ## QuickStart CAS Manager As A Service (and single connector CAC) 
   - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
     
