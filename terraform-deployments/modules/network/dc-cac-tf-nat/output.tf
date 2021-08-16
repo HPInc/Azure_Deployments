@@ -5,39 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-output "dc-private-ip" {
-  description = "The domain controller private ip address"
-  value       = azurerm_network_interface.dc_nic.ip_configuration[0].private_ip_address
-}
-
-output "dc-public-ip" {
-  description = "The domain controller public ip address"
-  value       = var.dc_ip.ip_address
-}
-
-output "dc-public-ip-id" {
-  description = "The domain controller public ip address id"
-  value       = var.dc_ip.id
-}
-
-output "dc-subnet-cidr" {
-  description = "The domain controller subnet CIDR"
-  value       = var.dc_subnet_cidr
-}
-
-output "dc-network-interface-id" {
-  description = "The domain controller network id"
-  value       = azurerm_network_interface.dc_nic.id
-}
 
 output "network-security-group-ids" {
   description = "The domain controller network security group id"
   value       = [for item in azurerm_network_security_group.nsg : item.id]
-}
-
-output "subnet-dc-id" {
-  description = "The domain controller network subnet id"
-  value       = azurerm_subnet.dc.id
 }
 
 output "subnet-workstation-ids" {
@@ -52,7 +23,7 @@ output "subnet-workstation-names" {
 
 output "subnet-workstation-cidr" {
   description = "The workstation subnet CIDRs"
-  value       = azurerm_subnet.workstation[0].address_prefixes
+  value       = azurerm_subnet.workstation.*.address_prefixes
 }
 
 output "subnet-workstation-locations" {
@@ -75,14 +46,9 @@ output "all-output" {
 
   # Anything that refers to this output must wait until the actions for this module have completed first
   depends_on = [
-    azurerm_network_interface.dc_nic,
-    var.dc_ip,
     azurerm_network_security_group.nsg,
-    azurerm_subnet.dc,
     azurerm_subnet.workstation,
-    azurerm_subnet_network_security_group_association.network,
-    azurerm_virtual_network.network,
-    azurerm_lb_outbound_rule.dc_outbound
+    azurerm_virtual_network.network
   ]
 }
 
@@ -93,14 +59,5 @@ output "resource-group-name" {
 
 output "virtual-network-name" {
   description = "Name of the virtual network"
-  value       = azurerm_virtual_network.network[0].name
-}
-
-output "virtual-network-id" {
-  description = "ID the virtual network"
-  value       = azurerm_virtual_network.network[0].id
-}
-
-output "dc-association-id" {
-  value = azurerm_network_interface_nat_rule_association.dc_association.id
+  value       = azurerm_virtual_network.network.*.name
 }
