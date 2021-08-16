@@ -54,10 +54,10 @@
 
 # Name of resource group for deployment resources. Name must be unique.
 # Leaving this commented will result in the name: 'cas_mgr_single_connector_[random_id]'
-# resource_group_name           = ""
+# resource_group_name           = "DemoPOC1"
 
 # Prefix for DC and CAC machines.
-# prefix                        = ""
+# prefix                        = "demo"
 
 # Debug flag to RDP into the DC VM.
 # create_debug_rdp_access       = false
