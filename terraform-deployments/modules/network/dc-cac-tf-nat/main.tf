@@ -140,68 +140,13 @@ resource "azurerm_subnet" "workstation" {
   virtual_network_name = azurerm_virtual_network.network[count.index].name
 }
 
-resource "azurerm_private_dns_zone" "dns" {
-  name                = "dns.internal"
-  resource_group_name = var.resource_group_name
-}
-
 resource "azurerm_private_dns_zone_virtual_network_link" "cac" {
   count = length(azurerm_virtual_network.network)
 
   name                  = "dns-vnet-link-${var.locations[count.index]}"
   resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.dns.name
+  private_dns_zone_name = var.dns-name
   virtual_network_id    = azurerm_virtual_network.network[count.index].id
-}
-
-resource "azurerm_private_dns_a_record" "dns" {
-  name                = var.active_directory_netbios_name
-  zone_name           = azurerm_private_dns_zone.dns.name
-  resource_group_name = var.resource_group_name
-  ttl                 = 300
-  records             = ["10.0.1.4"]
-}
-
-resource "azurerm_private_dns_srv_record" "dns-cac" {
-  name                = "_ldap._tcp.${var.active_directory_netbios_name}"
-  zone_name           = azurerm_private_dns_zone.dns.name
-  resource_group_name = var.resource_group_name
-  ttl                 = 300
-
-  record {
-    priority = 1
-    weight   = 1
-    port     = 389
-    target   = "${var.active_directory_netbios_name}.dns.internal"
-  }
-}
-
-resource "azurerm_private_dns_srv_record" "dns-ldaps" {
-  name                = "_ldap._tcp.${local.prefix}dc.${var.active_directory_netbios_name}"
-  zone_name           = azurerm_private_dns_zone.dns.name
-  resource_group_name = var.resource_group_name
-  ttl                 = 300
-
-  record {
-    priority = 3
-    weight   = 3
-    port     = 389
-    target   = "${var.active_directory_netbios_name}.dns.internal"
-  }
-}
-
-resource "azurerm_private_dns_srv_record" "dns-win" {
-  name                = "_ldap._tcp.dc._msdcs.${var.active_directory_netbios_name}"
-  zone_name           = azurerm_private_dns_zone.dns.name
-  resource_group_name = var.resource_group_name
-  ttl                 = 300
-
-  record {
-    priority = 2
-    weight   = 2
-    port     = 389
-    target   = "${var.active_directory_netbios_name}.dns.internal"
-  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "workstation" {

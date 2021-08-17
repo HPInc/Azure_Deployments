@@ -104,3 +104,7 @@ output "virtual-network-id" {
 output "dc-association-id" {
   value = azurerm_network_interface_nat_rule_association.dc_association.id
 }
+
+output "dns-name" {
+  value = azurerm_private_dns_zone.dns.name
+}

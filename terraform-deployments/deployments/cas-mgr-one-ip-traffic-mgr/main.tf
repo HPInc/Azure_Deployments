@@ -76,12 +76,13 @@ module "dc-cac-network-extra" {
   create_debug_rdp_access       = var.create_debug_rdp_access
   main_vnet_name                = module.dc-cac-network.virtual-network-name
   main_vnet_id                  = module.dc-cac-network.virtual-network-id
+  dns-name                      = module.dc-cac-network.dns-name
 }
 
 module "active-directory-domain-vm" {
   source = "../../modules/dc/dc-vm"
 
-  dc_vm_depends_on = [module.dc-cac-network.all-output]
+  dc_vm_depends_on = [module.dc-cac-network.all-output, module.dc-cac-network-extra.*.all-output]
 
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
@@ -103,7 +104,8 @@ module "active-directory-domain-service" {
     module.dc-cac-network.all-output,
     module.active-directory-domain-vm.domain-controller-name,
     module.active-directory-domain-vm.domain-controller-id,
-    module.dc-cac-network.dc-association-id
+    module.dc-cac-network.dc-association-id,
+    module.dc-cac-network-extra.*.all-output
   ]
 
   domain_controller_virtual_machine_name      = module.active-directory-domain-vm.domain-controller-name
@@ -127,7 +129,8 @@ module "active-directory-domain-configure" {
   dc_configure_depends_on = [
     module.dc-cac-network.all-output,
     module.active-directory-domain-service.uploaded-scripts,
-    module.active-directory-domain-service.uploaded-domain-users-list-count
+    module.active-directory-domain-service.uploaded-domain-users-list-count,
+    module.dc-cac-network-extra.*.all-output
     ]
 
   application_id                         = var.application_id
@@ -140,8 +143,8 @@ module "cas-mgr" {
   source = "../../modules/cas-mgr-lb-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
-  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id]
+  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output, module.dc-cac-network-extra.*.all-output]
+  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id, module.dc-cac-network-extra.*.all-output]
 
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
@@ -172,7 +175,7 @@ module "cac" {
   source = "../../modules/cac-cas-mgr-tf-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id, module.cas-mgr.cas-association-id, module.load-balancer-extra.*.probe-id]
+  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id, module.cas-mgr.cas-association-id, module.load-balancer-extra.*.probe-id, module.dc-cac-network-extra.*.all-output, module.cas-mgr.cas-provisioning]
   cac_count_list = var.cac_count_list
   cac_nat_depends_on = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id, module.cas-mgr.cas-association-id]
 
@@ -220,7 +223,7 @@ module "cac" {
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
@@ -248,7 +251,7 @@ module "windows-std-vm" {
 module "windows-gfx-vm" {
   source = "../../modules/windows-gfx-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
@@ -276,7 +279,7 @@ module "windows-gfx-vm" {
 module "centos-std-vm" {
   source = "../../modules/centos-std-vm"
 
-  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
 
   workstations                 = module.workstation-map.centos-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -303,7 +306,7 @@ module "centos-std-vm" {
 module "centos-gfx-vm" {
   source = "../../modules/centos-gfx-vm"
 
-  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
 
   workstations                 = module.workstation-map.centos-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name

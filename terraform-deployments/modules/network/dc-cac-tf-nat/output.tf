@@ -31,11 +31,6 @@ output "subnet-workstation-locations" {
   # workstation location subnet is created one per virtual network so the subnet locations match
   value = [for item in azurerm_virtual_network.network : item.location]
 }
-
-output "private-dns-zone-id" {
-  value = azurerm_private_dns_zone.dns.id
-}
-
 output "virtual-network-names" {
   value = [for item in azurerm_virtual_network.network : item.name]
 }
@@ -48,7 +43,9 @@ output "all-output" {
   depends_on = [
     azurerm_network_security_group.nsg,
     azurerm_subnet.workstation,
-    azurerm_virtual_network.network
+    azurerm_virtual_network.network,
+    azurerm_virtual_network_peering.peering_to_satellite_locations,
+    azurerm_virtual_network_peering.peering_to_main_location
   ]
 }
 
