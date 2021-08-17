@@ -30,3 +30,7 @@ output "cas-association-id" {
   value = azurerm_network_interface_nat_rule_association.cas_association.id
 }
 
+
+output "cas-provisioning" {
+  value = azurerm_virtual_machine_extension.cas-mgr-provisioning
+}

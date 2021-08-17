@@ -44,3 +44,7 @@ variable "main_vnet_name" {
 variable "main_vnet_id" {
   type        = string
 }
+
+variable "dns-name" {
+  type = string
+}

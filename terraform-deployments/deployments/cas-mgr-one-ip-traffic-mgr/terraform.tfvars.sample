@@ -98,3 +98,7 @@ aad_client_secret             = "<from section 3 step 5-6>"
 # tenant_id                     = "<from section 3 step 4>"
 # key_vault_id                  = "<found in key vault properties under Resource ID>"
 # ad_pass_secret_name           = "<variable name used for ad pass secret>"
+
+# Sub domain of the traffic manager FQDN.
+# e.g.: the value 'teradici' will create the FQDN 'teradici.trafficmanager.net'
+traffic_manager_dns_name = "teradici"

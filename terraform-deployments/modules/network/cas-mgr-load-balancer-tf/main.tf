@@ -46,7 +46,7 @@ resource "azurerm_lb" "main" {
   dynamic "frontend_ip_configuration" {
     for_each = { for idx, val in azurerm_public_ip.cac: idx => val}
     content {
-      name                 = "cac-${var.location}-${frontend_ip_configuration.key}"
+      name                 = "ip-config-cac-${frontend_ip_configuration.key}"
       public_ip_address_id = frontend_ip_configuration.value.id
     }
   }
