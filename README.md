@@ -16,9 +16,9 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
   ## CAS Manager Stand Alone
-  - [CAS-M Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [CAS-M Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [CAS Manager Multi Region Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
+  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
+  - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
 
 
   ## FAQ: How to install AAD DS and Local License Server
