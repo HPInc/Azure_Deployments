@@ -48,3 +48,22 @@ output "cas-mgr-public-ip" {
 output "cac-load-balancer-ip" {
   value = module.load-balancer.public-ip
 }
+
+
+
+
+output "cas-mgr-deployment-sa-storage-account" {
+    value = azurerm_storage_account.storage.name
+}
+
+output "cas-mgr-deployment-sa-storage-account-container" {
+    value = azurerm_storage_container.private-container.name
+}
+
+output "cas-mgr-deployment-sa-blob" {
+    value = local.cas_mgr_deployment_sa_file
+}
+
+output "cac-public-ips" {
+    value = flatten(module.load-balancer.cac-public)
+}

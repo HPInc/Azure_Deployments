@@ -1,6 +1,6 @@
-# CASM-Load-Balancer-One-IP Deployment
+# CASM-Single-Connector Deployment
 
-**Objective**: The objective of this documentation is to deploy the Load-Balancer-One-IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the Single Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
@@ -21,21 +21,21 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
-1. [CASM-Load-Balancer-One-IP Architecture](#1-CASM-Load-Balancer-One-IP-architecture)
+1. [CASM-Single-Connector Architecture](#1-CASM-Single-Connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Variable Assignment](#4-variable-assignment)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
-6. [Deploying the Load-Balancer-One-IP via Terraform](#6-deploying-the-Load-Balancer-One-IP-via-terraform)
+6. [Deploying the Single-Connector via Terraform](#6-deploying-the-Single-Connector-One-IP-via-terraform)
 7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 
-### 1. CASM-Load-Balancer-One-IP Architecture
+### 1. CASM-Single-Connector Architecture
 
-The Load-Balancer-One-IP deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
+The Single Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
 - ```subnet-cac```: for the Connector
 - ```subnet-cas```: for the CASM
 - ```subnet-ws```: for the workstations
@@ -51,8 +51,6 @@ Multiple domain-joined workstations and Cloud Access Connectors can be optionall
 - ```cac_configuration```: List of objects, where each object defined a connector
 
 The ```workstation_os``` property in the ```workstations``` parameter can be used to define the respective workstation's operating system (use 'linux' or 'windows'). 
-
-The Public Load Balancer distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the Load Balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the Load Balancer which have NAT rules set up to route into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
 
 This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the CASM-AADDS document to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
 
@@ -174,7 +172,7 @@ Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deploymen
       2. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
       3. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
           - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-      4. Answer ```yes``` to start provisioning the load balancer infrastructure. 
+      4. Answer ```yes``` to start provisioning the single connector infrastructure. 
 
 A typical deployment should take around 40-50 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
