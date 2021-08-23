@@ -28,7 +28,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
   - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
-  ### QuickStart for CAS Manager As A Service (Python script for running CAS-M SaaS + DC)
+  ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
   - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
  
