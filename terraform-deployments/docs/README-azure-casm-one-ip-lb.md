@@ -24,13 +24,14 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Variable Assignment](#4-variable-assignment)
-5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
-6. [Deploying the CASM-Load-Balancer-One-IP via Terraform](#6-deploying-the-single-connector-via-terraform)
-7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
-8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
-9. [Changing the deployment](#9-changing-the-deployment)
-10. [Deleting the deployment](#10-deleting-the-deployment)
-11. [Troubleshooting](#11-troubleshooting)
+5. [Storing Secrets on Azure Keyvault](#5-optional-storing-secrets-on-azure-key-vault)
+6. [Assigning a SSL Certificate](#6-optional-assigning-a-ssl-certificate)
+7. [Deploying the CASM-Load-Balancer-One-IP via Terraform](#7-deploying-the-single-connector-via-terraform)
+8. [Adding Workstations in CAS Manager](#8-adding-workstations-in-cas-manager)
+9. [Starting a PCoIP Session](#9-starting-a-pcoip-session)
+10. [Changing the deployment](#10-changing-the-deployment)
+11. [Deleting the deployment](#11-deleting-the-deployment)
+12. [Troubleshooting](#12-troubleshooting)
 
 ### 1. CASM-Load Balancer-One-IP Architecture
 
@@ -123,8 +124,43 @@ object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
     6. ```aadds_vnet_rg``` is the Resource Group Name of the previously configured AADDS deployment, the property must be in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
     7. ```aadds_domain_name``` is the Domain Name of the previously configured AADDS deployment, property must be in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
     8. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
+
+### 5. (Optional) Storing Secrets on Azure Key Vault
+
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
+
+As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key,  LLS admin password, connector token, and LLS activation code users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
+
+1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
+    1. Select the same region as the deployment.
+    2. Click next to go to the Access policy page.
+    3. Click **+ Add Access Policy**.
+        1. Under **Configure from template** select **Secret Management**.
+        2. Under **Select principal** click on **None selected**.
+        3. Find the application from [section 3](#3-connect-azure-to-cas-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+        4. Click **Review + create** and then **Create**.
+2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
+3. To create **AD safe mode admin password**, **AD admin password**, **LLS admin password**, **PCoIP registration key**, **connector token** and **LLS activation code** as secrets follow these steps for each value:
+    1. Click **+ Generate/Import**.
+    2. Enter the name of the secret.
+    3. Input the secret value.
+    4. Click **Create**.
+    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**. 
+      - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
+4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+```
+...
+
+# Only fill these when using Azure Key Vault secrets.
+# Examples and tips can be found in section 4 of the documentation.
+# key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
+# ad_pass_secret_name           = "adPasswordID"
+```
+- Tips for finding these variables:
+    1. ```key_vault_id```: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
+    2. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```. From the example above, this would be ```adPasswordID```.
     
-### 5. (Optional) Assigning a SSL Certificate
+### 6. (Optional) Assigning a SSL Certificate
 
 **Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
@@ -136,7 +172,7 @@ To upload a SSL certificate and SSL key onto ACS:
   5. The location of these files will be found in ```~/clouddrive/```
   6. Enter the paths to the SSL certificate and SSL key inside ```terraform.tfvars```.
 
-### 6. Deploying the CASM-Single-Connector via Terraform
+### 7. Deploying the CASM-Single-Connector via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
@@ -213,7 +249,7 @@ windows-graphics-workstations = [
 ]
 ```
     
-### 7. Adding Workstations in CAS Manager
+### 8. Adding Workstations in CAS Manager
 To connect to workstations, they have to be added through CAS Manager. 
 1. In a browser, enter ```https://<cas-mgr-public-ip>```.
     - The default username for CAS Manager is ```adminUser```.
@@ -226,7 +262,7 @@ To connect to workstations, they have to be added through CAS Manager.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
-### 8. Starting a PCoIP Session
+### 9. Starting a PCoIP Session
 Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
@@ -236,15 +272,15 @@ Once the workstations have been added by CAS Manager and assigned to Active Dire
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
-### 9. Changing the deployment
+### 10. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
 Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAS Manager admin console. Create a new connector to obtain a new token.
 
-### 10. Deleting the deployment
+### 11. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
-### 11. Troubleshooting
+### 12. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
 - If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
