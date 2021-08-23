@@ -19,6 +19,21 @@ module "load-balancer" {
   location                  = azurerm_resource_group.main.location
 }
 
+module "traffic-manager" {
+  source = "../../modules/network/traffic-manager"
+
+  traffic_manager_depends_on = [
+    module.aadds-network.all-output,
+    module.load-balancer.public-ip,
+    module.cac.cac-configure
+  ]
+
+  resource_group_name    = azurerm_resource_group.main.name
+  managed_endpoints      = [module.load-balancer.public-ip]
+  managed_endpoint_names = ["lb-https"]
+  dns_name               = var.traffic_manager_dns_name
+}
+
 module "aadds-network" {
   source = "../../modules/casm/aadds-network-lb-nat"
 
@@ -143,6 +158,7 @@ module "windows-std-vm" {
   storage_account_name         = azurerm_storage_account.storage.name
   workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
   workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
@@ -169,6 +185,7 @@ module "windows-gfx-vm" {
   storage_account_name         = azurerm_storage_account.storage.name
   workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
   workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
@@ -198,6 +215,8 @@ module "centos-std-vm" {
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
   minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
+
 }
 
 module "centos-gfx-vm" {
@@ -220,6 +239,7 @@ module "centos-gfx-vm" {
   domain_controller_ip         = var.aadds_domain_ip
   workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
   workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown

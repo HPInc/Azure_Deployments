@@ -10,32 +10,8 @@ module "workstation-map" {
   workstations = var.workstations
 }
 
-module "load-balancer" {
-  source = "../../modules/casm/casm-load-balancer-one-ip"
-  
-  instance_count            = var.cac_instance_count
-  prefix                    = var.prefix
-  resource_group_name       = azurerm_resource_group.main.name
-  location                  = azurerm_resource_group.main.location
-}
-
-module "traffic-manager" {
-  source = "../../modules/network/traffic-manager"
-
-  traffic_manager_depends_on = [
-    module.aadds-network.all-output,
-    module.load-balancer.public-ip,
-    module.cac.cac-configure
-  ]
-
-  resource_group_name    = azurerm_resource_group.main.name
-  managed_endpoints      = [module.load-balancer.public-ip]
-  managed_endpoint_names = ["lb-https"]
-  dns_name               = var.traffic_manager_dns_name
-}
-
 module "aadds-network" {
-  source = "../../modules/casm/aadds-network-lb-nat"
+  source = "../../modules/casm/aadds-network-vnet"
 
   resource_group_name     = azurerm_resource_group.main.name
   locations               = module.workstation-map.virtual-network-locations
@@ -55,15 +31,13 @@ module "aadds-network" {
 
 
 module "casm" {
-  source = "../../modules/casm/casm-vm-lb-nat"
+  source = "../../modules/casm/casm-vm"
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cas_nat_depends_on        = [module.load-balancer.probe-id]
 
   casm_subnet_depends_on = module.aadds-network.all-output
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
   private_container_url      = azurerm_storage_container.private-container.id
-
   storage_account_name         = azurerm_storage_account.storage.name
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
@@ -85,16 +59,12 @@ module "casm" {
   private_container_name    = azurerm_storage_container.private-container.name
   aadds_resource_group      = var.resource_group_name
   cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
-  cas_mgr_public_ip         = module.load-balancer.cas-public
-  lb_id                     = module.load-balancer.load-balancer-ids[0]
 }
 
 
 module "cac" {
-  source = "../../modules/cac-cas-mgr-aadds-lb-nat"
-  cac_subnet_depends_on = [module.aadds-network.all-output, module.casm.subnet, module.load-balancer.probe-id, module.casm.cas-association-id]
-  cac_nat_depends_on = [module.load-balancer.probe-id, module.casm.cas-association-id]
-
+  source = "../../modules/cac-cas-mgr-aadds"
+  cac_subnet_depends_on = [module.aadds-network.all-output, module.casm.subnet]
   cac_count_list = [var.cac_instance_count]
   cac_subnet_cidr = [cidrsubnet(local.vnet_cidr, 8, 2)]
   cas_mgr_url                = "https://${module.casm.internal-ip}"
@@ -106,12 +76,13 @@ module "cac" {
 
   prefix                = var.prefix
   domain_name           = var.aadds_domain_name
-  domain_controller_ip  = var.aadds_domain_ip
+  domain_controller_ip  = data.azurerm_virtual_network.aadds_vnet.dns_servers[0]
   storage_account_name  = azurerm_storage_account.storage.name
   private_container_url = azurerm_storage_container.private-container.id
 
   cac_admin_user     = var.cac_admin_username
   cac_admin_password = var.ad_admin_password
+  tenant_id                   = var.tenant_id
 
   resource_group_name         = azurerm_resource_group.main.name
   location                    = azurerm_resource_group.main.location
@@ -129,13 +100,33 @@ module "cac" {
 
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
-  cas_mgr_internal_ip       = module.casm.internal-ip
-  cas_mgr_public_ip         = module.load-balancer.cas-public.ip_address
-  cas_mgr_public_ip_id      = module.load-balancer.cas-public.id
-  cac_public                = module.load-balancer.cac-public
-  probe_id                  = module.load-balancer.probe-id
-  lb_id = module.load-balancer.load-balancer-ids[0]
-  is_private = true
+}
+
+module "aadds-mgmt-vm" {
+  source = "../../modules/aadds-mgmt-vm"
+  location                     = azurerm_resource_group.main.location
+
+  windows_host_vm_depends_on = [module.aadds-network.subnet-workstation-ids[0]]
+  blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
+  workstations                 = module.workstation-map.windows-std-workstations
+  resource_group_name          = azurerm_resource_group.main.name
+  admin_name                   = var.windows_admin_username
+  admin_password               = var.ad_admin_password
+  pcoip_registration_code      = var.pcoip_registration_code
+  domain_name                  = var.aadds_domain_name
+  ad_service_account_username  = var.ad_admin_username
+  ad_service_account_password  = var.ad_admin_password
+  application_id               = var.application_id
+  aad_client_secret            = var.aad_client_secret
+  key_vault_id                 = var.key_vault_id
+  ad_pass_secret_name          = var.ad_pass_secret_name
+  storage_account_name         = azurerm_storage_account.storage.name
+  workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
+  workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
+
+  enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
+  minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
+  minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
 }
 
 module "windows-std-vm" {
@@ -148,6 +139,7 @@ module "windows-std-vm" {
   admin_name                   = var.windows_admin_username
   admin_password               = var.ad_admin_password
   pcoip_registration_code      = var.pcoip_registration_code
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   domain_name                  = var.aadds_domain_name
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
@@ -173,6 +165,7 @@ module "windows-gfx-vm" {
   resource_group_name          = azurerm_resource_group.main.name
   admin_name                   = var.windows_admin_username
   admin_password               = var.ad_admin_password
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   pcoip_registration_code      = var.pcoip_registration_code
   domain_name                  = var.aadds_domain_name
   ad_service_account_username  = var.ad_admin_username
@@ -204,10 +197,11 @@ module "centos-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
-  domain_controller_ip         = var.aadds_domain_ip
+  domain_controller_ip         = data.azurerm_virtual_network.aadds_vnet.dns_servers[0]
   workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
   workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
@@ -228,11 +222,12 @@ module "centos-gfx-vm" {
   domain_name                  = var.aadds_domain_name
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   application_id               = var.application_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
-  domain_controller_ip         = var.aadds_domain_ip
+  domain_controller_ip         = data.azurerm_virtual_network.aadds_vnet.dns_servers[0]
   workstation_subnet_ids       = module.aadds-network.subnet-workstation-ids
   workstation_subnet_locations = module.aadds-network.subnet-workstation-locations
 

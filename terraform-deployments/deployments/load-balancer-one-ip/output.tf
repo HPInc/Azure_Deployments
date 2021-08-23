@@ -1,16 +1,20 @@
-# /*
-#  * Copyright (c) 2021 Teradici Corporation
-#  *
-#  * This source code is licensed under the MIT license found in the
-#  * LICENSE file in the root directory of this source tree.
-#  */
+/*
+ * Copyright (c) 2021 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
 output "resource_group" {
   value = azurerm_resource_group.main.name
 }
 
-output "domain-controller-internal-ip" {
+output "domain-controller-private-ip" {
   value = module.dc-cac-network.dc-private-ip
+}
+
+output "domain-controller-public-ip" {
+  value = module.dc-cac-network.dc-public-ip
 }
 
 output "windows-std-internal-ip" {
@@ -41,10 +45,6 @@ output "centos-std-internal-ip" {
   }
 }
 
-output "cas-mgr-public-ip" {
-  value = module.load-balancer.cas-public.ip_address
-}
-
-output "cac-load-balancer-ip" {
+output "load-balancer-public-ip" {
   value = module.load-balancer.public-ip
 }

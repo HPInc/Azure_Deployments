@@ -1,4 +1,4 @@
-# Load Balancer (Multi-connector) Single IP Deployment
+# Load Balancer (Multi-connector) Deployment
 
 **Objective**: The objective of this documentation is to deploy the load balancer architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). 
 
@@ -21,7 +21,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
-1. [Load Balancer Single IP Architecture](#1-load-balancer-architecture)
+1. [Load Balancer Architecture](#1-load-balancer-architecture)
 2. [Requirements](#2-requirements)
 3. [Connect Azure to CAS Manager as a Service](#3-connect-azure-to-cas-manager-as-a-service)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
@@ -33,9 +33,9 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 
-### 1. Load Balancer Single IP Architecture
+### 1. Load Balancer Architecture
 
-The Load Balancer Single IP deployment distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the load balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the firewall which then NATs into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
+The Load Balancer deployment distributes traffic between Cloud Access Connectors within the same region. These connectors can be in different virtual networks as long as they're in the same region. The client initiates a PCoIP session with the public IP of the Load balancer, and the Load Balancer selects one of the connectors to establish the connection. In-session PCoIP traffic goes through the selected Cloud Access Connector directly, bypassing the HTTPS Load Balancer. 
 
 Workstations and Cloud Access Connectors can be defined in the ```workstations``` and ```cac_configuration``` parameters respectively. Please refer to terraform.tfvars.sample for details.
 
