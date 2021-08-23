@@ -23,7 +23,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
     
   ## CAS Manager As A Service Architectures
   
-  ### CAS-M SaaS with AAD Domain Services (CAS-M SaaS + AAD DC)
+  ### CAS-M SaaS with Local Domain Controler (CAS-M SaaS + DC)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
   - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
   - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
