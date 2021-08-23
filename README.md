@@ -19,6 +19,8 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
   - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
     
+    
+    
   ## CAS Manager As A Service Architectures
   
   ### CAS-M SaaS with AAD Domain Services (CAS-M SaaS + AAD DC)
@@ -30,7 +32,8 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
  
-  ## FAQ: How to install AAD DS and Local License Server
+ 
+  ### FAQ: How to install AAD DS and Local License Server
   - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
   - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
 
