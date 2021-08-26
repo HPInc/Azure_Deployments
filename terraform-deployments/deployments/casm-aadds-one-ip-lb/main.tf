@@ -109,6 +109,7 @@ module "cac" {
   ad_pass_secret_name         = var.ad_pass_secret_name
   ssl_key                     = var.ssl_key
   ssl_cert                    = var.ssl_cert
+  tenant_id                   = var.tenant_id
 
   aadds_resource_group      = var.resource_group_name
 
@@ -148,7 +149,6 @@ module "windows-std-vm" {
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
   minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval
   tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
-
 }
 
 module "windows-gfx-vm" {

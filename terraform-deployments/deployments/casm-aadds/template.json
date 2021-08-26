@@ -29,6 +29,9 @@
         "pfxCert64": {
             "type": "string"
         },
+        "pfxPassword": {
+            "type": "string"
+        },
         "sku": {
             "type": "string",
             "defaultValue": "Standard"
@@ -55,7 +58,7 @@
                 "ldapsSettings": {
                     "ldaps": "Enabled",
                     "pfxCertificate": "[parameters('pfxCert64')]",
-                    "pfxCertificatePassword": "Password!234",
+                    "pfxCertificatePassword": "[parameters('pfxPassword')]",
                     "externalAccess": "Enabled"
                     }
             }

@@ -27,6 +27,7 @@ variable "cas_mgr_admin_password" {
 variable "mongodb_admin_password" {
   description = "Password for the Administrator of Mongodb VM"
   type        = string
+  default     = ""
 }
 
 

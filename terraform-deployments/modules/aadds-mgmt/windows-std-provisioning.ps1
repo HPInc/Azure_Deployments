@@ -336,12 +336,6 @@ else {
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
-PCoIP-Agent-Install
-
-if ("${pcoip_registration_code}" -ne "null") {
-    PCoIP-Agent-Register
-}
-
 Install-Idle-Shutdown
 
 Write-Output "Joining Domain"

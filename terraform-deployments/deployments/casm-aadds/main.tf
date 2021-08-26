@@ -154,6 +154,7 @@ resource "azurerm_template_deployment" "aadds" {
     vnetName                = azurerm_virtual_network.aadds_vnet.name
     vnetResourceGroup       = azurerm_resource_group.main.name
     pfxCert64               = data.local_file.pfxfile.content_base64
+    pfxPassword             = var.pfx_cert_password
     #sku                     = "Standard"
   }
   deployment_mode = "Incremental"
