@@ -10,9 +10,9 @@ terraform {
 }
 
 provider "azurerm" {
-  #partner_id    = "0d95c7be-a922-5be2-841a-5381655bf4f1"
-  # client_id     = var.application_id
-  # client_secret = var.aad_client_secret
-  subscription_id = var.subscription_id
+  partner_id    = "0d95c7be-a922-5be2-841a-5381655bf4f1"
+  client_id     = var.application_id
+  client_secret = var.aad_client_secret
   features {}
 }
+
