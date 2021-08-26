@@ -35,7 +35,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
 }
 
 resource "azurerm_lb_probe" "main" {
-  resource_group_name = var.resource_group_name
   loadbalancer_id     = azurerm_lb.main.id
   name                = var.probe_name
   port                = var.probe_port
@@ -50,66 +49,61 @@ resource "azurerm_lb_rule" "allow_port_22" {
 
   count = var.create_debug_ssh_access ? 1 : 0
 
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "allow-ssh-${var.location}"
   protocol                       = "Tcp"
   frontend_port                  = 22
   backend_port                   = 22
   frontend_ip_configuration_name = azurerm_lb.main.frontend_ip_configuration[0].name
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.main.id
   load_distribution              = "SourceIPProtocol"
 }
 
 resource "azurerm_lb_rule" "allow_port_443" {
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "allow-https-${var.location}"
   protocol                       = "Tcp"
   frontend_port                  = 443
   backend_port                   = 443
   frontend_ip_configuration_name = azurerm_lb.main.frontend_ip_configuration[0].name
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.main.id
   load_distribution              = "SourceIPProtocol"
 }
 
 resource "azurerm_lb_rule" "allow_port_4172" {
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "allow-4172-${var.location}"
   protocol                       = "Tcp"
   frontend_port                  = 4172
   backend_port                   = 4172
   frontend_ip_configuration_name = azurerm_lb.main.frontend_ip_configuration[0].name
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.main.id
   load_distribution              = "SourceIPProtocol"
 }
 
 resource "azurerm_lb_rule" "allow_port_4172_udp" {
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "allow-4172-udp-${var.location}"
   protocol                       = "Udp"
   frontend_port                  = 4172
   backend_port                   = 4172
   frontend_ip_configuration_name = azurerm_lb.main.frontend_ip_configuration[0].name
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.main.id
   load_distribution              = "SourceIPProtocol"
 }
 
 resource "azurerm_lb_rule" "allow_port_60443" {
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = azurerm_lb.main.id
   name                           = "allow-60443-${var.location}"
   protocol                       = "Tcp"
   frontend_port                  = 60443
   backend_port                   = 60443
   frontend_ip_configuration_name = azurerm_lb.main.frontend_ip_configuration[0].name
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = azurerm_lb_probe.main.id
   load_distribution              = "SourceIPProtocol"
 }

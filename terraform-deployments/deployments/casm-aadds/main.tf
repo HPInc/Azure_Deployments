@@ -125,30 +125,29 @@ data "local_file" "pfxfile" {
   filename = "${path.module}/cert.pfx"
 }
 
-resource "azurerm_template_deployment" "aadds" {
+resource "azurerm_resource_group_template_deployment" "aadds" {
   depends_on          = [null_resource.generate_pfx_ps, null_resource.generate_pfx_bash, azurerm_network_security_rule.nsg_5986, azurerm_subnet_network_security_group_association.network, azurerm_network_security_rule.nsg_5985, azurerm_network_security_rule.nsg_22, azurerm_network_security_rule.nsg_allow_all_vnet]
   name                = "aadds_template"
   resource_group_name = azurerm_resource_group.main.name
-  template_body       = file("template.json")
-  parameters = {
-    apiVersion              = "2017-06-01"
-    domainConfigurationType = "FullySynced"
-    domainName              = var.aadds_domain_name
-    filteredSync            = "Disabled"
-    location                = azurerm_resource_group.main.location
-    subnetName              = azurerm_subnet.aadds_subnet.name
-    vnetName                = azurerm_virtual_network.aadds_vnet.name
-    vnetResourceGroup       = azurerm_resource_group.main.name
-    pfxCert64               = data.local_file.pfxfile.content_base64
-    pfxPassword             = var.pfx_cert_password
-    #sku                     = "Standard"
-  }
+  template_content    = file("template.json")
+  parameters_content  = jsonencode({
+    apiVersion              = {value = "2017-06-01"}
+    domainConfigurationType = {value = "FullySynced"}
+    domainName              = {value = var.aadds_domain_name}
+    filteredSync            = {value = "Disabled"}
+    location                = {value = azurerm_resource_group.main.location}
+    subnetName              = {value = azurerm_subnet.aadds_subnet.name}
+    vnetName                = {value = azurerm_virtual_network.aadds_vnet.name}
+    vnetResourceGroup       = {value = azurerm_resource_group.main.name}
+    pfxCert64               = {value = data.local_file.pfxfile.content_base64}
+    pfxPassword             = {value = var.pfx_cert_password}
+  })
   deployment_mode = "Incremental"
 }
 
 resource "null_resource" "az-configure-aadds" {
   depends_on = [
-    azurerm_template_deployment.aadds
+    azurerm_resource_group_template_deployment.aadds
   ]
 
   provisioner "local-exec" {

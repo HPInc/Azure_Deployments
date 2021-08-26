@@ -273,7 +273,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "dc-associ
 
 resource "azurerm_lb_outbound_rule" "dc_outbound" {
   depends_on = [azurerm_network_interface_nat_rule_association.dc_association]
-  resource_group_name     = var.resource_group_name
   loadbalancer_id         = var.lb_id
   name                    = "dc-outbound"
   protocol                = "Tcp"
@@ -283,4 +282,3 @@ resource "azurerm_lb_outbound_rule" "dc_outbound" {
     name = "ip-config-dc-frontend"
   }
 }
-
