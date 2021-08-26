@@ -149,7 +149,12 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
-
+  timeouts {
+    create = "2h"
+    read = "1h"
+    update = "2h"
+    delete = "2h"
+  }
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.cas_mgr_provisioning_script}.tmpl", {
