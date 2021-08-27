@@ -1,6 +1,6 @@
 # CAS Manager (Single-Connector) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/cas-mgr-single-connector
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
