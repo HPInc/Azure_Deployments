@@ -5,23 +5,19 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
 ![single-connector diagram](/terraform-deployments/docs/png/CASMArchitecture.png)
 
-# CAS-Management Azure Architectures 
+# CAS-Manager Stand Alone Deployments 
 
- ## CAS Manager Stand Alone Architectures
- 
-  ### CAS-M with AAD Domain Services (CAS-M + AAD DS)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
-  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
-  - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+  - Single Connector Deployment
+    - [CAS-M + CAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-single-connector.md)
+    - [CAS-M + CAC + Local Domain Controler](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
+  - Load Balancer with Multi-Connector Deployment
+    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
+    - [CAS-M + nCAC + Local Domain Controler](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
+  - Multi Region multi LB Deployment
+    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+    - [CAS-M + nCAC + Local Domain Controler](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 
-  ### CAS-M with Local Domain Controler (CAS-M + DC)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
-    
-    
-    
-  ## CAS Manager As A Service Architectures
+# CAS Manager As A Service Deployments
   
   ### CAS-M SaaS with Local Domain Controler (CAS-M SaaS + DC)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
