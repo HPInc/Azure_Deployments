@@ -248,7 +248,7 @@ Run ```terraform destroy -force``` to remove all resources created by Terraform.
 
 ### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
-- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
+- If no machines are showing up on CAS Managepr or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
 - If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
     - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine ```[prefix]-cac-vm-0```, and the **Public IP address** will be shown on the top right.
@@ -258,7 +258,18 @@ Information about connecting to virtual machines for investigative purposes:
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
-    
+- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deplay ```terraform apply``` Terraform depends on two environment variables being configured. TF_LOG which could be set to DEBUG, INFO, WARN, or ERROR. The second one TF_LOG_PATH sets the path and file that logs will be logged into: terraformLogs.txt, however, it can be named whatever you like
+
+
+  - PowerShell:
+```> $env:TF_LOG="TRACE"```
+```> $env:TF_LOG_PATH="terraform.txt"```
+
+  - Bash:
+```$ export TF_LOG="TRACE"```
+```$ export TF_LOG_PATH="terraform.txt"```
+
+
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
     1. RDP into the Domain Controller virtual machine. 
