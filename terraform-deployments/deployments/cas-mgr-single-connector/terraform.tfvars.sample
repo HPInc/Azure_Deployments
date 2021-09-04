@@ -3,53 +3,61 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- */
+*/
 
- # List of workstations to deploy.
- # For workstation prefixes, max 5 characters to avoid name cropping.
- # Example below deploys 1 standard CentOS VM, 1 standard Windows VM, 1 graphics CentOS VM and 1 graphics Windows VM.
- 
- workstations = [
-    {
-        prefix           = "",
-        location         = "westus2",
-        workstation_os   = "linux",
-        vm_size          = "Standard_B2ms",
-        disk_type        = "Standard_LRS",
-        disk_size        = 128,
-        count            = 1,
-        isGFXHost        = false
-    },
-    {
-        prefix           = "",
-        location         = "westus2",
-        workstation_os   = "windows",
-        vm_size          = "Standard_B2ms",
-        disk_type        = "Standard_LRS",
-        disk_size        = 128,
-        count            = 1,
-        isGFXHost        = false
-    },
-    {
-        prefix           = "",
-        location         = "westus2",
-        workstation_os   = "linux",
-        vm_size          = "Standard_NV6",
-        disk_type        = "Standard_LRS",
-        disk_size        = 128,
-        count            = 1,
-        isGFXHost        = true
-    },
-    {
-        prefix           = "",
-        location         = "westus2",
-        workstation_os   = "windows",
-        vm_size          = "Standard_NV6",
-        disk_type        = "Standard_LRS",
-        disk_size        = 128,
-        count            = 1,
-        isGFXHost        = true
-    }
+# Service Principal Authentication <section 3>
+# Used for authentication and allows Terraform to manage resources.
+# Application (Service Principal) has to have two roles (in Subscripton/AIM)
+# 1. Contributor
+# 2. Virtual Machine Contributor
+application_id                = "<from section 3 step 4>"
+aad_client_secret             = "<from section 3 step 5-6>"
+
+# List of workstations to deploy.
+# For workstation prefixes, max 5 characters to avoid name cropping.
+# Example below deploys 1 standard CentOS VM, 1 standard Windows VM, 1 graphics CentOS VM and 1 graphics Windows VM.
+
+workstations = [
+{
+    prefix           = "",
+    location         = "westus2",
+    workstation_os   = "linux",
+    vm_size          = "Standard_B2ms",
+    disk_type        = "Standard_LRS",
+    disk_size        = 128,
+    count            = 1,
+    isGFXHost        = false
+},
+{
+    prefix           = "",
+    location         = "westus2",
+    workstation_os   = "windows",
+    vm_size          = "Standard_B2ms",
+    disk_type        = "Standard_LRS",
+    disk_size        = 128,
+    count            = 1,
+    isGFXHost        = false
+},
+{
+    prefix           = "",
+    location         = "westus2",
+    workstation_os   = "linux",
+    vm_size          = "Standard_NV6",
+    disk_type        = "Standard_LRS",
+    disk_size        = 128,
+    count            = 1,
+    isGFXHost        = true
+},
+{
+    prefix           = "",
+    location         = "westus2",
+    workstation_os   = "windows",
+    vm_size          = "Standard_NV6",
+    disk_type        = "Standard_LRS",
+    disk_size        = 128,
+    count            = 1,
+    isGFXHost        = true
+}
 ]
 
 # Name of resource group for deployment resources. Name must be unique.
@@ -83,11 +91,8 @@ safe_mode_admin_password      = "Password!234"
 cas_mgr_admin_password        = "Password!234"
 pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 
-# Used for authentication and allows Terraform to manage resources.
-application_id                = "<from section 3 step 4>"
-aad_client_secret             = "<from section 3 step 5-6>"
 
-# Only fill these when using Azure Key Vault secrets.
+# (Optional) Only fill these when using Azure Key Vault secrets.
 # Examples and tips can be found in section 4 of the documentation.
 # tenant_id                     = "<from section 3 step 4>"
 # key_vault_id                  = "<found in key vault properties under Resource ID>"
