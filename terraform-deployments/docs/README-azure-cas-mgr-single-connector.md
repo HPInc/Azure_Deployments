@@ -299,13 +299,13 @@ Information about connecting to virtual machines for investigative purposes:
   - PowerShell:
   ```
     $env:TF_LOG="TRACE"
-    $env:TF_LOG_PATH="terraform.txt"
+    $env:TF_LOG_PATH="terraformLogs.txt"
   ```
 
   - Bash:
   ```
     export TF_LOG="TRACE"
-    export TF_LOG_PATH="terraform.txt"
+    export TF_LOG_PATH="terraformLogs.txt"
   ```
 
 
