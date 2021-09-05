@@ -283,11 +283,11 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 Information about connecting to virtual machines for investigative purposes:
 
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
-  <<<<<<< HEAD
   1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
   2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
   3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
-- # To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
+  
+- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
       1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
       2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
       3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
