@@ -273,10 +273,10 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 - If the console looks frozen, try pressing Enter to unfreeze it.
   <<<<<<< HEAD
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
-- # If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
+- If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
 - If no machines are showing up on CAS Managepr or get errors when connecting via PCoIP client, wait 2 minutes and retry.
 - If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
-  > > > > > > > d7968bad072ae9609c21e542211555e7c6af36b6
+
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
   - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
 
@@ -305,11 +305,11 @@ Information about connecting to virtual machines for investigative purposes:
   ```
     export TF_LOG="TRACE"
     export TF_LOG_PATH="terraformLogs.txt"
+    
   ```
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
-  > > > > > > > d7968bad072ae9609c21e542211555e7c6af36b6
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable   in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
   1. RDP into the Domain Controller virtual machine.
   ```
   Computer: <domain-controller-public-ip>
