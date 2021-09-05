@@ -294,18 +294,15 @@ Information about connecting to virtual machines for investigative purposes:
 - If ACS times out and takes all the terrafrom logs with it, you can set it up before you deplay `terraform apply` Terraform depends on two environment variables being configured. TF_LOG which could be set to DEBUG, INFO, WARN, or ERROR. The second one TF_LOG_PATH sets the path and file that logs will be logged into: terraformLogs.txt, however, it can be named whatever you like
 
   - PowerShell:
-
   ```
     $env:TF_LOG="TRACE"
     $env:TF_LOG_PATH="terraformLogs.txt"
   ```
-
   - Bash:
 
   ```
     export TF_LOG="TRACE"
-    export TF_LOG_PATH="terraformLogs.txt"
-    
+    export TF_LOG_PATH="terraformLogs.txt"   
   ```
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
