@@ -8,6 +8,8 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
+![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
+
 ## Table of Contents
 
 1. [CAS Manager Single-Connector Architecture](#1-cas-manager-single-connector-architecture)
