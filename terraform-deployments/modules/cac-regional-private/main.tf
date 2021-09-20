@@ -16,12 +16,13 @@ locals {
 }
 
 resource "time_offset" "start" {
-  offset_hours = 0
+  offset_days = -1
 }
 
 resource "time_offset" "expiry" {
-  offset_hours = 1
+  offset_days = 1
 }
+
 data "azurerm_storage_account_blob_container_sas" "token" {
 
   count = var.instance_count
