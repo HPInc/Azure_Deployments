@@ -181,6 +181,7 @@ module "cac-configuration" {
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   tenant_id                   = var.tenant_id
+  cas_mgr_url                 = cas_mgr_url
 }
 
 module "windows-std-vm" {
