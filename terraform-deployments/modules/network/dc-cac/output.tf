@@ -70,7 +70,10 @@ output "all-output" {
     azurerm_subnet.dc,
     azurerm_subnet.workstation,
     azurerm_subnet_network_security_group_association.network,
-    azurerm_virtual_network.network
+    azurerm_virtual_network.network,
+    azurerm_private_dns_srv_record.dns-win,
+    azurerm_private_dns_srv_record.dns-ldaps,
+    azurerm_network_security_rule.nsg_allow_all_vnet
   ]
 }
 
