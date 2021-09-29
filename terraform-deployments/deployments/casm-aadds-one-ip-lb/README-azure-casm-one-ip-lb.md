@@ -1,12 +1,12 @@
-# CASM-Single-Connector Deployment
+# Single-Connector Deployment
 
-**Objective**: The objective of this documentation is to deploy the Single Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - **[CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)**
+  - **[CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)**
   - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
-  - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
+  - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
   - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
   - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
   - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
@@ -19,24 +19,23 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
   - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
-
 ## Table of Contents
-1. [CASM-Single-Connector Architecture](#1-CASM-Single-Connector-architecture)
+1. [CASM-Load-Balancer-One-IP Architecture](#1-CASM-single-connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Variable Assignment](#4-variable-assignment)
 5. [Storing Secrets on Azure Keyvault](#5-optional-storing-secrets-on-azure-key-vault)
 6. [Assigning a SSL Certificate](#6-optional-assigning-a-ssl-certificate)
-7. [Deploying the Single-Connector via Terraform](#7-deploying-the-Single-Connector-One-IP-via-terraform)
+7. [Deploying the CASM-Load-Balancer-One-IP via Terraform](#7-deploying-the-single-connector-via-terraform)
 8. [Adding Workstations in CAS Manager](#8-adding-workstations-in-cas-manager)
 9. [Starting a PCoIP Session](#9-starting-a-pcoip-session)
 10. [Changing the deployment](#10-changing-the-deployment)
 11. [Deleting the deployment](#11-deleting-the-deployment)
 12. [Troubleshooting](#12-troubleshooting)
 
-### 1. CASM-Single-Connector Architecture
+### 1. CASM-Load Balancer-One-IP Architecture
 
-The Single Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
+The Single-Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
 - ```subnet-cac```: for the Connector
 - ```subnet-cas```: for the CASM
 - ```subnet-ws```: for the workstations
@@ -45,7 +44,7 @@ Network Security Rules are created to allow wide-open access within the Virtual 
 
 A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
-This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
+This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the following respective parameters:
 - ```workstations```: List of objects, where each object defines a workstation
@@ -94,9 +93,10 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 
 ### 4. Variable Assignment
+
 ---IMPORTANT NOTE: All AADDS Deployments require login credentials from an account in the Azure Active Directory of the tenant the deployment is taking place in. These credentials are entered in the tfvars file as detailed below. In order for accounts in the Azure Active Directory to sync with the AADDS, the accounts' password must either be changed or reset AFTER the AADDS has finished deploying and provisioning. For reasons on why this is, refer to (https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization). Failure to do so will result in the deployment failing due to failed login attempts and the Active Directory user account being locked. Therefore, only enter the ad_admin_password below AFTER it has been changed following the AADDS deployment.---
 
-Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
 ```
 ad_admin_username             = "aadds_user"
 ad_admin_password             = "AADDS_Password1!"
@@ -180,8 +180,8 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deployment must be completed and fully provisioned. 
 1. Clone the repository into your Azure Cloud Shell (ACS) environment.
   - ```git clone https://github.com/teradici/Azure_Deployments```
-2. Change directory into: ```/terraform-deployments/deployments/casm-lb-one-ip```.
-  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-lb-one-ip```.
+2. Change directory into: ```/terraform-deployments/deployments/casm-single-connector```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
@@ -208,7 +208,7 @@ Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deploymen
       2. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
       3. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
           - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-      4. Answer ```yes``` to start provisioning the single connector infrastructure. 
+      4. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
 A typical deployment should take around 40-50 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
@@ -218,11 +218,9 @@ Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-cac-public-ip = [
-  [
-    "public_ip" = "52.109.24.176"
-  ],
-]
+cac-load-balancer-ip = {
+  "westus2" = "123.345.678.91"
+}
 cas-mgr-public-ip = "52.109.24.178"
 centos-graphics-workstations = [
   {

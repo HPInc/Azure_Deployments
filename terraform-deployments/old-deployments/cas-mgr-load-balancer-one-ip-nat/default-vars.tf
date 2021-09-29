@@ -25,16 +25,6 @@ variable "centos_admin_username" {
   default     = "centos_admin"
 }
 
-variable "cac_instance_count" {
-  description = "Number of Cloud Access Connector instances to deploy in each zone"
-  default     = 1
-}
-
-variable "cas_mgr_url" {
-  description = "CAS Manager URL"
-  default     = "https://cam.teradici.com"
-}
-
 variable "pcoip_agent_location" {
   description = "URL of Teradici PCoIP Standard Agent"
   default     = "https://downloads.teradici.com/win/stable/"
@@ -92,7 +82,7 @@ variable "tenant_id" {
 
 variable "prefix" {
   description = "Prefix to add to name of new resources. Must be <= 9 characters."
-  default     = ""
+  default     = "tera"
 }
 
 variable "enable_workstation_idle_shutdown" {
@@ -108,16 +98,4 @@ variable "minutes_idle_before_shutdown" {
 variable "minutes_cpu_polling_interval" {
   description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
   default     = 15
-}
-
-variable "object_id" {
-  description = "The object ID of your app registration in AAD"
-  type        = string
-  default     = ""
-}
-
-variable "key_vault_name" {
-  description = "Name of the Azure Keyvault that is created. Must be globally unique."
-  type        = string
-  default     = ""
 }
