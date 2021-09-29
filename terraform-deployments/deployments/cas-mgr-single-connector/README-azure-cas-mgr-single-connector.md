@@ -1,60 +1,66 @@
-#  CAS-M Single-Connector Deployment (StanAlone with AAD DS)
+# CAS Manager (Single-Connector) Deployment
 
-**Objective**: The objective of this documentation is to deploy the Single Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
-For additional Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments please visit:
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+  - **[CAS Manager Single-Connector Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)**
+  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
+  - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
+  - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
+  - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
+  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
+  - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
+  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
+  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
+  - [CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
+  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
-1. [CASM-Single-Connector Architecture](#1-CASM-Single-Connector-architecture)
+1. [CAS Manager Single-Connector Architecture](#1-cas-manager-single-connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
-4. [Variable Assignment](#4-variable-assignment)
-5. [Storing Secrets on Azure Keyvault](#5-optional-storing-secrets-on-azure-key-vault)
-6. [Assigning a SSL Certificate](#6-optional-assigning-a-ssl-certificate)
-7. [Deploying the Single-Connector via Terraform](#7-deploying-the-Single-Connector-One-IP-via-terraform)
-8. [Adding Workstations in CAS Manager](#8-adding-workstations-in-cas-manager)
-9. [Starting a PCoIP Session](#9-starting-a-pcoip-session)
-10. [Changing the deployment](#10-changing-the-deployment)
-11. [Deleting the deployment](#11-deleting-the-deployment)
-12. [Troubleshooting](#12-troubleshooting)
+4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
+5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
+6. [Deploying via Terraform](#6-deploying-via-terraform)
+7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
+8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
+9. [Changing the deployment](#9-changing-the-deployment)
+10. [Deleting the deployment](#10-deleting-the-deployment)
+11. [Troubleshooting](#11-troubleshooting)
 
-### 1. CASM-Single-Connector Architecture
+### 1. CAS Manager Single-Connector Architecture
 
-The Single Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
+The Cloud Access Software (CAS) Manager Single-Connector deployment creates a Virtual Network with 3 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
+- ```subnet-dc```: for the Domain Controller
 - ```subnet-cac```: for the Connector
-- ```subnet-cas```: for the CASM
 - ```subnet-ws```: for the workstations
+- ```subnet-cas-mgr```: for the CAS Manager
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
 
+A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a ```domain_users_list``` CSV file is specified. The Domain Controller is given a static IP (configurable).
+
 A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
-This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
+Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the ```workstations``` variable. This is a list of objects where each object defines a workstation.
 
-Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the following respective parameters:
-- ```workstations```: List of objects, where each object defines a workstation
-- ```cac_configuration```: List of objects, where each object defined a connector
+Note: Since this is a single region deployment, please make sure that all ```location``` values in the ```workstations``` parameter are all identical.
 
-The ```workstation_os``` property in the ```workstations``` parameter can be used to define the respective workstation's operating system (use 'linux' or 'windows'). 
+These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the CASM-AADDS document to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
+The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
 
-As the deployment makes use of an internal keyvault and database for storage, key vault secret configuration is not available for this deployment.
+![cas manager single-connector diagram](/terraform-deployments/docs/png/cas-mgr-single-deployment.png)
 
-Each workstation can be configured with a graphics agent by using the ```isGFXHost``` property of the ```workstations``` parameter.
-
-These workstations are automatically domain-joined to the AADDS and have the PCoIP Agent installed.
-
-Note: Please make sure that the following variables are synced from the previous AADDS Deployment that the```location``` property in the ```workstations``` parameter is in sync with the ```aadds_location``` property defined in the AADDS deployment, or with the existing AADDS location. 
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- An existing AADDS deployment (see the CASM-AADDS documentation).
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
@@ -69,7 +75,6 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
 4. Copy the following information from the application overview: 
     - Client ID
     - Tenant ID
-    - Object ID
 5. Under the same app, click **Certificates & secrets**.
 6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
 7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
@@ -80,43 +85,11 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 
-### 4. Variable Assignment
----IMPORTANT NOTE: All AADDS Deployments require login credentials from an account in the Azure Active Directory of the tenant the deployment is taking place in. These credentials are entered in the tfvars file as detailed below. In order for accounts in the Azure Active Directory to sync with the AADDS, the accounts' password must either be changed or reset AFTER the AADDS has finished deploying and provisioning. For reasons on why this is, refer to (https://docs.microsoft.com/en-us/azure/active-directory-domain-services/synchronization). Failure to do so will result in the deployment failing due to failed login attempts and the Active Directory user account being locked. Therefore, only enter the ad_admin_password below AFTER it has been changed following the AADDS deployment.---
+### 4. (Optional) Storing Secrets on Azure Key Vault
 
-Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
-```
-ad_admin_username             = "aadds_user"
-ad_admin_password             = "AADDS_Password1!"
-safe_mode_admin_password      = "Password!234"
-cas_mgr_admin_password        = "Password!234"
-mongodb_admin_password        = "Password!234"
-pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, CAS Manager admin password, and PCoIP registration key in terraform.tfvars.
 
-aadds_vnet_name               = "AAD_DS_TeraVNet"
-aadds_vnet_rg                 = "AAD_DS_Teradici"
-aadds_domain_name             = "example.onmicrosoft.com"
-
-application_id                = "4928a0xd-e1re-592l-9321-5f114953d88c"
-aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
-tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
-object_id                     = "4913cc14-2c26-4054-9d98-faea1e34213c"
-
-```
-- Tips for finding these variables:
-    1. ```application_id```, ```tenant_id```, and ```object_id``` are from [section 3](#3-service-principal-authentication) step 4.
-    2. ```aad_client_secret```: This is the same secret from [section 3](#3-service-principal-authentication). If this secret is no longer saved, follow section 3 from steps 1-3 & 5-6 to obtain a new client secret.
-    3. ad_admin_username is the username of an account belonging to the Azure Active Directory in the current tenant.
-    4. ad_admin_password is the password of an account belonging to the Azure Active Directory in the current tenant.
-    5. ```aadds_vnet_name``` is the VNet Name of the previously configured AADDS deployment, the property must be in in sync with the ```aadds_vnet_name``` property defined in the AADDS deployment, or with the existing AADDS Virtual Network Name.
-    6. ```aadds_vnet_rg``` is the Resource Group Name of the previously configured AADDS deployment, the property must be in sync with the ```aadds_vnet_rg``` property defined in the AADDS deployment, or with the existing AADDS resource group name.
-    7. ```aadds_domain_name``` is the Domain Name of the previously configured AADDS deployment, property must be in sync with the ```aadds_domain_name``` property defined in the AADDS deployment, or with the existing AADDS domain name.
-    8. (Optional) ```aadds_vnet_cidr``` is the CIDR of the address space the VNET will be created with. This must not conflict with the CIDRs of any other CASM deployments. By default, the terraform deployment looks up the addresses of existing CASM deployments and selects a non-conflicting CIDR.
-
-### 5. (Optional) Storing Secrets on Azure Key Vault
-
-**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, PCoIP registration key, and connector token in terraform.tfvars.
-
-As a security method to help protect the AD safe mode admin password, AD admin password, PCoIP registration key,  LLS admin password, connector token, and LLS activation code users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
+As a security method to help protect the values listed above, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
 1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault. 
     1. Select the same region as the deployment.
@@ -124,30 +97,42 @@ As a security method to help protect the AD safe mode admin password, AD admin p
     3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
-        3. Find the application from [section 3](#3-connect-azure-to-cas-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+        3. Find the application from [section 3](#3-service-principal-authentication) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
         4. Click **Review + create** and then **Create**.
 2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
-3. To create **AD safe mode admin password**, **AD admin password**, **LLS admin password**, **PCoIP registration key**, **connector token** and **LLS activation code** as secrets follow these steps for each value:
+3. To create **AD safe mode admin password**, **AD admin password**, **CAS Manager admin password**, and **PCoIP registration key** as secrets follow these steps for each value:
     1. Click **+ Generate/Import**.
     2. Enter the name of the secret.
     3. Input the secret value.
     4. Click **Create**.
     5. Click on the secret that was created, click on the version and copy the **Secret Identifier**. 
       - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
-4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+5. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
 ```
-...
+# (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
+# To encrypt follow section 4 of the documentation.
+ad_admin_password             = "https://mykeyvault.vault.azure.net/secrets/adPasswordID/123abcexample"
+safe_mode_admin_password      = "https://mykeyvault.vault.azure.net/secrets/safeAdminPasswordID/123abcexample"
+cas_mgr_admin_password        = "https://mykeyvault.vault.azure.net/secrets/casManagerPasswordID/123abcexample"
+pcoip_registration_code       = "https://mykeyvault.vault.azure.net/secrets/pcoipSecretID/123abcexample"
+
+# Used for authentication and allows Terraform to manage resources.
+application_id                = "4928a0xd-e1re-592l-9321-5f114953d88c"
+aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 
 # Only fill these when using Azure Key Vault secrets.
 # Examples and tips can be found in section 4 of the documentation.
+# tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
 # key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
 # ad_pass_secret_name           = "adPasswordID"
 ```
 - Tips for finding these variables:
-    1. ```key_vault_id```: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
-    2. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```. From the example above, this would be ```adPasswordID```.
+    1. ```application_id``` and ```tenant_id``` are from [section 3](#3-service-principal-authentication) step 4.
+    2. ```aad_client_secret```: This is the same secret from [section 3](#3-service-principal-authentication). If this secret is no longer saved, follow section 3 from steps 1-3 & 5-6 to obtain a new client secret.
+    3. ```key_vault_id```: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
+    4. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```. From the example above, this would be ```adPasswordID```.
     
-### 6. (Optional) Assigning a SSL Certificate
+### 5. (Optional) Assigning a SSL Certificate
 
 **Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
@@ -159,16 +144,16 @@ To upload a SSL certificate and SSL key onto ACS:
   5. The location of these files will be found in ```~/clouddrive/```
   6. Enter the paths to the SSL certificate and SSL key inside ```terraform.tfvars```.
 
-### 7. Deploying the CASM-Single-Connector via Terraform
+### 6. Deploying via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
 
-Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deployment must be completed and fully provisioned. 
+Before deploying, ```terraform.tfvars``` must be complete. 
 1. Clone the repository into your Azure Cloud Shell (ACS) environment.
   - ```git clone https://github.com/teradici/Azure_Deployments```
-2. Change directory into: ```/terraform-deployments/deployments/casm-lb-one-ip```.
-  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-lb-one-ip```.
+2. Change directory into: ```/terraform-deployments/deployments/single-connector```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
@@ -192,12 +177,18 @@ Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deploymen
         - ```count```: Number of workstations to deploy under the specific settings.
         - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
-      2. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-      3. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
-          - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-      4. Answer ```yes``` to start provisioning the single connector infrastructure. 
+3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
+    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
+      - 1 UPPERCASE letter
+      - 1 lowercase letter
+      - 1 number
+      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
+4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
+5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
+    - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
+6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
-A typical deployment should take around 40-50 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
+A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
@@ -223,7 +214,9 @@ centos-standard-workstations = [
     "private_ip" = "10.0.4.6"
   },
 ]
-resource_group = "casm_single_connector_c4fe3"
+domain-controller-private-ip = "10.0.1.4"
+domain-controller-public-ip = "52.109.24.161"
+resource_group = "single_connector_deployment_c4fe3"
 windows-standard-workstations = [
   {
     "name" = "swin-0"
@@ -238,7 +231,7 @@ windows-graphics-workstations = [
 ]
 ```
     
-### 8. Adding Workstations in CAS Manager
+### 7. Adding Workstations in CAS Manager
 To connect to workstations, they have to be added through CAS Manager. 
 1. In a browser, enter ```https://<cas-mgr-public-ip>```.
     - The default username for CAS Manager is ```adminUser```.
@@ -251,25 +244,23 @@ To connect to workstations, they have to be added through CAS Manager.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
-### 9. Starting a PCoIP Session
+### 8. Starting a PCoIP Session
 Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
-    - **Note**: If the ```public_ip``` of the ```cac-vms``` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine ```[prefix]-cac-vm-0``` and the **Public IP address** will be shown.
+    - **Note**: If the ```public_ip``` of the ```cac-public-ip``` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine ```[prefix]-cac-vm-0``` and the **Public IP address** will be shown.
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5. 
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
-### 10. Changing the deployment
+### 9. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
-Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAS Manager admin console. Create a new connector to obtain a new token.
-
-### 11. Deleting the deployment
+### 10. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
-### 12. Troubleshooting
+### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
 - If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. These files store the state of the current infrastructure and configuration. 
@@ -281,6 +272,24 @@ Information about connecting to virtual machines for investigative purposes:
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
+    
+- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
+    1. RDP into the Domain Controller virtual machine. 
+    
+    ```
+    Computer: <domain-controller-public-ip>
+    User: cas_admin
+    Password: <ad_admin_password from terraform.tfvars>
+    ```
+   2. From inside the Domain Controller, RDP into the Windows workstation. 
+    
+    ```
+    Computer: <win-internal-ip>
+    User: windows_admin
+    Password: <ad_admin_password from terraform.tfvars>
+    ```
+   3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

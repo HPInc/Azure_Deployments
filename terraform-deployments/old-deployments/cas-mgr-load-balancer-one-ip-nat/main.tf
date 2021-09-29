@@ -20,36 +20,10 @@ module "load-balancer" {
   location                  = var.cac_location_list[0]
 }
 
-module "load-balancer-extra" {
-  count = length(var.cac_count_list) - 1
-  source = "../../modules/network/cas-mgr-load-balancer-tf"
-  load_balancer_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-vm.dc-machine-type]
-  
-  instance_count            = var.cac_count_list[count.index + 1]
-  prefix                    = var.prefix
-  resource_group_name       = azurerm_resource_group.main.name
-  location                  = var.cac_location_list[count.index + 1]
-}
-
-module "traffic-manager" {
-  source = "../../modules/network/traffic-manager"
-
-  traffic_manager_depends_on = [
-    module.dc-cac-network.all-output,
-    module.load-balancer.public-ip
-  ]
-
-  resource_group_name    = azurerm_resource_group.main.name
-  managed_endpoints      = [module.load-balancer.public-ip]
-  managed_endpoint_names = ["lb-https"]
-  dns_name               = var.traffic_manager_dns_name
-}
-
-
 module "dc-cac-network" {
-  source = "../../modules/network/dc-cac-lb-nat-main"
+  source = "../../modules/network/dc-cac-lb-nat"
   resource_group_name     = azurerm_resource_group.main.name
-  locations               = [var.cac_location_list[0]]
+  locations               = var.cac_location_list
   vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
   dc_nat_depends_on       = [module.load-balancer.probe-id]
 
@@ -62,27 +36,10 @@ module "dc-cac-network" {
   dc_ip                         = module.load-balancer.dc-public
 }
 
-module "dc-cac-network-extra" {
-  source = "../../modules/network/dc-cac-tf-nat"
-  resource_group_name     = azurerm_resource_group.main.name
-  locations               = slice(var.cac_location_list,1,length(var.cac_location_list))
-  vnet_peer_to_peer_links = module.workstation-map.virtual-network-peer-to-peer-links
-  dc_nat_depends_on       = [module.load-balancer-extra.*.probe-id]
-
-  prefix                        = var.prefix
-  application_id                = var.application_id
-  aad_client_secret             = var.aad_client_secret
-  active_directory_netbios_name = var.active_directory_netbios_name
-  create_debug_rdp_access       = var.create_debug_rdp_access
-  main_vnet_name                = module.dc-cac-network.virtual-network-name
-  main_vnet_id                  = module.dc-cac-network.virtual-network-id
-  dns-name                      = module.dc-cac-network.dns-name
-}
-
 module "active-directory-domain-vm" {
   source = "../../modules/dc/dc-vm"
 
-  dc_vm_depends_on = [module.dc-cac-network.all-output, module.dc-cac-network-extra.*.all-output]
+  dc_vm_depends_on = [module.dc-cac-network.all-output]
 
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
@@ -104,8 +61,7 @@ module "active-directory-domain-service" {
     module.dc-cac-network.all-output,
     module.active-directory-domain-vm.domain-controller-name,
     module.active-directory-domain-vm.domain-controller-id,
-    module.dc-cac-network.dc-association-id,
-    module.dc-cac-network-extra.*.all-output
+    module.dc-cac-network.dc-association-id
   ]
 
   domain_controller_virtual_machine_name      = module.active-directory-domain-vm.domain-controller-name
@@ -129,8 +85,7 @@ module "active-directory-domain-configure" {
   dc_configure_depends_on = [
     module.dc-cac-network.all-output,
     module.active-directory-domain-service.uploaded-scripts,
-    module.active-directory-domain-service.uploaded-domain-users-list-count,
-    module.dc-cac-network-extra.*.all-output
+    module.active-directory-domain-service.uploaded-domain-users-list-count
     ]
 
   application_id                         = var.application_id
@@ -140,11 +95,11 @@ module "active-directory-domain-configure" {
 }
 
 module "cas-mgr" {
-  source = "../../modules/cas-mgr-lb-nat-az-kv"
+  source = "../../modules/cas-mgr-lb-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output, module.dc-cac-network-extra.*.all-output]
-  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id, module.dc-cac-network-extra.*.all-output]
+  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
+  cas_nat_depends_on        = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id]
 
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
@@ -172,10 +127,10 @@ module "cas-mgr" {
 }
 
 module "cac" {
-  source = "../../modules/cac-cas-mgr-tf-nat"
+  source = "../../modules/cac-cas-mgr-lb-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id, module.cas-mgr.cas-association-id, module.load-balancer-extra.*.probe-id, module.dc-cac-network-extra.*.all-output, module.cas-mgr.cas-provisioning]
+  cac_subnet_depends_on = [module.cas-mgr.subnet, module.active-directory-domain-configure.service-configured, module.load-balancer.probe-id, module.cas-mgr.cas-association-id]
   cac_count_list = var.cac_count_list
   cac_nat_depends_on = [module.dc-cac-network.dc-association-id, module.load-balancer.probe-id, module.cas-mgr.cas-association-id]
 
@@ -183,8 +138,8 @@ module "cac" {
   cas_mgr_insecure           = true
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
 
-  network_security_group_ids    = concat(module.dc-cac-network.network-security-group-ids, module.dc-cac-network-extra.*.network-security-group-ids[0])
-  azurerm_virtual_network_names = concat(module.dc-cac-network.virtual-network-names, module.dc-cac-network-extra.virtual-network-names)
+  network_security_group_ids    = module.dc-cac-network.network-security-group-ids
+  azurerm_virtual_network_names = module.dc-cac-network.virtual-network-names
 
   prefix                = var.prefix
   domain_name           = "${var.active_directory_netbios_name}.dns.internal"
@@ -214,16 +169,16 @@ module "cac" {
   cas_mgr_internal_ip       = module.cas-mgr.internal-ip
   cas_mgr_public_ip         = module.load-balancer.cas-public.ip_address
   cas_mgr_public_ip_id      = module.load-balancer.cas-public.id
-  cac_public                = concat([module.load-balancer.cac-public], module.load-balancer-extra.*.cac-public)
-  probe_id                  = concat([module.load-balancer.probe-id], module.load-balancer-extra.*.probe-id)
-  lb_id = length(module.load-balancer-extra.*.load-balancer-ids) == 0 ? module.load-balancer.load-balancer-ids : concat(module.load-balancer.load-balancer-ids, module.load-balancer-extra.*.load-balancer-ids[0])
+  cac_public                = module.load-balancer.cac-public
+  probe_id                  = module.load-balancer.probe-id
+  lb_id = module.load-balancer.load-balancer-ids[0]
   is_private = true
 }
 
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
@@ -240,8 +195,8 @@ module "windows-std-vm" {
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   storage_account_name         = azurerm_storage_account.storage.name
-  workstation_subnet_ids       = concat(module.dc-cac-network.subnet-workstation-ids, module.dc-cac-network-extra.subnet-workstation-ids)
-  workstation_subnet_locations = concat(module.dc-cac-network.subnet-workstation-locations, module.dc-cac-network-extra.subnet-workstation-locations)
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
@@ -251,7 +206,7 @@ module "windows-std-vm" {
 module "windows-gfx-vm" {
   source = "../../modules/windows-gfx-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
@@ -268,8 +223,8 @@ module "windows-gfx-vm" {
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   storage_account_name         = azurerm_storage_account.storage.name
-  workstation_subnet_ids       = concat(module.dc-cac-network.subnet-workstation-ids, module.dc-cac-network-extra.subnet-workstation-ids)
-  workstation_subnet_locations = concat(module.dc-cac-network.subnet-workstation-locations, module.dc-cac-network-extra.subnet-workstation-locations)
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
@@ -279,7 +234,7 @@ module "windows-gfx-vm" {
 module "centos-std-vm" {
   source = "../../modules/centos-std-vm"
 
-  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
+  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -295,8 +250,8 @@ module "centos-std-vm" {
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   domain_controller_ip         = module.dc-cac-network.dc-private-ip
-  workstation_subnet_ids       = concat(module.dc-cac-network.subnet-workstation-ids, module.dc-cac-network-extra.subnet-workstation-ids)
-  workstation_subnet_locations = concat(module.dc-cac-network.subnet-workstation-locations, module.dc-cac-network-extra.subnet-workstation-locations)
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown
@@ -306,7 +261,7 @@ module "centos-std-vm" {
 module "centos-gfx-vm" {
   source = "../../modules/centos-gfx-vm"
 
-  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured, module.dc-cac-network-extra.*.all-output]
+  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -322,8 +277,8 @@ module "centos-gfx-vm" {
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   domain_controller_ip         = module.dc-cac-network.dc-private-ip
-  workstation_subnet_ids       = concat(module.dc-cac-network.subnet-workstation-ids, module.dc-cac-network-extra.subnet-workstation-ids)
-  workstation_subnet_locations = concat(module.dc-cac-network.subnet-workstation-locations, module.dc-cac-network-extra.subnet-workstation-locations)
+  workstation_subnet_ids       = module.dc-cac-network.subnet-workstation-ids
+  workstation_subnet_locations = module.dc-cac-network.subnet-workstation-locations
 
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown
   minutes_idle_before_shutdown     = var.minutes_idle_before_shutdown

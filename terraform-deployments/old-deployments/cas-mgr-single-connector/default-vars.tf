@@ -115,9 +115,3 @@ variable "object_id" {
   type        = string
   default     = ""
 }
-
-variable "key_vault_name" {
-  description = "Name of the Azure Keyvault that is created. Must be globally unique."
-  type        = string
-  default     = ""
-}

@@ -9,8 +9,8 @@ locals {
   cas_mgr_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
   cas_mgr_provisioning_script = "cas-mgr-provisioning.sh"
   cas_mgr_setup_script        = "cas-mgr-setup.py"
-  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 }
+
 resource "time_offset" "start" {
   offset_days = -1
 }
@@ -26,6 +26,9 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
+  depends_on = [
+    var.blob_depends_on
+  ]
   connection_string = var.storage_connection_string
   container_name    = var.private_container_name
   https_only        = true
@@ -59,14 +62,6 @@ resource "azurerm_subnet_network_security_group_association" "cac" {
   network_security_group_id = var.network_security_group_ids[0]
 }
 
-resource "azurerm_public_ip" "cas-mgr-public-ip" {
-  name                = "cas-mgr-public-ip"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
 resource "azurerm_network_interface" "cas-mgr-nic" {
   name                = "${var.host_name}-nic"
   location            = var.location
@@ -75,7 +70,7 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
     name                          = "cas-mgr-ipconfig"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.cas-mgr.id
-    public_ip_address_id          = azurerm_public_ip.cas-mgr-public-ip.id
+    #public_ip_address_id          = var.cas_mgr_public_ip.id
   }
 }
 
@@ -118,16 +113,48 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
   }
 }
 
+resource "azurerm_lb_backend_address_pool" "cas-mgr" {
+  depends_on = [var.cas_nat_depends_on]
+  loadbalancer_id = var.lb_id
+  name            = "cas-mgr-pool"
+}
+
+# Optional load balancer vm association
+resource "azurerm_network_interface_backend_address_pool_association" "cas-association" {
+  network_interface_id    = azurerm_network_interface.cas-mgr-nic.id
+  ip_configuration_name   = "cas-mgr-ipconfig"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
+}
+
+resource "azurerm_lb_outbound_rule" "cas_outbound" {
+  depends_on = [azurerm_network_interface_backend_address_pool_association.cas-association, azurerm_linux_virtual_machine.cas-mgr-vm]
+  resource_group_name     = var.resource_group_name
+  loadbalancer_id         = var.lb_id
+  name                    = "cas-outbound"
+  protocol                = "Tcp"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.cas-mgr.id
+
+  frontend_ip_configuration {
+    name = "ip-config-cas-frontend"
+  }
+}
+
+
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 
-  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script]
+  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm, azurerm_storage_blob.cas-mgr-setup-script, azurerm_lb_outbound_rule.cas_outbound, azurerm_network_interface_nat_rule_association.cas_association]
 
   name                 = azurerm_linux_virtual_machine.cas-mgr-vm.name
   virtual_machine_id   = azurerm_linux_virtual_machine.cas-mgr-vm.id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
-
+  timeouts {
+    create = "2h"
+    read = "1h"
+    update = "2h"
+    delete = "2h"
+  }
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.cas_mgr_provisioning_script}.tmpl", {
@@ -149,3 +176,20 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   SETTINGS
 }
 
+resource "azurerm_lb_nat_rule" "cas_nat" {
+  depends_on = [var.cas_nat_depends_on,azurerm_lb_outbound_rule.cas_outbound, azurerm_linux_virtual_machine.cas-mgr-vm]
+  resource_group_name            = var.resource_group_name
+  loadbalancer_id                = var.lb_id
+  name                           = "HTTPSAccess"
+  protocol                       = "Tcp"
+  frontend_port                  = 443
+  backend_port                   = 443
+  frontend_ip_configuration_name = "ip-config-cas-frontend"
+}
+
+resource "azurerm_network_interface_nat_rule_association" "cas_association" {
+  depends_on = [azurerm_linux_virtual_machine.cas-mgr-vm]
+  network_interface_id  = azurerm_network_interface.cas-mgr-nic.id
+  ip_configuration_name = "cas-mgr-ipconfig"
+  nat_rule_id           = azurerm_lb_nat_rule.cas_nat.id
+}

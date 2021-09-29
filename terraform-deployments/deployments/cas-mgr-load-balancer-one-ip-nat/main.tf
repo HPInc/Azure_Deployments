@@ -95,7 +95,7 @@ module "active-directory-domain-configure" {
 }
 
 module "cas-mgr" {
-  source = "../../modules/cas-mgr-lb-nat"
+  source = "../../modules/cas-mgr-lb-nat-az-kv"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
   cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
