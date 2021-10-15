@@ -125,7 +125,7 @@ install_cas_mgr() {
 }
 
 mongo_kv_setup() {
-    HOME_DIR = /home/${cas_mgr_username}
+    HOME_DIR=/home/${cas_mgr_username}
 
     yum install openssl
     openssl genrsa -out rootCA.key 4096
@@ -229,9 +229,9 @@ check_required_vars
 add_cas_mgr_repo
 config_selinux
 install_cas_mgr
-mongo_kv_setup
 cas_mgr_setup
 install_azcopy
 upload_dsa_key
+mongo_kv_setup
 
 log "--> Provisioning script completed successfully."

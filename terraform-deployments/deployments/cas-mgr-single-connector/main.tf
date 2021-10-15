@@ -84,7 +84,7 @@ module "active-directory-domain-configure" {
 }
 
 module "cas-mgr" {
-  source = "../../modules/cas-mgr"
+  source = "../../modules/cas-mgr-az-kv"
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
@@ -101,12 +101,12 @@ module "cas-mgr" {
   aad_client_secret           = var.aad_client_secret
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
-  tenant_id                   = "" //var.tenant_id
+  tenant_id                   = var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   pcoip_registration_code     = var.pcoip_registration_code
-  //key_vault_name              = var.key_vault_name == "" ? "kv-${random_id.string.hex}" : var.key_vault_name
-  //object_id                   = var.object_id
+  key_vault_name              = var.key_vault_name == "" ? "kv-${random_id.string.hex}" : var.key_vault_name
+  object_id                   = var.object_id
 
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name

@@ -156,3 +156,14 @@ variable "cas_nat_depends_on" {
   default     =  null
 }
 
+
+variable "key_vault_name" {
+  description = "Name of created Azure Keyvault, must be globally unique."
+  type        = string
+  default     = ""
+}
+
+variable "object_id" {
+  description = "Object ID of the app registration in AAD"
+  type        = string
+}

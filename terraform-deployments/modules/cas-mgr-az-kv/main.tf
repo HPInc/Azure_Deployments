@@ -39,7 +39,6 @@ resource "azurerm_key_vault" "casm_keyvault" {
   access_policy {
     tenant_id = var.tenant_id
     object_id = var.object_id
-    application_id = var.application_id
 
     certificate_permissions = [
       "create",
