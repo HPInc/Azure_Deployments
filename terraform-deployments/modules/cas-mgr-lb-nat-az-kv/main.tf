@@ -9,6 +9,8 @@ locals {
   cas_mgr_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
   cas_mgr_provisioning_script = "cas-mgr-provisioning.sh"
   cas_mgr_setup_script        = "cas-mgr-setup.py"
+
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 }
 
 resource "time_offset" "start" {
@@ -23,6 +25,80 @@ data "azurerm_key_vault_secret" "ad-pass" {
   count        = var.key_vault_id != "" ? 1 : 0
   name         = var.ad_pass_secret_name
   key_vault_id = var.key_vault_id
+}
+
+resource "azurerm_key_vault" "casm_keyvault" {
+  name                        = var.key_vault_name == "" ? "kv-${var.resource_group_name}" : var.key_vault_name
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  enabled_for_disk_encryption = true
+  tenant_id                   = var.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = false
+
+  sku_name = "standard"
+
+  access_policy {
+    tenant_id = var.tenant_id
+    object_id = var.object_id
+
+    certificate_permissions = [
+      "create",
+      "delete",
+      "deleteissuers",
+      "get",
+      "getissuers",
+      "import",
+      "list",
+      "listissuers",
+      "managecontacts",
+      "manageissuers",
+      "setissuers",
+      "update",
+    ]
+
+    key_permissions = [
+      "backup",
+      "create",
+      "decrypt",
+      "delete",
+      "encrypt",
+      "get",
+      "import",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "sign",
+      "unwrapKey",
+      "update",
+      "verify",
+      "wrapKey",
+    ]
+
+    secret_permissions = [
+      "backup",
+      "delete",
+      "get",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "set",
+    ]
+
+    storage_permissions = [
+      "backup",
+      "delete",
+      "get",
+      "list",
+      "purge",
+      "recover",
+      "restore",
+      "set",
+      "update"
+    ]
+  }
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {
@@ -158,6 +234,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.cas_mgr_provisioning_script}.tmpl", {
+  cas_mgr_username           = var.ad_service_account_username,
   cas_mgr_add_repo_script    = var.cas_mgr_add_repo_script,
   cas_mgr_deployment_sa_file = var.cas_mgr_deployment_sa_file,
   cas_mgr_admin_password     = var.cas_mgr_admin_password,
@@ -168,7 +245,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   pcoip_registration_code    = var.pcoip_registration_code,
   application_id             = var.application_id,
   aad_client_secret          = var.aad_client_secret,
-  tenant_id                  = var.tenant_id
+  tenant_id                  = local.tenant_id
 })
 )
 }"

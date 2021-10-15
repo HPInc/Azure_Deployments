@@ -124,6 +124,25 @@ install_cas_mgr() {
     fi
 }
 
+mongo_kv_setup() {
+    HOME_DIR=/home/${cas_mgr_username}
+
+    yum install openssl
+    openssl genrsa -out rootCA.key 4096
+    openssl req -newkey rsa:4096 \
+                -x509 \                                                                                                       
+                -sha256 \
+                -days 365 \
+                -nodes \
+                -out $INSTALL_DIR/certificate.crt \
+                -keyout $INSTALL_DIR/secret.key \
+                -subj "/C=CA/ST=BC/L=Burnaby/O=Teradici/OU=Software Department/CN=www.teradici.com"
+
+    log "--> Configuring Azure Keyvault..."
+    /usr/local/bin/cas-manager configure --config-file /home/${cas_mgr_username}/casm.conf
+    rm /home/${cas_mgr_username}/casm.conf
+}
+
 cas_mgr_setup() {
     local optional_args=""
 
@@ -213,5 +232,6 @@ install_cas_mgr
 cas_mgr_setup
 install_azcopy
 upload_dsa_key
+mongo_kv_setup
 
 log "--> Provisioning script completed successfully."
