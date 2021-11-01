@@ -25,8 +25,9 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 2. [Requirements](#2-requirements)
 3. [Deploying the AADDS via Terraform](#3-deploying-the-aadds-via-terraform)
 4. [Configuring an existing AADDS](#4-configuring-an-existing-aadds)
-5. [Deleting the deployment](#10-deleting-the-deployment)
-6. [Troubleshooting](#11-troubleshooting)
+5. [Deleting the deployment](#5-deleting-the-deployment)
+6. [Troubleshooting](#6-troubleshooting)
+7. [Videos](#7-videos)
 
 ### 1. AADDS Architecture
 
@@ -116,6 +117,9 @@ Terraform destroy will not work completely with this deployment as additional cl
 
 ### 6. Common issues during deployment
 Here are some common issues that might pop up during or after the deployment. 
+
+### 7. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=UvL8LwhGnb8)
 
 1. Forgetting to reset the password of your AAD service account during deployment - the deployment actually usually finishes and succeeds after a long time but nothing will be working correctly, but the bigger issue here is that since the deployment tries to log in with the credentials and fails, the user will be locked out of their account for a few hours or up to a day depending on the Azure AD settings from the failed login attempts. There is no way to fix this other than to create a new account or wait for the account to unlock.
 

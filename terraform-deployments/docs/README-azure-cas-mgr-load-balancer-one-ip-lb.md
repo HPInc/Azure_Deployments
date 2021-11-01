@@ -19,6 +19,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
+12. [Videos](#12-videos)
 
 ### 1. CAS Manager Load Balancer NAT Single IP Architecture
 
@@ -243,6 +244,9 @@ Information about connecting to virtual machines for investigative purposes:
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**.
+
+### 12. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MjYa32lKkWc)
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

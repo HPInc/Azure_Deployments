@@ -32,6 +32,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Changing the deployment](#10-changing-the-deployment)
 11. [Deleting the deployment](#11-deleting-the-deployment)
 12. [Troubleshooting](#12-troubleshooting)
+13. [Videos](#13-videos)
 
 ### 1. CASM-Load Balancer-One-IP Architecture
 
@@ -292,6 +293,9 @@ Information about connecting to virtual machines for investigative purposes:
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
+
+### 13. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=UvL8LwhGnb8)
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents
