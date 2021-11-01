@@ -1,4 +1,4 @@
-# Single-Connector Deployment
+# CASM-Load Balancer-One-IP Deployment
 
 **Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 

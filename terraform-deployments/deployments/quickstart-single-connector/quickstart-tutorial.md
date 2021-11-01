@@ -50,6 +50,9 @@ Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quick
     -   If an error message shows, manually delete resource groups on the Azure Portal.
 3. Log in to https://cam.teradici.com and delete the deployment named ```azure_quickstart_<timestamp>```
 
+### Videos
+A video of the deployment process for this script can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MHsHEM_Crt4)
+
 ### Additional notes
 - If Azure Cloud Shell times out, you can look for the public IP address of the Cloud Access Connector on the Azure Portal.
   1. Go to the [Azure Portal](http://portal.azure.com/).
