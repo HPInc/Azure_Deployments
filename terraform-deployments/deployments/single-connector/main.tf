@@ -59,6 +59,7 @@ module "dc-cac-network" {
 
 module "cac-network" {
   source = "../../modules/cac/cac-network"
+  cac_subnet_depends_on = [module.active-directory-domain-configure.service-configured]
 
   prefix                        = var.prefix
   resource_group_name           = azurerm_resource_group.main.name

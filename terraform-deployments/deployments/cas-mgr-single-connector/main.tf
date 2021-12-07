@@ -86,7 +86,7 @@ module "active-directory-domain-configure" {
 module "cas-mgr" {
   source = "../../modules/cas-mgr"
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-
+  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
   private_container_url      = azurerm_storage_container.private-container.id
@@ -153,7 +153,7 @@ module "cac" {
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
@@ -181,7 +181,8 @@ module "windows-std-vm" {
 module "windows-gfx-vm" {
   source = "../../modules/windows-gfx-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
@@ -209,7 +210,7 @@ module "windows-gfx-vm" {
 module "centos-std-vm" {
   source = "../../modules/centos-std-vm"
 
-  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id]
+  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -236,7 +237,7 @@ module "centos-std-vm" {
 module "centos-gfx-vm" {
   source = "../../modules/centos-gfx-vm"
 
-  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id]
+  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name
