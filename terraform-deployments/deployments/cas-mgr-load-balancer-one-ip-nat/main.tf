@@ -95,7 +95,7 @@ module "active-directory-domain-configure" {
 }
 
 module "cas-mgr" {
-  source = "../../modules/cas-mgr-lb-nat-az-kv"
+  source = "../../modules/cas-mgr-lb-nat"
 
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
   cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
@@ -119,8 +119,6 @@ module "cas-mgr" {
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   pcoip_registration_code     = var.pcoip_registration_code
-  key_vault_name              = var.key_vault_name == "" ? "kv-${random_id.string.hex}" : var.key_vault_name
-  object_id                   = var.object_id
 
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
