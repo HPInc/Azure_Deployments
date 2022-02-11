@@ -2,6 +2,8 @@
 
 **Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
+![Load Balanced One IP Architecture](/terraform-deployments/docs/png/CASM+LB1.png)
+
 ## Table of Contents
 1. [CASM-Load-Balancer-One-IP Architecture](#1-CASM-single-connector-architecture)
 2. [Requirements](#2-requirements)
@@ -17,7 +19,6 @@
 12. [Troubleshooting](#12-troubleshooting)
 13. [Videos](#13-videos)
 
-![Load Balanced One IP Architecture](/terraform-deployments/docs/png/CASM+LB1.png)
 
 ### 1. CASM-Load Balancer-One-IP Architecture
 
