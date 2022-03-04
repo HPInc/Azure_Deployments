@@ -50,9 +50,9 @@ variable "host_name" {
   default     = "lls-vm"
 }
 
-variable "lls_repo_url" {
-  description = "Location of the Teradici License Server RPM repo"
-  default     = "https://downloads.teradici.com/rhel/teradici-repo-latest.noarch.rpm"
+variable "teradici_download_token" {
+  description = "Token used to download from Teradici"
+  default     = "yj39yHtgj68Uv2Qf"
 }
 
 variable "lls_admin_password" {

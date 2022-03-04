@@ -49,8 +49,8 @@ param(
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
 $LOG_FILE = "C:\Teradici\provisioning.log"
-$PCOIP_AGENT_FILENAME = ""
-$PCOIP_AGENT_LOCATION_URL = "https://downloads.teradici.com/win/stable/"
+$TERADICI_DOWNLOAD_TOKEN = "yj39yHtgj68Uv2Qf"
+$PCOIP_AGENT_LOCATION_URL = "https://dl.teradici.com/${TERADICI_DOWNLOAD_TOKEN}/pcoip-agent/raw/names/pcoip-agent-standard-exe/versions/latest/"
 
 $DATA = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $DATA.Add("pcoip_registration_code", "${pcoip_registration_code}")
@@ -129,20 +129,7 @@ function PCoIP-Agent-Install {
     }
 
     $agentInstallerDLDirectory = "C:\Teradici"
-    if (![string]::IsNullOrEmpty($PCOIP_AGENT_FILENAME)) {
-        "--> Using user-specified PCoIP standard agent filename..."
-        $agent_filename = $PCOIP_AGENT_FILENAME
-    }
-    else {
-        "--> Using default latest PCoIP standard agent..."
-        $agent_latest = $PCOIP_AGENT_LOCATION_URL + "latest-standard-agent.json"
-        $wc = New-Object System.Net.WebClient
-
-        "--> Checking for the latest PCoIP standard agent version from $agent_latest..."
-        $string = Retry -Action { $wc.DownloadString($agent_latest) }
-
-        $agent_filename = $string | ConvertFrom-Json | Select-Object -ExpandProperty "filename"
-    }
+    $agent_filename = "pcoip-agent-standard_latest.exe"
     $pcoipAgentInstallerUrl = $PCOIP_AGENT_LOCATION_URL + $agent_filename
     $destFile = $agentInstallerDLDirectory + '\' + $agent_filename
     $wc = New-Object System.Net.WebClient

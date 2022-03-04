@@ -40,11 +40,6 @@ variable "workstation_subnet_name" {
   default     = "workstation-subnet"
 }
 
-variable "pcoip_agent_location" {
-  description = "URL of Teradici PCoIP Standard Agent"
-  default     = "https://downloads.teradici.com/win/stable/"
-}
-
 variable "active_directory_netbios_name" {
   description = "The netbios name of the Active Directory domain, for example `consoto`"
   default     = "tera"

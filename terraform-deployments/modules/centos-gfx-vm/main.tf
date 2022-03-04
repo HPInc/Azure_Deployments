@@ -107,6 +107,7 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   application_id                   = var.application_id,
   aad_client_secret                = var.aad_client_secret,
   tenant_id                        = var.tenant_id,
+  teradici_download_token          = var.teradici_download_token
   nvidia_driver_url                = var.nvidia_driver_url,
   enable_workstation_idle_shutdown = var.enable_workstation_idle_shutdown,
   minutes_cpu_polling_interval     = var.minutes_cpu_polling_interval,
@@ -117,4 +118,3 @@ resource "azurerm_virtual_machine_extension" "centos-gfx-provisioning" {
   }
   SETTINGS
 }
-
