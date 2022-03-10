@@ -88,17 +88,16 @@ resource "azurerm_virtual_machine_extension" "lls-provisioning" {
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.lls_provisioning_script}.tmpl", {
-  lls_repo_url        = var.lls_repo_url,
-  lls_admin_password  = var.lls_admin_password,
-  lls_activation_code = var.lls_activation_code,
-  lls_license_count   = var.lls_license_count,
-  application_id              = var.application_id
-  aad_client_secret           = var.aad_client_secret
-  tenant_id                   = var.tenant_id
+  teradici_download_token = var.teradici_download_token,
+  lls_admin_password      = var.lls_admin_password,
+  lls_activation_code     = var.lls_activation_code,
+  lls_license_count       = var.lls_license_count,
+  application_id          = var.application_id
+  aad_client_secret       = var.aad_client_secret
+  tenant_id               = var.tenant_id
 })
 )
 }"
     }
   SETTINGS
 }
-

@@ -12,11 +12,11 @@ locals {
 }
 
 resource "time_offset" "start" {
-  offset_days = -7
+  offset_days = -1
 }
 
 resource "time_offset" "expiry" {
-  offset_days = 7
+  offset_days = 1
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {
@@ -149,7 +149,12 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
-
+  timeouts {
+    create = "2h"
+    read = "1h"
+    update = "2h"
+    delete = "2h"
+  }
   protected_settings = <<SETTINGS
   {
   "script": "${base64encode(templatefile("${path.module}/${local.cas_mgr_provisioning_script}.tmpl", {

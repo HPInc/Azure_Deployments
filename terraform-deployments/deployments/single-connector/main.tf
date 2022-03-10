@@ -59,6 +59,7 @@ module "dc-cac-network" {
 
 module "cac-network" {
   source = "../../modules/cac/cac-network"
+  cac_network_depends_on = [module.active-directory-domain-configure.service-configured]
 
   prefix                        = var.prefix
   resource_group_name           = azurerm_resource_group.main.name
@@ -181,6 +182,7 @@ module "cac-configuration" {
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   tenant_id                   = var.tenant_id
+  cas_mgr_url                 = var.cas_mgr_url
 }
 
 module "windows-std-vm" {

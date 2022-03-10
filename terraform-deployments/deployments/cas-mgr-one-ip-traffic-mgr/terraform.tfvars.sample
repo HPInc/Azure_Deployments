@@ -32,7 +32,7 @@
     },
     {
         prefix           = "",
-        location         = "eastus",
+        location         = "westus2",
         workstation_os   = "linux",
         vm_size          = "Standard_NV6",
         disk_type        = "Standard_LRS",
@@ -42,7 +42,7 @@
     },
     {
         prefix           = "",
-        location         = "eastus",
+        location         = "westus2",
         workstation_os   = "windows",
         vm_size          = "Standard_NV6",
         disk_type        = "Standard_LRS",
@@ -55,8 +55,8 @@
 # Specify the location(s) and number of connectors to create per location.
 # The Domain Controller and CAS Manager VMs will be placed in the location listed first.
 # e.g. This will deploy 2 connectors in West US 2 and 3 in East US.
-# cac_location_list = ["westus2", "eastus"]
-# cac_count_list    = [2, 2]
+# cac_location_list = ["westus2"]
+# cac_count_list    = [2]
 
 # Name of resource group for deployment resources. Name must be unique.
 # Leaving this commented will result in the name: 'cas_mgr_load_balancer_[random_id]'

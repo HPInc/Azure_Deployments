@@ -33,6 +33,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
+12. [Videos](#12-videos)
 
 ### 1. CAS Manager Load Balancer Single IP Architecture
 
@@ -51,13 +52,11 @@ Cloud Access Connectors are created and register themselves with the CAS Manager
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the ```workstations``` variable. This is a list of objects where each object defines a workstation. These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-The Internal Load Balancer distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the firewall which then NATs into the frontend of the Load Balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the firewall which then also NATs into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
+The Load Balancer distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the firewall which then NATs into the frontend of the Load Balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the firewall which then also NATs into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
 
 This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
 
 ![cas_mgr_load_balancer_diagram](/terraform-deployments/docs/png/load-balancer-azure-one-ip.png)
-
-NOTE: Currently, only single region deployments are supported for this deployment. Make sure that all workstations are in the same region and only one location is configured in the location list. Multi-region support to come at a later date.
 
 ### 2. Requirements
 - Access to a subscription on Azure. 
@@ -260,6 +259,9 @@ Information about connecting to virtual machines for investigative purposes:
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**.
+
+### 12. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MjYa32lKkWc)
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

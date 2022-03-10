@@ -9,14 +9,14 @@ locals {
   cas_mgr_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
   cas_mgr_provisioning_script = "cas-mgr-provisioning.sh"
   cas_mgr_setup_script        = "cas-mgr-setup.py"
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 }
-
 resource "time_offset" "start" {
-  offset_days = -7
+  offset_days = -1
 }
 
 resource "time_offset" "expiry" {
-  offset_days = 7
+  offset_days = 1
 }
 
 data "azurerm_key_vault_secret" "ad-pass" {

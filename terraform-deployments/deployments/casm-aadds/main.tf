@@ -22,10 +22,10 @@ resource "azurerm_virtual_network" "aadds_vnet" {
 	address_space       = ["10.0.0.0/16"]
 	location            = azurerm_resource_group.main.location
 	resource_group_name = azurerm_resource_group.main.name
-       dns_servers         = [
-           "10.0.0.4",
-           "10.0.0.5"
-        ]
+      #  dns_servers         = [
+      #      "10.0.0.4",
+      #      "10.0.0.5"
+      #   ]
 }
 
 resource "azurerm_subnet" "aadds_subnet" {
@@ -37,7 +37,7 @@ resource "azurerm_subnet" "aadds_subnet" {
 
 
 resource "azurerm_network_security_group" "nsg" {
-  name                = "aadds-nsg-${azurerm_resource_group.main.location}"
+  name                = "aadds-nsg-${azurerm_resource_group.main.location}-2"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 }
@@ -51,20 +51,6 @@ resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   source_port_range          = "*"
   destination_port_ranges    = ["1-65525"]
   source_address_prefix      = "10.0.0.0/16"
-  destination_address_prefix = "*"
-  resource_group_name        = azurerm_resource_group.main.name
-  network_security_group_name = azurerm_network_security_group.nsg.name
-}
-
-resource "azurerm_network_security_rule" "nsg_restrict_ldaps" {
-  name                       = "restrict ldaps"
-  priority                   = 200
-  direction                  = "Inbound"
-  access                     = "Allow"
-  protocol                   = "Tcp"
-  source_port_range          = "636"
-  destination_port_ranges    = ["636"]
-  source_address_prefix      = "10.0.0.0/8"
   destination_address_prefix = "*"
   resource_group_name        = azurerm_resource_group.main.name
   network_security_group_name = azurerm_network_security_group.nsg.name
@@ -140,7 +126,7 @@ data "local_file" "pfxfile" {
 }
 
 resource "azurerm_template_deployment" "aadds" {
-  depends_on          = [null_resource.generate_pfx_ps, null_resource.generate_pfx_bash, azurerm_network_security_rule.nsg_5986, azurerm_subnet_network_security_group_association.network]
+  depends_on          = [null_resource.generate_pfx_ps, null_resource.generate_pfx_bash, azurerm_network_security_rule.nsg_5986, azurerm_subnet_network_security_group_association.network, azurerm_network_security_rule.nsg_5985, azurerm_network_security_rule.nsg_22, azurerm_network_security_rule.nsg_allow_all_vnet]
   name                = "aadds_template"
   resource_group_name = azurerm_resource_group.main.name
   template_body       = file("template.json")
@@ -160,3 +146,12 @@ resource "azurerm_template_deployment" "aadds" {
   deployment_mode = "Incremental"
 }
 
+resource "null_resource" "az-configure-aadds" {
+  depends_on = [
+    azurerm_template_deployment.aadds
+  ]
+
+  provisioner "local-exec" {
+    command = "az network vnet update -g ${var.aadds_rg_name} -n ${var.aadds_vnet_name} --dns-servers 10.0.0.4 10.0.0.5"
+  }
+}

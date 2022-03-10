@@ -9,6 +9,7 @@ locals {
   cas_mgr_admin_password      = var.key_vault_id == "" ? var.ad_service_account_password : tostring(data.azurerm_key_vault_secret.ad-pass[0].value)
   cas_mgr_provisioning_script = "cas-mgr-provisioning.sh"
   cas_mgr_setup_script        = "cas-mgr-setup.py"
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
 }
 
 resource "time_offset" "start" {
@@ -258,7 +259,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
   pcoip_registration_code    = var.pcoip_registration_code,
   application_id             = var.application_id,
   aad_client_secret          = var.aad_client_secret,
-  tenant_id                  = var.tenant_id
+  tenant_id                  = local.tenant_id
 })
 )
 }"

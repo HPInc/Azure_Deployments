@@ -64,7 +64,7 @@ module "active-directory-domain-service" {
   key_vault_id                                = var.key_vault_id
   application_id                              = var.application_id
   aad_client_secret                           = var.aad_client_secret
-  tenant_id                                   = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   safe_mode_admin_password                    = var.safe_mode_admin_password
 }
 
@@ -86,7 +86,7 @@ module "active-directory-domain-configure" {
 module "cas-mgr" {
   source = "../../modules/cas-mgr"
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
-
+  cas_mgr_subnet_depends_on = [module.dc-cac-network.all-output]
   cas_mgr_deployment_sa_file = local.cas_mgr_deployment_sa_file
   cas_mgr_admin_password     = var.cas_mgr_admin_password
   private_container_url      = azurerm_storage_container.private-container.id
@@ -108,6 +108,7 @@ module "cas-mgr" {
 
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
+  cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
 }
 
 module "cac" {
@@ -139,7 +140,7 @@ module "cac" {
   aad_client_secret           = var.aad_client_secret
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
-  tenant_id                   = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   ssl_key                     = var.ssl_key
@@ -152,7 +153,7 @@ module "cac" {
 module "windows-std-vm" {
   source = "../../modules/windows-std-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-std-workstations
@@ -164,7 +165,7 @@ module "windows-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -180,7 +181,8 @@ module "windows-std-vm" {
 module "windows-gfx-vm" {
   source = "../../modules/windows-gfx-vm"
 
-  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id]
+  windows_host_vm_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
+
   blob_depends_on = [azurerm_storage_account.storage, azurerm_storage_container.blob]
 
   workstations                 = module.workstation-map.windows-gfx-workstations
@@ -192,7 +194,7 @@ module "windows-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -208,7 +210,7 @@ module "windows-gfx-vm" {
 module "centos-std-vm" {
   source = "../../modules/centos-std-vm"
 
-  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id]
+  centos_std_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-std-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -219,7 +221,7 @@ module "centos-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -235,7 +237,7 @@ module "centos-std-vm" {
 module "centos-gfx-vm" {
   source = "../../modules/centos-gfx-vm"
 
-  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id]
+  centos_gfx_depends_on = [module.dc-cac-network.subnet-dc-id, module.active-directory-domain-configure.service-configured]
 
   workstations                 = module.workstation-map.centos-gfx-workstations
   resource_group_name          = azurerm_resource_group.main.name
@@ -246,7 +248,7 @@ module "centos-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name

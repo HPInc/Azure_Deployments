@@ -9,6 +9,7 @@ locals {
   prefix         = var.prefix != "" ? "${var.prefix}-" : ""
   cas_mgr_script = "get-cac-token.py"
   num_regions    = length(var.locations)
+  tenant_id      = var.key_vault_id == "" ? "" : var.tenant_id
 }
 
 resource "azurerm_storage_blob" "get-cac-token-script" {
@@ -57,7 +58,7 @@ module "cac-regional" {
   application_id      = var.application_id
   aad_client_secret   = var.aad_client_secret
   key_vault_id        = var.key_vault_id
-  tenant_id           = var.tenant_id
+  tenant_id           = local.tenant_id
   ad_pass_secret_name = var.ad_pass_secret_name
 
   storage_connection_string = var.storage_connection_string
@@ -102,7 +103,7 @@ module "cac-regional-private" {
   application_id      = var.application_id
   aad_client_secret   = var.aad_client_secret
   key_vault_id        = var.key_vault_id
-  tenant_id           = var.tenant_id
+  tenant_id           = local.tenant_id
   ad_pass_secret_name = var.ad_pass_secret_name
 
   storage_connection_string = var.storage_connection_string

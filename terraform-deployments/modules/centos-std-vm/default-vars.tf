@@ -11,6 +11,11 @@ variable "centos_std_depends_on" {
   default     = null
 }
 
+variable "teradici_download_token" {
+  description = "Token used to download from Teradici"
+  default     = "yj39yHtgj68Uv2Qf"
+}
+
 variable "enable_workstation_idle_shutdown" {
   description = "Enable Cloud Access Manager auto idle shutdown for Workstations"
   default     = true

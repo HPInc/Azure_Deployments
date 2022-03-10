@@ -119,7 +119,7 @@ module "active-directory-domain-service" {
   key_vault_id                                = var.key_vault_id
   application_id                              = var.application_id
   aad_client_secret                           = var.aad_client_secret
-  tenant_id                                   = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   safe_mode_admin_password                    = var.safe_mode_admin_password
 }
 
@@ -160,7 +160,8 @@ module "cas-mgr" {
   aad_client_secret           = var.aad_client_secret
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
-  tenant_id                   = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
+
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   pcoip_registration_code     = var.pcoip_registration_code
@@ -202,7 +203,7 @@ module "cac" {
   aad_client_secret           = var.aad_client_secret
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
-  tenant_id                   = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
   ssl_key                     = var.ssl_key
@@ -235,7 +236,7 @@ module "windows-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -263,7 +264,7 @@ module "windows-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -290,7 +291,7 @@ module "centos-std-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
@@ -317,7 +318,7 @@ module "centos-gfx-vm" {
   ad_service_account_username  = var.ad_admin_username
   ad_service_account_password  = var.ad_admin_password
   application_id               = var.application_id
-  tenant_id                    = var.tenant_id
+  tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
   aad_client_secret            = var.aad_client_secret
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name

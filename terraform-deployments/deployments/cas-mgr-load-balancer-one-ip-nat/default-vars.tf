@@ -25,11 +25,6 @@ variable "centos_admin_username" {
   default     = "centos_admin"
 }
 
-variable "pcoip_agent_location" {
-  description = "URL of Teradici PCoIP Standard Agent"
-  default     = "https://downloads.teradici.com/win/stable/"
-}
-
 variable "active_directory_netbios_name" {
   description = "The netbios name of the Active Directory domain, for example `consoto`"
   default     = "tera"
@@ -98,4 +93,16 @@ variable "minutes_idle_before_shutdown" {
 variable "minutes_cpu_polling_interval" {
   description = "Polling interval for checking CPU utilization to determine if machine is idle, must be between 1 and 60"
   default     = 15
+}
+
+variable "object_id" {
+  description = "The object ID of your app registration in AAD"
+  type        = string
+  default     = ""
+}
+
+variable "key_vault_name" {
+  description = "Name of the Azure Keyvault that is created. Must be globally unique."
+  type        = string
+  default     = ""
 }

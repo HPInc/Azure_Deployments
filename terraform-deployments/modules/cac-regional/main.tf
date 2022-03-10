@@ -22,11 +22,11 @@ data "azurerm_key_vault_secret" "ad-pass" {
 }
 
 resource "time_offset" "start" {
-  offset_days = -7
+  offset_days = -1
 }
 
 resource "time_offset" "expiry" {
-  offset_days = 7
+  offset_days = 1
 }
 
 data "azurerm_storage_account_blob_container_sas" "token" {

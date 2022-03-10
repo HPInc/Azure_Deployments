@@ -4,20 +4,6 @@
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - **[CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)**
-  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
-  - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
-  - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
-  - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
-  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
-  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
-  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
-  - [CAS Manager (Multi Region Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
@@ -33,6 +19,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
+12. [Videos](#12-videos)
 
 ### 1. CAS Manager Load Balancer NAT Single IP Architecture
 
@@ -257,6 +244,9 @@ Information about connecting to virtual machines for investigative purposes:
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**.
+
+### 12. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MjYa32lKkWc)
 
 ## Appendix
 ### Current VM sizes supported by PCoIP Graphics Agents

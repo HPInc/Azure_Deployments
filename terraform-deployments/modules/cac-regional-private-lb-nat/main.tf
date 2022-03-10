@@ -397,3 +397,24 @@ resource "null_resource" "run-cac-provisioning-script" {
   }
 }
 
+#https debug nat
+
+# resource "azurerm_lb_nat_rule" "cac_nat_https" {
+#   count = var.instance_count
+#   depends_on = [azurerm_network_interface_nat_rule_association.cac_association_ssh, azurerm_linux_virtual_machine.cac-vm]
+#   resource_group_name            = var.resource_group_name
+#   loadbalancer_id                = var.lb_id
+#   name                           = "https-cac-${count.index}"
+#   protocol                       = "Tcp"
+#   frontend_port                  = 443
+#   backend_port                   = 443
+#   frontend_ip_configuration_name = "ip-config-cac-${count.index}"
+# }
+
+# resource "azurerm_network_interface_nat_rule_association" "cac_association_https" {
+#   count = var.instance_count
+#   depends_on = [azurerm_network_interface_nat_rule_association.cac_association_ssh, azurerm_linux_virtual_machine.cac-vm]
+#   network_interface_id  = azurerm_network_interface.cac-nic[count.index].id
+#   ip_configuration_name = "primary"
+#   nat_rule_id           = azurerm_lb_nat_rule.cac_nat_https[count.index].id
+# }

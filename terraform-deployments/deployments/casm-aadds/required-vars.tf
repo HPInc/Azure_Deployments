@@ -1,3 +1,8 @@
+# variable "subscription_id" {
+#   description = "Subscription ID of the directory the AADDS will be deployed in"
+#   type        = string
+# }
+
 variable "aadds_rg_name" {
   description = "Name of the resource group the AADDS will belong in"
   type        = string
@@ -32,4 +37,3 @@ variable "application_id" {
 variable "aad_client_secret" {
   type = string
 }
-
