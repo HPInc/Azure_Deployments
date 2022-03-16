@@ -7,4 +7,5 @@
 *.used
 *.hcl
 *.pfx
+*.export
 **__pycache__
