@@ -92,11 +92,11 @@ To interact directly with remote workstations, an Azure Account must be connecte
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 10. Login to CAS Manager admin console [here](https://cas.teradici.com).
-11. [Create](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+11. [Create](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
 12. Click on **Cloud Service Accounts** and then **Azure**.
 13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
-15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token) a token. Tokens will be used in the .tfvars file. 
+15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/cas_connector_install/#2-obtaining-the-connector-token) a token. Tokens will be used in the .tfvars file. 
     - This token expires in 2 hours. 
     - The value will be used inside ```terraform.tfvars``` like so: 
     ```
