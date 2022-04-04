@@ -32,7 +32,7 @@ variable "probe_port" {
 variable "probe_protocol" {
   description = "The Vm port used for polling"
   type        = string
-  default     = "https"
+  default     = "Https"
 }
 
 variable "probe_path" {

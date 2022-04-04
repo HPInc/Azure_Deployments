@@ -135,7 +135,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "main" {
 resource "azurerm_lb_outbound_rule" "cac_outbound" {
   count = length(var.cac_configuration)
   depends_on = [azurerm_network_interface_backend_address_pool_association.main, azurerm_lb_nat_rule.cac_nat]
-  resource_group_name     = var.resource_group_name
   loadbalancer_id         = var.lb_id
   name                    = "cac-outbound-${count.index}"
   protocol                = "Tcp"
@@ -146,24 +145,20 @@ resource "azurerm_lb_outbound_rule" "cac_outbound" {
   }
 }
 
-
-
-
 resource "azurerm_lb_rule" "allow_port_443" {
   depends_on                     = [var.cac_nat_depends_on, azurerm_network_interface_backend_address_pool_association.main, azurerm_network_interface_nat_rule_association.cac_association_ssh, azurerm_linux_virtual_machine.cac]
-  resource_group_name            = var.resource_group_name
   loadbalancer_id                = var.lb_id
   name                           = "allow-https-${var.location}"
   protocol                       = "Tcp"
   frontend_port                  = 443
   backend_port                   = 443
   frontend_ip_configuration_name = "loadbalancer-frontend"
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.main.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.main.id]
   probe_id                       = var.probe_id
   load_distribution              = "SourceIPProtocol"
 }
 
-resource "azurerm_template_deployment" "shutdown_schedule_template" {
+resource "azurerm_resource_group_template_deployment" "shutdown_schedule_template" {
   depends_on = [
     azurerm_linux_virtual_machine.cac
   ]
@@ -174,17 +169,17 @@ resource "azurerm_template_deployment" "shutdown_schedule_template" {
   resource_group_name = var.resource_group_name
   deployment_mode     = "Incremental"
 
-  parameters = {
-    "location"                       = var.location
-    "virtualMachineName"             = azurerm_linux_virtual_machine.cac[count.index].name
-    "autoShutdownStatus"             = "Enabled"
-    "autoShutdownTime"               = "18:00"
-    "autoShutdownTimeZone"           = "Pacific Standard Time"
-    "autoShutdownNotificationStatus" = "Disabled"
-    "autoShutdownNotificationLocale" = "en"
-  }
+  parameters_content = jsonencode({
+    "location"                       = {value = var.location}
+    "virtualMachineName"             = {value = azurerm_linux_virtual_machine.cac[count.index].name}
+    "autoShutdownStatus"             = {value = "Enabled"}
+    "autoShutdownTime"               = {value = "18:00"}
+    "autoShutdownTimeZone"           = {value = "Pacific Standard Time"}
+    "autoShutdownNotificationStatus" = {value = "Disabled"}
+    "autoShutdownNotificationLocale" = {value = "en"}
+  })
 
-  template_body = <<DEPLOY
+  template_content = <<DEPLOY
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",

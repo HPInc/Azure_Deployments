@@ -54,7 +54,6 @@ resource "azurerm_lb" "main" {
 
 resource "azurerm_lb_probe" "main" {
   depends_on = [azurerm_lb.main, var.load_balancer_depends_on]
-  resource_group_name = var.resource_group_name
   loadbalancer_id     = azurerm_lb.main.id
   name                = var.probe_name
   port                = var.probe_port
