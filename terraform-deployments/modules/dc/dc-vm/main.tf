@@ -44,22 +44,22 @@ resource "azurerm_windows_virtual_machine" "domain-controller" {
   }
 }
 
-resource "azurerm_template_deployment" "shutdown_schedule_template" {
+resource "azurerm_resource_group_template_deployment" "shutdown_schedule_template" {
   name                = "${azurerm_windows_virtual_machine.domain-controller.name}-shutdown-schedule-template"
   resource_group_name = var.resource_group_name
   deployment_mode     = "Incremental"
 
-  parameters = {
-    "location"                       = var.location
-    "virtualMachineName"             = azurerm_windows_virtual_machine.domain-controller.name
-    "autoShutdownStatus"             = "Enabled"
-    "autoShutdownTime"               = "18:00"
-    "autoShutdownTimeZone"           = "Pacific Standard Time"
-    "autoShutdownNotificationStatus" = "Disabled"
-    "autoShutdownNotificationLocale" = "en"
-  }
+  parameters_content = jsonencode({
+    "location"                       = {value = var.location}
+    "virtualMachineName"             = {value = azurerm_windows_virtual_machine.domain-controller.name}
+    "autoShutdownStatus"             = {value = "Enabled"}
+    "autoShutdownTime"               = {value = "18:00"}
+    "autoShutdownTimeZone"           = {value = "Pacific Standard Time"}
+    "autoShutdownNotificationStatus" = {value = "Disabled"}
+    "autoShutdownNotificationLocale" = {value = "en"}
+  })
 
-  template_body = <<DEPLOY
+  template_content = <<DEPLOY
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",

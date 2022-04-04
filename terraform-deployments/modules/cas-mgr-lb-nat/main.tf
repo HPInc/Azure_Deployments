@@ -128,7 +128,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "cas-assoc
 
 resource "azurerm_lb_outbound_rule" "cas_outbound" {
   depends_on = [azurerm_network_interface_backend_address_pool_association.cas-association, azurerm_linux_virtual_machine.cas-mgr-vm]
-  resource_group_name     = var.resource_group_name
   loadbalancer_id         = var.lb_id
   name                    = "cas-outbound"
   protocol                = "Tcp"
@@ -138,7 +137,6 @@ resource "azurerm_lb_outbound_rule" "cas_outbound" {
     name = "ip-config-cas-frontend"
   }
 }
-
 
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 
