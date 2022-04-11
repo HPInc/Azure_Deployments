@@ -6,7 +6,8 @@
  */
 
 output "ids" {
-  value = {
+  sensitive = true
+  value     = {
     "tenant_id" : data.azurerm_subscription.primary.tenant_id,
     "subscription_id" : data.azurerm_subscription.primary.subscription_id,
     "resource_group_name" : azurerm_resource_group.primary.name,

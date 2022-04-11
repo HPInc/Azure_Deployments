@@ -13,7 +13,7 @@ The Python script is a wrapper script that sets up the environment required for 
 
 Edit files inside Azure Cloud Shell by entering: ```code azure-cloudshell-quickstart.cfg```
 1. **reg_code**: Replace **`<code>`** with your PCoIP Registration code. If you don't have one, visit [https://www.teradici.com/compare-plans](https://www.teradici.com/compare-plans)
-2. **api_token**: Replace **`<token>`** with the CAS Manager API token. Log into [https://cam.teradici.com](https://cam.teradici.com), click on your email address on the top right, and select **Get API token**.
+2. **api_token**: Replace **`<token>`** with the CAS Manager API token. Log into [https://cas.teradici.com](https://cas.teradici.com), click on your email address on the top right, and select **Get API token**.
 3. **ad_admin_password** & **safe_mode_admin_password** must have atleast 3 of the following requirements:
     - 1 UPPERCASE letter
     - 1 lowercase letter
@@ -48,7 +48,7 @@ Run the following command in Azure Cloud Shell: ```python azure-cloudshell-quick
 1. Change directory into ```~/terraform-deployments/deployments/quickstart-single-connector```
 2. Use the command: ```python azure-cloudshell-quickstart.py cleanup``` to delete all deployment resources.
     -   If an error message shows, manually delete resource groups on the Azure Portal.
-3. Log in to https://cam.teradici.com and delete the deployment named ```azure_quickstart_<timestamp>```
+3. Log in to https://cas.teradici.com and delete the deployment named ```azure_quickstart_<timestamp>```
 
 ### Videos
 A video of the deployment process for this script can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MHsHEM_Crt4)

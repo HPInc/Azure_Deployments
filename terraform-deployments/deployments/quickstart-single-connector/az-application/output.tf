@@ -14,7 +14,7 @@ output "app_application_id" {
 }
 
 output "client_secret" {
-  value = random_string.client-secret-value.result
+  value = azuread_application_password.client-secret.value
 }
 
 output "app_object_id" {
@@ -22,5 +22,5 @@ output "app_object_id" {
 }
 
 output "application_name" {
-  value = azuread_application.cam-application.name
+  value = azuread_application.cam-application.display_name
 }
