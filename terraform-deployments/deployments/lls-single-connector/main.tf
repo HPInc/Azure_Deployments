@@ -30,6 +30,7 @@ resource "azurerm_storage_account" "windows-script-storage" {
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   allow_nested_items_to_be_public = true
+  min_tls_version                 = "TLS1_0"
 }
 
 resource "azurerm_storage_container" "windows-script-blob" {
