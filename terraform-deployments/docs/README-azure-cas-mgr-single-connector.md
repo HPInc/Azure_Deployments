@@ -156,11 +156,11 @@ Before deploying, `terraform.tfvars` must be complete.
 
 - `git clone https://github.com/teradici/Azure_Deployments`
 
-2. Change directory into: `/terraform-deployments/deployments/single-connector`.
+2. Change directory into: `/terraform-deployments/deployments/cas-mgr-single-connector`.
 
-- `cd Azure_Deployments/terraform-deployments/deployments/load-balancer`.
+- `cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector`
 
-3. Save `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
+3. Save / rename `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
 
    - To copy: `cp terraform.tfvars.sample terraform.tfvars` or `mv terraform.tfvars.sample terraform.tfvars`
    - To open the file in Azure Cloud Shell, use: `code terraform.tfvars`
@@ -182,7 +182,7 @@ Before deploying, `terraform.tfvars` must be complete.
       - `disk_type`: Type of storage for the workstation.
         - Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
       - `count`: Number of workstations to deploy under the specific settings.
-      - `isGFXHost`: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+      - `isGFXHost`: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
         - Possible values: **true** or **false**
 
 4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
@@ -190,11 +190,11 @@ Before deploying, `terraform.tfvars` must be complete.
      - 1 UPPERCASE letter
      - 1 lowercase letter
      - 1 number
-     - 1 special character. e.g.: `!@#$%^&*(*))_+`
-5. Run `terraform init` to initialize a working directory containing Terraform configuration files.
-6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform.
+     - 1 special character. e.g.: `!@#$%^&*()-_=+`
+5. Run `terraform init` to initialize a working directory containing Terraform configuration files
+6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-7. Answer `yes` to start provisioning the single-connector infrastructure.
+7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
@@ -246,7 +246,7 @@ To connect to workstations, they have to be added through CAS Manager.
 
 1. In a browser, enter `https://<cas-mgr-public-ip>`.
    - The default username for CAS Manager is `adminUser`.
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**.
+2. Click Workstations on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
 3. From the **Provider** dropdown, select **Private Cloud**.
 4. In the search box below, select Windows and CentOS workstations.
 5. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
@@ -277,7 +277,6 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 ### 11. Troubleshooting
 
 - If the console looks frozen, try pressing Enter to unfreeze it.
-  <<<<<<< HEAD
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
 - If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
 - If no machines are showing up on CAS Managepr or get errors when connecting via PCoIP client, wait 2 minutes and retry.
@@ -328,7 +327,7 @@ Information about connecting to virtual machines for investigative purposes:
   3.  The installation log path for Windows workstations and DC machines are located in `C:/Teradici/provisioning.log`.
 
 ### 12. Videos
-A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc)
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc). Note that the process to add a role assignment to a subscription has changed slightly, as detailed in [section 3.9](#3-service-principal-authentication).
 
 ## Appendix
 
