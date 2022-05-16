@@ -50,34 +50,37 @@ The following diagram shows a CAS Manager single-connector deployment instance w
 
 ### 2. Requirements
 
-- Access to a subscription on Azure.
-- a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
+- Access to a subscription on Azure, with permissions to create app registrations and role assignments
+   - Alternatively, have access to some app registration on your subscription including its application ID and client secret
+   - In order to create role assignments, you will need either "Owner" or "User Access Administrator" roles under your subscription
+- a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- [Terraform v0.13.5](https://www.terraform.io/downloads.html)
-- [Azure Cloud Shell](https://shell.azure.com) access.
+- [Terraform v0.13.5](https://www.terraform.io/downloads.html) or later
+- [Azure Cloud Shell](https://shell.azure.com) access through the Azure portal
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
-- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/) (needs to be usable in Azure Cloud Shell)
 
 ### 3. Service Principal Authentication
 
-In order for Terraform to deploy & manage resources on a user's behalf, they must authenticate through a service principal.
+In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
 
 1. Login to the [Azure portal](http://portal.azure.com/)
-2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
+2. If not already open, from the dashboard open the left sidebar using the top-left button next to "Microsoft Azure". Click **Azure Active Directory**, then select **App registrations** from the "Manage" panel
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused.
-   - More detailed information on how to create a Service Principal can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret).
-4. Copy the following information from the application overview:
-   - Client ID
-   - Tenant ID
-5. Under the same app, click **Certificates & secrets**.
-6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
-7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
-8. Copy the **Subscription ID** and click on **Access control (IAM)** on the blade.
-9. Click **+ Add**, click **Add role assignments** and follow these steps to add roles:
-   1. Under **Role**, click the dropdown and select the role **Contributor**
-   2. Leave **Assign access to** as **User, group, or service principal**
-   3. Under **Select** search for the application name from step 4 and click **Save**
-   4. Repeat steps 1 to 3 for the role **Virtual Machine Contributor**
+   - More detailed information on how to create a Service Principal can be found directly through Microsoft Docs [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret). Navigate to the application overview by clicking on the registration name.
+4. Copy and save the following information from the application overview:
+   - **Application (client) ID** (required)
+   - **Directory (tenant) ID** (optional; if you plan to use encrypted secrets through Azure Key Vault in [section 4](#4-optional-storing-secrets-on-azure-key-vault)
+5. In the same page, on the left sidebar and in the "Manage" section, click **Certificates & secrets**
+6. Create a new Client Secret or use an existing secret if you already know it. This value will only be shown once immediately after creation, make sure to save it
+7. From the account dashboard, or using the search bar, go to **Subscriptions**. On the next page, select your subscription of choice
+8. Navigate to the **Access control (IAM)** for this subscription
+9. Click **+ Add**, and **Add role assignment** in the dropdown. Alternatively, select **Add role assignment** directly from the box titled "Grant access to this resource":
+   1. Under **Role**, select the role **Contributor**. Click "Next"
+   2. Under **Members**, leave the option on **User, group, or service principal**
+   3. Select members to add the role to, searching up and clicking on the app registration name on the right side
+   4. Review any details of interest, and click **Review + assign**
+   5. Repeat this step for the role **Virtual Machine Contributor**
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
@@ -157,10 +160,10 @@ Before deploying, `terraform.tfvars` must be complete.
 
 - `cd Azure_Deployments/terraform-deployments/deployments/load-balancer`.
 
-2. Save `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
+3. Save `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
 
-   - To copy: `cp terraform.tfvars.sample terraform.tfvars`
-   - To configure: `code terraform.tfvars`
+   - To copy: `cp terraform.tfvars.sample terraform.tfvars` or `mv terraform.tfvars.sample terraform.tfvars`
+   - To open the file in Azure Cloud Shell, use: `code terraform.tfvars`
    - To include optional variables, uncomment the line by removing preceding `#`.
    - Make sure the locations of the connectors and work stations are identical.
 
@@ -182,16 +185,16 @@ Before deploying, `terraform.tfvars` must be complete.
       - `isGFXHost`: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
         - Possible values: **true** or **false**
 
-3. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
+4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
      - 1 UPPERCASE letter
      - 1 lowercase letter
      - 1 number
      - 1 special character. e.g.: `!@#$%^&*(*))_+`
-4. Run `terraform init` to initialize a working directory containing Terraform configuration files.
-5. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform.
+5. Run `terraform init` to initialize a working directory containing Terraform configuration files.
+6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform.
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer `yes` to start provisioning the single-connector infrastructure.
+7. Answer `yes` to start provisioning the single-connector infrastructure.
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
