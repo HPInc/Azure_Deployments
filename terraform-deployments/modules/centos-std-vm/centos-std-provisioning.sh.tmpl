@@ -6,7 +6,6 @@
 
 #!/bin/bash
 
-INST_LOG_PATH="/var/log/teradici/agent/"
 INST_LOG_FILE="/var/log/teradici/agent/install.log"
 DETAILED_LOG_FILE="/var/log/teradici/agent/detailed.log"
 TERADICI_DOWNLOAD_TOKEN=${teradici_download_token}
@@ -249,15 +248,11 @@ fi
 # Create log file
 if [[ ! -f "$INST_LOG_FILE" ]]
 then
-    mkdir -p "$INST_LOG_PATH"
+    mkdir -p "$(dirname $INST_LOG_FILE)"
     touch "$INST_LOG_FILE"
     chmod +644 "$INST_LOG_FILE"
-fi
 
-# Create log file
-if [[ ! -f "$DETAILED_LOG_FILE" ]]
-then
-    mkdir -p "$ERR_LOG_PATH"
+    mkdir -p "$(dirname $DETAILED_LOG_FILE)"
     touch "$DETAILED_LOG_FILE"
     chmod +644 "$DETAILED_LOG_FILE"
 fi
@@ -273,9 +268,6 @@ yum -y -q install dnf-automatic
 log "Starting dnf"
 systemctl enable dnf-automatic.timer
 systemctl start dnf-automatic.timer
-
-# A flag to check if a GUI is installed
-IS_GUI_INSTALLED=0
 
 log "--> Get epel-release"
 yum -y install epel-release
@@ -294,9 +286,42 @@ get_credentials
 
 log "--> Installing Linux GUI ..."
 yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 ]
+then
     log "Failed to install Linux GUI"
-    IS_GUI_INSTALLED=1
+    log "--> Retrying installation of Linux GUI ..."
+    sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
+    sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
+
+    wait_for=60
+    max_tries=5
+    current_tries=0
+
+    while [[ $current_tries -le $max_tries ]]
+    do
+        # Sometimes this installation will fail with an error of
+        # http://olcentgbl.trafficmanager.net/centos/7/updates/x86_64/repodata/filelists.sqlite.bz2: [Errno -1] Metadata file does not match checksum
+        # Testing has shown clearing the YUM cache and retrying the installation
+        # to be an effective workaround.
+        log "---> Cleaning YUM cache"
+        yum clean all
+        yum clean metadata
+        rm -rf /var/cache/yum/*
+        rm -rf /var/tmp/yum*
+        log "---> Waiting for $wait_for seconds"
+        sleep $wait_for
+        yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
+
+        # Exit loop on success
+        [ $? -eq 0 ] && break
+
+        current_tries=$(($current_tries + 1))
+        if [[ $current_tries -ge $max_tries ]]
+        then
+            log "Failed to install Linux GUI after $current_tries attempts."
+            exit 1
+        fi
+    done
 fi
 
 log "--> Set default to graphical target"
@@ -307,19 +332,6 @@ join_domain
 install_pcoip_agent
 
 install_idle_shutdown
-
-if [[ $IS_GUI_INSTALLED -eq 1 ]]
-then
-    log "--> Retrying installation of Linux GUI ..."
-    sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
-    sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
-    yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
-
-    if [ $? -ne 0 ]; then
-        log "Failed to install Linux GUI on the second attempt."
-        exit 1
-    fi
-fi
 
 # Stage complete
 log "--> Installaion complete!"

@@ -365,9 +365,6 @@ join_domain()
 # A flag to indicate if this is run from reboot
 RE_ENTER=0
 
-# A flag to check if a GUI is installed
-IS_GUI_INSTALLED=0
-
 if (rpm -q pcoip-agent-graphics); then
     exit
 fi
@@ -409,11 +406,43 @@ then
     get_credentials
 
     log "--> Installing Linux GUI ..."
-    # yum -y groupinstall "Server with GUI"
     yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
-    if [ $? -ne 0 ]; then
+    if [ $? -ne 0 ]
+    then
         log "Failed to install Linux GUI"
-        IS_GUI_INSTALLED=1
+        log "--> Retrying installation of Linux GUI ..."
+        sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
+        sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
+
+        wait_for=60
+        max_tries=5
+        current_tries=0
+
+        while [[ $current_tries -le $max_tries ]]
+        do
+            # Sometimes this installation will fail with an error of
+            # http://olcentgbl.trafficmanager.net/centos/7/updates/x86_64/repodata/filelists.sqlite.bz2: [Errno -1] Metadata file does not match checksum
+            # Testing has shown clearing the YUM cache and retrying the installation
+            # to be an effective workaround.
+            log "---> Cleaning YUM cache"
+            yum clean all
+            yum clean metadata
+            rm -rf /var/cache/yum/*
+            rm -rf /var/tmp/yum*
+            log "---> Waiting for $wait_for seconds"
+            sleep $wait_for
+            yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
+
+            # Exit loop on success
+            [ $? -eq 0 ] && break
+
+            current_tries=$(($current_tries + 1))
+            if [[ $current_tries -ge $max_tries ]]
+            then
+                log "Failed to install Linux GUI after $current_tries attempts."
+                exit 1
+            fi
+        done
     fi
 
     log "--> Setting default to graphical target..."
@@ -428,18 +457,6 @@ then
     remove_nouveau
 
     install_kernel_header
-
-    if [ $IS_GUI_INSTALLED -eq 1 ]; then
-        log "--> Retrying installation of Linux GUI ..."
-        sudo sed -i '3s/# *//' /etc/yum.repos.d/epel.repo
-        sudo sed -i '4s/^/#/' /etc/yum.repos.d/epel.repo
-        yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
-
-        if [ $? -ne 0 ]; then
-            log "Failed to install Linux GUI on the second attempt."
-            exit 1
-        fi
-    fi
 
     yum update -y --exclude=WALinuxAgent
 
