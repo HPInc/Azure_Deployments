@@ -24,6 +24,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 12. [Videos](#12-videos)
+13. [Appendix](#13-appendix)
 
 ### 1. CAS Manager Single-Connector Architecture
 
@@ -185,6 +186,8 @@ Before deploying, `terraform.tfvars` must be complete.
       - `isGFXHost`: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
         - Possible values: **true** or **false**
 
+   The remaining variables have their descriptions included in the provided sample file.
+
 4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
      - 1 UPPERCASE letter
@@ -195,6 +198,7 @@ Before deploying, `terraform.tfvars` must be complete.
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
 7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
+   - To skip the need for this extra input, you can also use `terraform apply --auto-approve | tee -a installer.log`
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
@@ -278,25 +282,22 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
-- If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
-- If no machines are showing up on CAS Managepr or get errors when connecting via PCoIP client, wait 2 minutes and retry.
-- If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
+- If you are trying to create a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration
+- If no machines are showing up on CAS Manager or you get errors when connecting via PCoIP client, wait 2 minutes and retry
 
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
   - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
 
-Information about connecting to virtual machines for investigative purposes:
+Connecting to virtual machines for investigative purposes:
 
-- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
+- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstation use the Connector (cac-vm) as a bastion host.
   1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
   2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
   3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
   
-- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
-      1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
-      2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
-      3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
-- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deplay `terraform apply` Terraform depends on two environment variables being configured. TF_LOG which could be set to DEBUG, INFO, WARN, or ERROR. The second one TF_LOG_PATH sets the path and file that logs will be logged into: terraformLogs.txt, however, it can be named whatever you like
+- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deploy with `terraform apply`. Terraform depends on two environment variables being configured:
+   -  `TF_LOG` which is one of DEBUG, INFO, WARN, ERROR
+   -  `TF_LOG_PATH` sets the path and file where logs will be stored (e.g. terraformLogs.txt)
 
   - PowerShell:
   ```
@@ -311,7 +312,7 @@ Information about connecting to virtual machines for investigative purposes:
   ```
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable   in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
   1. RDP into the Domain Controller virtual machine.
   ```
   Computer: <domain-controller-public-ip>
@@ -329,7 +330,7 @@ Information about connecting to virtual machines for investigative purposes:
 ### 12. Videos
 A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc). Note that the process to add a role assignment to a subscription has changed slightly, as detailed in [section 3.9](#3-service-principal-authentication).
 
-## Appendix
+### 13. Appendix
 
 ### Current VM sizes supported by PCoIP Graphics Agents
 
