@@ -89,23 +89,23 @@ In order for Terraform to deploy and manage resources on a user's behalf, it mus
 
 As a security method to help protect the values listed above, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
-1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault.
-   1. Select the same region as the deployment.
+1. In the Azure portal, search for **Key vaults**. Navigate to the  and click **+ Create** for a new key vault.
+   1. Select the same region as your intended deployment region (i.e. the region where your VMs are to be provisioned)
    2. Click next to go to the Access policy page.
-   3. Click **+ Add Access Policy**.
+   3. Click **+ Add Access Policy** (small link under "Permission Model").
       1. Under **Configure from template** select **Secret Management**.
       2. Under **Select principal** click on **None selected**.
-      3. Find the application from [section 3](#3-service-principal-authentication) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+      3. Find the application registration you created or used from [section 3](#3-service-principal-authentication) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
       4. Click **Review + create** and then **Create**.
-2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
+2. Click on the key vault that was created and click on **Secrets** under "Settings" inside the leftmost blade.
 3. To create **AD safe mode admin password**, **AD admin password**, **CAS Manager admin password**, and **PCoIP registration key** as secrets follow these steps for each value:
-   1. Click **+ Generate/Import**.
-   2. Enter the name of the secret.
-   3. Input the secret value.
-   4. Click **Create**.
+   1. Click **+ Generate/Import**. Leave the upload option as "Manual"
+   2. Enter a name for the secret
+   3. Input your desired secret value
+   4. Click **Create**
    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
    - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
-4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+4. Fill in the following variables, a completed example is shown below. Follow the tips underneath to help complete details regarding the Key vault. Note that the last 3 variables have been uncommented by removing the `#` at the beginning of their respective lines so that they will be used in deployment.
 
 ```
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted.
@@ -121,16 +121,17 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 
 # Only fill these when using Azure Key Vault secrets.
 # Examples and tips can be found in section 4 of the documentation.
-# tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
-# key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
-# ad_pass_secret_name           = "adPasswordID"
+tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
+key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
+ad_pass_secret_name           = "adPasswordID"
 ```
 
 - Tips for finding these variables:
   1. `application_id` and `tenant_id` are from [section 3](#3-service-principal-authentication) step 4.
   2. `aad_client_secret`: This is the same secret from [section 3](#3-service-principal-authentication). If this secret is no longer saved, follow section 3 from steps 1-3 & 5-6 to obtain a new client secret.
-  3. `key_vault_id`: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
-  4. `ad_pass_secret_name`: This is the name used for the ad pass secret. The name can be seen after`/secrets/` from the variable `ad_admin_password`. From the example above, this would be `adPasswordID`.
+  3. `tenant_id`: This can be found from the overview page of your desired Service Principal / App registration that you will be using for deployment. Copy the **Directory (tenant) ID** field to this variable
+  4. `key_vault_id`: Go to the key vault containing the secrets on the Azure portal and click on **Properties** under "Settings" inside the opened blade. Copy the **Resource ID**.
+  5. `ad_pass_secret_name`: This is the name used for the ad pass secret. The name can be seen after`/secrets/` from the variable `ad_admin_password`. From the example above, this would be `adPasswordID`.
 
 ### 5. (Optional) Assigning a SSL Certificate
 
