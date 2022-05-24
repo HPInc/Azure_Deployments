@@ -247,26 +247,30 @@ windows-graphics-workstations = [
 
 ### 7. Adding Workstations in CAS Manager
 
-To connect to workstations, they have to be added through CAS Manager.
+To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
 
-1. In a browser, enter `https://<cas-mgr-public-ip>`.
-   - The default username for CAS Manager is `adminUser`.
-2. Click Workstations on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
-3. From the **Provider** dropdown, select **Private Cloud**.
-4. In the search box below, select Windows and CentOS workstations.
-5. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
-   - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
-6. Click **Save**.
+Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+- Through the output variables of a successful deployment
+- Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
+
+1. In a browser, go to `https://<cas-mgr-public-ip>`.
+2. Log in using the username `adminUser`, paired with the password specified in `terraform.tfvars`
+3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
+4. From the **Provider** dropdown, select **Private Cloud**.
+5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
+   - **Note:** You can remove workstations selected for assignment under **Remote workstations to be added (x)**.
+7. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
+8. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
 
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
+Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
+   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection.
-   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
+2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
