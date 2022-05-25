@@ -362,6 +362,7 @@ A video of the deployment process for this terraform can be found on [Teradici's
 |**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
 
 [NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
+Note that NVv4 virtual machines currently support only Windows guest operating systems.
 |**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 |**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
