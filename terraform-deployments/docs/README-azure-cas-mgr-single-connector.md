@@ -24,6 +24,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 12. [Videos](#12-videos)
+13. [Appendix](#13-appendix)
 
 ### 1. CAS Manager Single-Connector Architecture
 
@@ -50,34 +51,37 @@ The following diagram shows a CAS Manager single-connector deployment instance w
 
 ### 2. Requirements
 
-- Access to a subscription on Azure.
-- a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
+- Access to a subscription on Azure, with permissions to create app registrations and role assignments
+   - Alternatively, have access to some app registration on your subscription including its application ID and client secret
+   - In order to create role assignments, you will need either "Owner" or "User Access Administrator" roles under your subscription
+- a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- [Terraform v0.13.5](https://www.terraform.io/downloads.html)
-- [Azure Cloud Shell](https://shell.azure.com) access.
+- [Terraform v0.13.5](https://www.terraform.io/downloads.html) or later
+- [Azure Cloud Shell](https://shell.azure.com) access through the Azure portal
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
-- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/) (needs to be usable in Azure Cloud Shell)
 
 ### 3. Service Principal Authentication
 
-In order for Terraform to deploy & manage resources on a user's behalf, they must authenticate through a service principal.
+In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
 
 1. Login to the [Azure portal](http://portal.azure.com/)
-2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
+2. If not already open, from the dashboard open the left sidebar using the top-left button next to "Microsoft Azure". Click **Azure Active Directory**, then select **App registrations** from the "Manage" panel
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused.
-   - More detailed information on how to create a Service Principal can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret).
-4. Copy the following information from the application overview:
-   - Client ID
-   - Tenant ID
-5. Under the same app, click **Certificates & secrets**.
-6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
-7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
-8. Copy the **Subscription ID** and click on **Access control (IAM)** on the blade.
-9. Click **+ Add**, click **Add role assignments** and follow these steps to add roles:
-   1. Under **Role**, click the dropdown and select the role **Contributor**
-   2. Leave **Assign access to** as **User, group, or service principal**
-   3. Under **Select** search for the application name from step 4 and click **Save**
-   4. Repeat steps 1 to 3 for the role **Virtual Machine Contributor**
+   - More detailed information on how to create a Service Principal can be found directly through Microsoft Docs [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret). Navigate to the application overview by clicking on the registration name.
+4. Copy and save the following information from the application overview:
+   - **Application (client) ID** (required)
+   - **Directory (tenant) ID** (optional; if you plan to use encrypted secrets through Azure Key Vault in [section 4](#4-optional-storing-secrets-on-azure-key-vault)
+5. In the same page, on the left sidebar and in the "Manage" section, click **Certificates & secrets**
+6. Create a new Client Secret or use an existing secret if you already know it. This value will only be shown once immediately after creation, make sure to save it
+7. From the account dashboard, or using the search bar, go to **Subscriptions**. On the next page, select your subscription of choice
+8. Navigate to the **Access control (IAM)** for this subscription
+9. Click **+ Add**, and **Add role assignment** in the dropdown. Alternatively, select **Add role assignment** directly from the box titled "Grant access to this resource":
+   1. Under **Role**, select the role **Contributor**. Click "Next"
+   2. Under **Members**, leave the option on **User, group, or service principal**
+   3. Select members to add the role to, searching up and clicking on the app registration name on the right side
+   4. Review any details of interest, and click **Review + assign**
+   5. Repeat this step for the role **Virtual Machine Contributor**
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
@@ -85,23 +89,23 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
 
 As a security method to help protect the values listed above, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
-1. In the Azure portal, search for **Key Vault** and click **+ Add** to create a new key vault.
-   1. Select the same region as the deployment.
+1. In the Azure portal, search for **Key vaults**. Navigate to the  and click **+ Create** for a new key vault.
+   1. Select the same region as your intended deployment region (i.e. the region where your VMs are to be provisioned)
    2. Click next to go to the Access policy page.
-   3. Click **+ Add Access Policy**.
+   3. Click **+ Add Access Policy** (small link under "Permission Model").
       1. Under **Configure from template** select **Secret Management**.
       2. Under **Select principal** click on **None selected**.
-      3. Find the application from [section 3](#3-service-principal-authentication) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+      3. Find the application registration you created or used from [section 3](#3-service-principal-authentication) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
       4. Click **Review + create** and then **Create**.
-2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
+2. Click on the key vault that was created and click on **Secrets** under "Settings" inside the leftmost blade.
 3. To create **AD safe mode admin password**, **AD admin password**, **CAS Manager admin password**, and **PCoIP registration key** as secrets follow these steps for each value:
-   1. Click **+ Generate/Import**.
-   2. Enter the name of the secret.
-   3. Input the secret value.
-   4. Click **Create**.
+   1. Click **+ Generate/Import**. Leave the upload option as "Manual"
+   2. Enter a name for the secret
+   3. Input your desired secret value
+   4. Click **Create**
    5. Click on the secret that was created, click on the version and copy the **Secret Identifier**.
    - **Tip**: To reduce the chance of errors, verify the secret is correct by clicking on **Show Secret Value**.
-4. Fill in the following variables. Below is a completed example with tips underneath that can aid in finding the values.
+4. Fill in the following variables, a completed example is shown below. Follow the tips underneath to help complete details regarding the Key vault. Note that the last 3 variables have been uncommented by removing the `#` at the beginning of their respective lines so that they will be used in deployment.
 
 ```
 # (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted.
@@ -117,16 +121,17 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 
 # Only fill these when using Azure Key Vault secrets.
 # Examples and tips can be found in section 4 of the documentation.
-# tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
-# key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
-# ad_pass_secret_name           = "adPasswordID"
+tenant_id                     = "31f56g8-1k3a-q43e-1r3x-dc340b62cf18"
+key_vault_id                  = "/subscriptions/12e06/resourceGroups/keyvault/providers/Microsoft.KeyVault/vaults/mykeyvault"
+ad_pass_secret_name           = "adPasswordID"
 ```
 
 - Tips for finding these variables:
   1. `application_id` and `tenant_id` are from [section 3](#3-service-principal-authentication) step 4.
   2. `aad_client_secret`: This is the same secret from [section 3](#3-service-principal-authentication). If this secret is no longer saved, follow section 3 from steps 1-3 & 5-6 to obtain a new client secret.
-  3. `key_vault_id`: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
-  4. `ad_pass_secret_name`: This is the name used for the ad pass secret. The name can be seen after`/secrets/` from the variable `ad_admin_password`. From the example above, this would be `adPasswordID`.
+  3. `tenant_id`: This can be found from the overview page of your desired Service Principal / App registration that you will be using for deployment. Copy the **Directory (tenant) ID** field to this variable
+  4. `key_vault_id`: Go to the key vault containing the secrets on the Azure portal and click on **Properties** under "Settings" inside the opened blade. Copy the **Resource ID**.
+  5. `ad_pass_secret_name`: This is the name used for the ad pass secret. The name can be seen after`/secrets/` from the variable `ad_admin_password`. From the example above, this would be `adPasswordID`.
 
 ### 5. (Optional) Assigning a SSL Certificate
 
@@ -153,14 +158,14 @@ Before deploying, `terraform.tfvars` must be complete.
 
 - `git clone https://github.com/teradici/Azure_Deployments`
 
-2. Change directory into: `/terraform-deployments/deployments/single-connector`.
+2. Change directory into: `/terraform-deployments/deployments/cas-mgr-single-connector`.
 
-- `cd Azure_Deployments/terraform-deployments/deployments/load-balancer`.
+- `cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector`
 
-2. Save `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
+3. Save / rename `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
 
-   - To copy: `cp terraform.tfvars.sample terraform.tfvars`
-   - To configure: `code terraform.tfvars`
+   - To copy: `cp terraform.tfvars.sample terraform.tfvars` or `mv terraform.tfvars.sample terraform.tfvars`
+   - To open the file in Azure Cloud Shell, use: `code terraform.tfvars`
    - To include optional variables, uncomment the line by removing preceding `#`.
    - Make sure the locations of the connectors and work stations are identical.
 
@@ -179,19 +184,22 @@ Before deploying, `terraform.tfvars` must be complete.
       - `disk_type`: Type of storage for the workstation.
         - Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
       - `count`: Number of workstations to deploy under the specific settings.
-      - `isGFXHost`: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+      - `isGFXHost`: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
         - Possible values: **true** or **false**
 
-3. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
+   The remaining variables have their descriptions included in the provided sample file.
+
+4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
      - 1 UPPERCASE letter
      - 1 lowercase letter
      - 1 number
-     - 1 special character. e.g.: `!@#$%^&*(*))_+`
-4. Run `terraform init` to initialize a working directory containing Terraform configuration files.
-5. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform.
+     - 1 special character. e.g.: `!@#$%^&*()-_=+`
+5. Run `terraform init` to initialize a working directory containing Terraform configuration files
+6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer `yes` to start provisioning the single-connector infrastructure.
+7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
+   - To skip the need for this extra input, you can also use `terraform apply --auto-approve | tee -a installer.log`
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
@@ -239,26 +247,30 @@ windows-graphics-workstations = [
 
 ### 7. Adding Workstations in CAS Manager
 
-To connect to workstations, they have to be added through CAS Manager.
+To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
 
-1. In a browser, enter `https://<cas-mgr-public-ip>`.
-   - The default username for CAS Manager is `adminUser`.
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**.
-3. From the **Provider** dropdown, select **Private Cloud**.
-4. In the search box below, select Windows and CentOS workstations.
-5. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
-   - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
-6. Click **Save**.
+Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+- Through the output variables of a successful deployment
+- Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
+
+1. In a browser, go to `https://<cas-mgr-public-ip>`.
+2. Log in using the username `adminUser`, paired with the password specified in `terraform.tfvars`
+3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
+4. From the **Provider** dropdown, select **Private Cloud**.
+5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
+   - **Note:** You can remove workstations selected for assignment under **Remote workstations to be added (x)**.
+7. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
+8. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
 
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector.
+Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
+   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection.
-   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
+2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**
 3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
@@ -274,27 +286,23 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 ### 11. Troubleshooting
 
 - If the console looks frozen, try pressing Enter to unfreeze it.
-  <<<<<<< HEAD
 - If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
-- If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
-- If no machines are showing up on CAS Managepr or get errors when connecting via PCoIP client, wait 2 minutes and retry.
-- If trying to run a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration.
+- If you are trying to create a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration
+- If no machines are showing up on CAS Manager or you get errors when connecting via PCoIP client, wait 2 minutes and retry
 
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
   - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
 
-Information about connecting to virtual machines for investigative purposes:
+Connecting to virtual machines for investigative purposes:
 
-- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
+- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstation use the Connector (cac-vm) as a bastion host.
   1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
   2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
   3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
   
-- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
-      1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
-      2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
-      3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
-- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deplay `terraform apply` Terraform depends on two environment variables being configured. TF_LOG which could be set to DEBUG, INFO, WARN, or ERROR. The second one TF_LOG_PATH sets the path and file that logs will be logged into: terraformLogs.txt, however, it can be named whatever you like
+- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deploy with `terraform apply`. Terraform depends on two environment variables being configured:
+   -  `TF_LOG` which is one of DEBUG, INFO, WARN, ERROR
+   -  `TF_LOG_PATH` sets the path and file where logs will be stored (e.g. terraformLogs.txt)
 
   - PowerShell:
   ```
@@ -309,7 +317,7 @@ Information about connecting to virtual machines for investigative purposes:
   ```
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable   in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
   1. RDP into the Domain Controller virtual machine.
   ```
   Computer: <domain-controller-public-ip>
@@ -325,9 +333,9 @@ Information about connecting to virtual machines for investigative purposes:
   3.  The installation log path for Windows workstations and DC machines are located in `C:/Teradici/provisioning.log`.
 
 ### 12. Videos
-A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc)
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc). Note that the process to add a role assignment to a subscription has changed slightly, as detailed in [section 3.9](#3-service-principal-authentication).
 
-## Appendix
+### 13. Appendix
 
 ### Current VM sizes supported by PCoIP Graphics Agents
 
@@ -345,3 +353,21 @@ A video of the deployment process for this terraform can be found on [Teradici's
 |**Standard_NV6**|6|56|340|1|8|24|1|1|25|
 |**Standard_NV12**|12|112|680|2|16|48|2|2|50|
 |**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
+
+[NVv3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv3-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max uncached disk throughput: IOPS/MBps**|**Max NICs**|**Expected network bandwidth (Mbps)**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV12s_v3**|12|112|320|1|8|12|20000/200|4|6000|1|25|
+|**Standard_NV24s_v3**|24|224|640|2|16|24|40000/400|8|12000|2|50|
+|**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
+
+[NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
+Note that NVv4 virtual machines currently support only Windows guest operating systems.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
+|**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
+|**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
+|**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|
+
+
