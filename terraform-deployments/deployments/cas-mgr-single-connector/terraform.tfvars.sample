@@ -73,7 +73,8 @@ workstations = [
 # Full path to the domain users list .csv file.
 # ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector/domain_users_list.csv"
 
-# Active directory administrator username.
+# Active directory administrator username (SSH to VMs and PCoIP client login). 
+# For the CAS Manager web UI, be sure to use "adminUser".
 # ad_admin_username       = "cas_admin"
 
 # Active Directory NetBIOS name
@@ -92,7 +93,8 @@ cas_mgr_admin_password        = "Password!234"
 pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 
 
-# (Optional) Only fill these when using Azure Key Vault secrets.
+# (Optional) Only fill and uncomment these when using Azure Key Vault secrets. 
+# If using them, be sure all are uncommented; otherwise, leave all of them commented.
 # Examples and tips can be found in section 4 of the documentation.
 # tenant_id                     = "<from section 3 step 4>"
 # key_vault_id                  = "<found in key vault properties under Resource ID>"
