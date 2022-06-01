@@ -2,11 +2,6 @@
 
 **Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/cas-mgr-single-connector
 
-For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
-
-- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
 
@@ -25,6 +20,13 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 11. [Troubleshooting](#11-troubleshooting)
 12. [Videos](#12-videos)
 13. [Appendix](#13-appendix)
+
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
+
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
+
 
 ### 1. CAS Manager Single-Connector Architecture
 
