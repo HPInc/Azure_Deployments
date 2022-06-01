@@ -374,5 +374,3 @@ Note that NVv4 virtual machines currently support only Windows guest operating s
 |**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
 |**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
 |**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|
-
-
