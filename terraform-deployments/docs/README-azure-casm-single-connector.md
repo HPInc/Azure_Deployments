@@ -2,10 +2,6 @@
 
 **Objective**: The objective of this documentation is to deploy the Single Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
-For additional Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments please visit:
-- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ## Table of Contents
 1. [CASM-Single-Connector Architecture](#1-CASM-Single-Connector-architecture)
@@ -20,6 +16,12 @@ For additional Azure deployments, Amazon Web Services (AWS) deployments, and Goo
 10. [Changing the deployment](#10-changing-the-deployment)
 11. [Deleting the deployment](#11-deleting-the-deployment)
 12. [Troubleshooting](#12-troubleshooting)
+
+
+For additional Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments please visit:
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ### 1. CASM-Single-Connector Architecture
 

@@ -2,11 +2,6 @@
 
 **Objective**: The objective of this documentation is to deploy the CAS Manager load balancer single IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
-For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
-- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
-
 ## Table of Contents
 1. [CAS Manager Load Balancer Single IP Architecture](#1-cas-manager-load-balancer-architecture)
 2. [Requirements](#2-requirements)
@@ -20,6 +15,11 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
 12. [Videos](#12-videos)
+
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 ### 1. CAS Manager Load Balancer NAT Single IP Architecture
 

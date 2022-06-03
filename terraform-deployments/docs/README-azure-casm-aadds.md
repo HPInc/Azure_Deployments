@@ -2,24 +2,6 @@
 
 **Objective**: The objective of this documentation is to deploy a Azure Active Directory Domain Services on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
-For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
-- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - **[CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)**
-  - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
-  - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
-  - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
-  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-  - [Load Balancer (Multi-Connector) Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
-  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
-  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
-  - [CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
-- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
-
 ## Table of Contents
 1. [Single-Connector Architecture](#1-aadds-architecture)
 2. [Requirements](#2-requirements)
@@ -28,6 +10,12 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 5. [Deleting the deployment](#5-deleting-the-deployment)
 6. [Troubleshooting](#6-troubleshooting)
 7. [Videos](#7-videos)
+
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
+
 
 ### 1. AADDS Architecture
 
@@ -130,3 +118,5 @@ A video of the deployment process for this terraform can be found on [Teradici's
 ### 7.. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If the user encounters permission issues during deployment, ensure that the users' account is correctly assigned all the necessary roles.
+
+
