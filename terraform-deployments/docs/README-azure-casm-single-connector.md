@@ -169,8 +169,8 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deployment must be completed and fully provisioned. 
 1. Clone the repository into your Azure Cloud Shell (ACS) environment.
   - ```git clone https://github.com/teradici/Azure_Deployments```
-2. Change directory into: ```/terraform-deployments/deployments/casm-lb-one-ip```.
-  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-lb-one-ip```.
+2. Change directory into: ```/terraform-deployments/deployments/casm-aadds-single-connector```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-aadds-single-connector```.
 2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
