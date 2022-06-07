@@ -6,7 +6,7 @@
  */
 
 locals {
-  prefix = var.prefix != "" ? "${var.prefix}-" : ""
+  prefix = var.prefix != "" ? "${var.prefix}-" : "cac-"
 }
 
 resource "azurerm_public_ip" "loadbalancer_public_ip" {
@@ -41,7 +41,7 @@ resource "azurerm_public_ip" "cas-mgr-public-ip" {
 
 resource "azurerm_lb" "main" {
 
-  name                = "${var.prefix}-loadbalancer"
+  name                = "${local.prefix}loadbalancer"
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Standard"

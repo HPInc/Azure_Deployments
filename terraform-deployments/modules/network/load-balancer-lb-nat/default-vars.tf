@@ -11,11 +11,11 @@ variable "load_balancer_depends_on" {
   default = null
 }
 
- variable "prefix" {
+variable "prefix" {
   description = "Prefix used for the name of the load balancer"
   type        = string
   default     = "cac"
- }
+}
 
 variable "probe_name" {
   description = "The name of the load balancer probe profile"
@@ -32,7 +32,7 @@ variable "probe_port" {
 variable "probe_protocol" {
   description = "The Vm port used for polling"
   type        = string
-  default     = "https"
+  default     = "Https"
 }
 
 variable "probe_path" {
