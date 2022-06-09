@@ -32,7 +32,6 @@ resource "azurerm_traffic_manager_external_endpoint" "main" {
   count = length(var.managed_endpoints)
 
   name                = var.managed_endpoint_names[count.index]
-  resource_group_name = var.resource_group_name
   profile_id          = azurerm_traffic_manager_profile.main.id
   weight              = 100 + count.index
   target              = var.managed_endpoints[count.index]
