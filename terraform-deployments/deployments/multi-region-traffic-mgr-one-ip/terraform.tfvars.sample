@@ -53,8 +53,9 @@
 ]
 
 # Specify the location(s) and number of connectors to create per location.
+# A connector will be created in a region for each token listed
 # The Domain Controller and CAS Manager VMs will be placed in the location listed first.
-# e.g. This will deploy 2 connectors in West US 2 and 3 in East US.
+# e.g. This will deploy connectors in West US 2 and East US
 cac_configuration = {
     "westus2" : ["cac token obtained from https://cam.teradici.com/app/connectors"]
     "eastus"  : ["cac token obtained from https://cam.teradici.com/app/connectors"]
@@ -88,7 +89,6 @@ cac_configuration = {
 # To encrypt these 4 values follow section 4 of the documentation.
 ad_admin_password             = "Password!234"
 safe_mode_admin_password      = "Password!234"
-cas_mgr_admin_password        = "Password!234"
 pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
 
 # Used for authentication and allows Terraform to manage resources.
