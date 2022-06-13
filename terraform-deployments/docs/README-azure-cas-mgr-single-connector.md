@@ -257,6 +257,7 @@ Determine the public IP address of CAS Manager Virtual Machine. This can be done
 
 1. In a browser, go to `https://<cas-mgr-public-ip>`.
 2. Log in using the username `adminUser`, paired with the password specified in `terraform.tfvars`
+   - Do not use the username specified in your variable file labelled `ad_admin_username`; the provided `adminUser` is the only provisioned one by default on deployment
 3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
 4. From the **Provider** dropdown, select **Private Cloud**.
 5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
@@ -294,6 +295,8 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 
 - If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
   - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
+
+- When logging into the CAS Manager web UI, if you come across a message stating **Ad configuration not found**, be sure to log in using the default username `adminUser`
 
 Connecting to virtual machines for investigative purposes:
 

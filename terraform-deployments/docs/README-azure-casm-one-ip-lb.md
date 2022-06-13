@@ -161,7 +161,7 @@ To upload a SSL certificate and SSL key onto ACS:
   5. The location of these files will be found in ```~/clouddrive/```
   6. Enter the paths to the SSL certificate and SSL key inside ```terraform.tfvars```.
 
-### 7. Deploying the CASM-Single-Connector via Terraform
+### 7. Deploying the CASM-Load Balancer-One-IP via Terraform
 terraform.tfvars is the file in which a user specifies variables for a deployment. The ```terraform.tfvars.sample``` sample file shows the required variables that a user must provide, along with other commonly used but optional variables. 
 
 **Note**: Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
@@ -169,9 +169,9 @@ terraform.tfvars is the file in which a user specifies variables for a deploymen
 Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deployment must be completed and fully provisioned. 
 1. Clone the repository into your Azure Cloud Shell (ACS) environment.
   - ```git clone https://github.com/teradici/Azure_Deployments```
-2. Change directory into: ```/terraform-deployments/deployments/casm-single-connector```.
-  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-single-connector```.
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+2. Change directory into: ```/terraform-deployments/deployments/casm-aadds-one-ip-lb```.
+  - ```cd Azure_Deployments/terraform-deployments/deployments/casm-aadds-one-ip-lb```.
+3. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
     - To include optional variables, uncomment the line by removing preceding ```#```.
@@ -239,25 +239,31 @@ windows-graphics-workstations = [
 ```
     
 ### 8. Adding Workstations in CAS Manager
-To connect to workstations, they have to be added through CAS Manager. 
-1. In a browser, enter ```https://<cas-mgr-public-ip>```.
-    - The default username for CAS Manager is ```adminUser```.
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
-3. From the **Provider** dropdown, select **Private Cloud**.
-6. In the search box below, select Windows and CentOS workstations.
-7. At the bottom click the option **Individually select users** and select the users to assign to the workstations. 
-    - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
+To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
+
+Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+- Through the output variables of a successful deployment
+- Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
+
+1. In a browser, go to `https://<cas-mgr-public-ip>`.
+2. Log in using the username `adminUser`, paired with the password specified in `terraform.tfvars`
+   - Do not use the username specified in your variable file labelled `ad_admin_username`; the provided `adminUser` is the only provisioned one by default on deployment
+3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
+4. From the **Provider** dropdown, select **Private Cloud**.
+5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
+   - **Note:** You can remove workstations selected for assignment under **Remote workstations to be added (x)**.
+7. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
 8. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 9. Starting a PCoIP Session
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
+Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
+   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. 
-    - **Note**: If the ```public_ip``` of the ```cac-vms``` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine ```[prefix]-cac-vm-0``` and the **Public IP address** will be shown.
-3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5. 
+2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**
+3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 8 step 5.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
@@ -286,6 +292,7 @@ Information about connecting to virtual machines for investigative purposes:
 A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=UvL8LwhGnb8)
 
 ## Appendix
+
 ### Current VM sizes supported by PCoIP Graphics Agents
 
 [NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
@@ -296,10 +303,25 @@ A video of the deployment process for this terraform can be found on [Teradici's
 |**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
 |**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
 
-
 [NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
 |**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 |**Standard_NV6**|6|56|340|1|8|24|1|1|25|
 |**Standard_NV12**|12|112|680|2|16|48|2|2|50|
 |**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
+
+[NVv3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv3-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max uncached disk throughput: IOPS/MBps**|**Max NICs**|**Expected network bandwidth (Mbps)**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV12s_v3**|12|112|320|1|8|12|20000/200|4|6000|1|25|
+|**Standard_NV24s_v3**|24|224|640|2|16|24|40000/400|8|12000|2|50|
+|**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
+
+[NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
+Note that NVv4 virtual machines currently support only Windows guest operating systems.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
+|**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
+|**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
+|**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|
