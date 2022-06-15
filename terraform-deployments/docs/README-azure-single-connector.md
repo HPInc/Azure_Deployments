@@ -2,6 +2,7 @@
 
 **Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
+
 ## Table of Contents
 1. [Single-Connector Architecture](#1-single-connector-architecture)
 2. [Requirements](#2-requirements)
@@ -19,6 +20,8 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
 - [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
+
+Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/single-connector
 
 ### 1. Single-Connector Architecture
 
