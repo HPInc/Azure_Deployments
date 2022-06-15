@@ -26,7 +26,7 @@ variable "profile_port" {
 variable "profile_protocol" {
   description = "The Vm port used for polling"
   type        = string
-  default     = "https"
+  default     = "HTTPS"
 }
 
 variable "profile_path" {

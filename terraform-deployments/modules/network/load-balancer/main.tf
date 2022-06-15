@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+locals {
+  prefix = var.prefix != "" ? "${var.prefix}-" : "cac-"
+}
+
 resource "azurerm_public_ip" "loadbalancer_public_ip" {
   count = length(var.locations)
 
@@ -19,7 +23,7 @@ resource "azurerm_public_ip" "loadbalancer_public_ip" {
 resource "azurerm_lb" "main" {
   count = length(var.locations)
 
-  name                = "${var.prefix}-loadbalancer-${var.locations[count.index]}"
+  name                = "${local.prefix}loadbalancer-${var.locations[count.index]}"
   location            = var.locations[count.index]
   resource_group_name = var.resource_group_name
   sku                 = "Standard"
