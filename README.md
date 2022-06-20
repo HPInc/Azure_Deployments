@@ -26,7 +26,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
   ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
   - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
+  - [Step-by-Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
  
  
   ### FAQ: How to install AAD DS and Local License Server
