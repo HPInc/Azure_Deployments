@@ -1,6 +1,6 @@
 # CAS Manager (Multi Region Traffic Manager) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager multi region traffic manager architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CAS Manager Multi-Region Traffic Manager architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 ## Table of Contents
 1. [CAS Manager Multi Region Traffic Manager Architecture](#1-cas-manager-multi-region-traffic-manager-architecture)
@@ -53,23 +53,26 @@ The following diagram shows a deployment instance with one Cloud Access Connecto
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
 ### 3. Service Principal Authentication
-In order for Terraform to deploy & manage resources on a user's behalf, they must authenticate through a service principal. 
+
+In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
+
 1. Login to the [Azure portal](http://portal.azure.com/)
-2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
-3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
-    - More detailed information on how to create a Service Principal can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret).
-4. Copy the following information from the application overview: 
-    - Client ID
-    - Tenant ID
-5. Under the same app, click **Certificates & secrets**.
-6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
-7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
-8. Copy the **Subscription ID** and click on **Access control (IAM)** on the blade. 
-9. Click **+ Add**, click **Add role assignments** and follow these steps to add roles:
-    1. Under **Role**, click the dropdown and select the role **Reader**.
-    2. Leave **Assign access to** as **User, group, or service principal**
-    3. Under **Select** search for the application name from step 4 and click **Save**.
-    4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
+2. If not already open, from the dashboard open the left sidebar using the top-left button next to "Microsoft Azure". Click **Azure Active Directory**, then select **App registrations** from the "Manage" panel
+3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused.
+   - More detailed information on how to create a Service Principal can be found directly through Microsoft Docs [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret). Navigate to the application overview by clicking on the registration name.
+4. Copy and save the following information from the application overview:
+   - **Application (client) ID** (required)
+   - **Directory (tenant) ID** (optional; if you plan to use encrypted secrets through Azure Key Vault in [section 4](#4-optional-storing-secrets-on-azure-key-vault)
+5. In the same page, on the left sidebar and in the "Manage" section, click **Certificates & secrets**
+6. Create a new Client Secret or use an existing secret if you already know it. This value will only be shown once immediately after creation, make sure to save it
+7. From the account dashboard, or using the search bar, go to **Subscriptions**. On the next page, select your subscription of choice
+8. Navigate to the **Access control (IAM)** for this subscription
+9. Click **+ Add**, and **Add role assignment** in the dropdown. Alternatively, select **Add role assignment** directly from the box titled "Grant access to this resource":
+   1. Under **Role**, select the role **Contributor**. Click "Next"
+   2. Under **Members**, leave the option on **User, group, or service principal**
+   3. Select members to add the role to, searching up and clicking on the app registration name on the right side
+   4. Review any details of interest, and click **Review + assign**
+   5. Repeat this step for the role **Virtual Machine Contributor**
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
@@ -163,16 +166,17 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```count```: Number of workstations to deploy under the specific settings.
         - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
-4. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
-    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
-      - 1 UPPERCASE letter
-      - 1 lowercase letter
-      - 1 number
-      - 1 special character. e.g.: ```!@#$%^&*(*))_+```
-5. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-6. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
-    - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-7. Answer ```yes``` to start provisioning the CAS Manager multi region traffic manager infrastructure. 
+4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
+   - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
+     - 1 UPPERCASE letter
+     - 1 lowercase letter
+     - 1 number
+     - 1 special character. e.g.: `!@#$%^&*()-_=+`
+5. Run `terraform init` to initialize a working directory containing Terraform configuration files
+6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
+   - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
+7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
+   - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
@@ -206,14 +210,21 @@ windows-std-internal-ip = {
 ```
     
 ### 7. Adding Workstations in CAS Manager
-To connect to workstations, they have to be added through CAS Manager. 
-1. In a browser, enter ```https://<cas-mgr-public-ip>```.
-    - The default username for CAS Manager is ```adminUser```.
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
-3. From the **Provider** dropdown, select **Private Cloud**.
-6. In the search box below, select Windows and CentOS workstations.
-7. At the bottom click the option **Individually select users** and select the users to assign to the workstations. 
-    - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
+
+To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
+
+Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+- Through the output variables of a successful deployment
+- Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
+
+1. In a browser, go to `https://<cas-mgr-public-ip>`.
+2. Log in using the username `adminUser`, paired with the `cas_mgr_admin_password` specified in `terraform.tfvars`
+   - Do not use the username specified in your variable file labelled `ad_admin_username`; the provided `adminUser` is the only provisioned one by default on deployment
+3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
+4. From the **Provider** dropdown, select **Private Cloud**.
+5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
+   - **Note:** You can remove workstations selected for assignment under **Remote workstations to be added (x)**.
+7. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
 8. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.

@@ -1,6 +1,6 @@
 # CAS Manager (Load Balancer NAT Single IP) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager load balancer single IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CAS Manager Load Balancer NAT Single IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 ## Table of Contents
 1. [CAS Manager Load Balancer Single IP Architecture](#1-cas-manager-load-balancer-architecture)
@@ -39,7 +39,7 @@ Multiple domain-joined workstations and Cloud Access Connectors can be optionall
 
 The Public Load Balancer distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the public frontend IP the Load Balancer, and the Load Balancer selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on the Load Balancer which have NAT rules set up to route into the selected Cloud Access Connector, bypassing the HTTPS Load Balancer.
 
-This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the public Load Balancer NAT, whose rules are preconfigured.
+This deployment runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the public Load Balancer NAT, whose rules are preconfigured.
 
 NOTE: Currently, only single region deployments are supported for this deployment. Make sure that all workstations are in the same region and only one location is configured in the location list. Multi-region support to come at a later date.
 
@@ -53,23 +53,26 @@ NOTE: Currently, only single region deployments are supported for this deploymen
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
 ### 3. Service Principal Authentication
-In order for Terraform to deploy & manage resources on a user's behalf, they must authenticate through a service principal. 
+
+In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
+
 1. Login to the [Azure portal](http://portal.azure.com/)
-2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
-3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
-    - More detailed information on how to create a Service Principal can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret).
-4. Copy the following information from the application overview: 
-    - Client ID
-    - Tenant ID
-5. Under the same app, click **Certificates & secrets**.
-6. Create a new Client Secret or use an existing secret. This value will only be shown once, make sure to save it.
-7. Go to Subscriptions by searching **subscription** into the search bar and click on the subscription of choice.
-8. Copy the **Subscription ID** and click on **Access control (IAM)** on the blade. 
-9. Click **+ Add**, click **Add role assignments** and follow these steps to add roles:
-    1. Under **Role**, click the dropdown and select the role **Reader**.
-    2. Leave **Assign access to** as **User, group, or service principal**
-    3. Under **Select** search for the application name from step 4 and click **Save**.
-    4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
+2. If not already open, from the dashboard open the left sidebar using the top-left button next to "Microsoft Azure". Click **Azure Active Directory**, then select **App registrations** from the "Manage" panel
+3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused.
+   - More detailed information on how to create a Service Principal can be found directly through Microsoft Docs [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#create-a-new-application-secret). Navigate to the application overview by clicking on the registration name.
+4. Copy and save the following information from the application overview:
+   - **Application (client) ID** (required)
+   - **Directory (tenant) ID** (optional; if you plan to use encrypted secrets through Azure Key Vault in [section 4](#4-optional-storing-secrets-on-azure-key-vault)
+5. In the same page, on the left sidebar and in the "Manage" section, click **Certificates & secrets**
+6. Create a new Client Secret or use an existing secret if you already know it. This value will only be shown once immediately after creation, make sure to save it
+7. From the account dashboard, or using the search bar, go to **Subscriptions**. On the next page, select your subscription of choice
+8. Navigate to the **Access control (IAM)** for this subscription
+9. Click **+ Add**, and **Add role assignment** in the dropdown. Alternatively, select **Add role assignment** directly from the box titled "Grant access to this resource":
+   1. Under **Role**, select the role **Contributor**. Click "Next"
+   2. Under **Members**, leave the option on **User, group, or service principal**
+   3. Select members to add the role to, searching up and clicking on the app registration name on the right side
+   4. Review any details of interest, and click **Review + assign**
+   5. Repeat this step for the role **Virtual Machine Contributor**
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
@@ -203,24 +206,33 @@ windows-std-internal-ip = {
 ```
     
 ### 7. Adding Workstations in CAS Manager
-To connect to workstations, they have to be added through CAS Manager. 
-1. In a browser, enter ```https://<cas-mgr-public-ip>```.
-    - The default username for CAS Manager is ```adminUser```.
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
-3. From the **Provider** dropdown, select **Private Cloud**.
-6. In the search box below, select Windows and CentOS workstations.
-7. At the bottom click the option **Individually select users** and select the users to assign to the workstations. 
-    - **Note:** If assigning certain users to certain workstations, remove workstations under **Remote workstations to be added (x)**.
+
+To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
+
+Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+- Through the output variables of a successful deployment
+- Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
+
+1. In a browser, go to `https://<cas-mgr-public-ip>`.
+2. Log in using the username `adminUser`, paired with the `cas_mgr_admin_password` specified in `terraform.tfvars`
+   - Do not use the username specified in your variable file labelled `ad_admin_username`; the provided `adminUser` is the only provisioned one by default on deployment
+3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
+4. From the **Provider** dropdown, select **Private Cloud**.
+5. In the search box below, select the workstations to assign users to (i.e. Windows and CentOS workstations).
+   - **Note:** You can remove workstations selected for assignment under **Remote workstations to be added (x)**.
+7. At the bottom click the option **Individually select users** and select the users to assign to the workstations.
 8. Click **Save**.
 
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. 
+
+Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
+   - **Note**: If you need to find the `public_ip` of the `cac-public-ip` output after it has gone away, it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
-2. Enter the public frontend IP address of the public load balancer and enter a name for this connection. 
-3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5. 
+2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**
+3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** from section 7 step 5.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
@@ -231,19 +243,55 @@ Terraform is a declarative language to describe the desired state of resources. 
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
 ### 11. Troubleshooting
-- If the console is frozen, try pressing Enter to unfreeze it. If freezing persists, a fresh deployment must be performed.
-- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
-- If trying to run a fresh deployment and have been running into errors, delete ```terraform.tfstate```. This file stores the state of the current infrastructure and configuration. Remember to also delete the previous deployment on the [Azure Portal](http://portal.azure.com/) if it's no longer being used.
-- If for any reason there are no outputs displaying on ACS the IP address of the load balancer can be found by going onto the [Azure Portal](http://portal.azure.com/). Go into the deployment's resource group, select the Load Balancer, load balancer public frontend IP can be found under the "Public IP Configuration" of the load balancer settings.
 
-Information about connecting to virtual machines for investigative purposes:
-- All resources in this deployment do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) public IP address that is assigned to the public load balancer.
-    1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
-    2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
-    3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
-    
-- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
-- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**.
+- If the console looks frozen, try pressing Enter to unfreeze it.
+- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
+- If you are trying to create a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration
+- If no machines are showing up on CAS Manager or you get errors when connecting via PCoIP client, wait 2 minutes and retry
+
+- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
+  - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
+
+- When logging into the CAS Manager web UI, if you come across a message stating **Ad configuration not found**, be sure to log in using the default username `adminUser`
+
+Connecting to virtual machines for investigative purposes:
+
+- CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstation use the Connector (cac-vm) as a bastion host.
+  1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
+  2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
+  3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
+
+- To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
+- **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
+  1. RDP into the Domain Controller virtual machine.
+  ```
+  Computer: <domain-controller-public-ip>
+  User: cas_admin
+  Password: <ad_admin_password from terraform.tfvars>
+  ```
+  2.  From inside the Domain Controller, RDP into the Windows workstation.
+  ```
+  Computer: <win-internal-ip>
+  User: windows_admin
+  Password: <ad_admin_password from terraform.tfvars>
+  ```
+  3.  The installation log path for Windows workstations and DC machines are located in `C:/Teradici/provisioning.log`.
+  
+- If ACS times out and takes all the terraform logs with it, you can set it up before you deploy with `terraform apply`. Terraform depends on two environment variables being configured:
+   -  `TF_LOG` which is one of DEBUG, INFO, WARN, ERROR, TRACE
+   -  `TF_LOG_PATH` sets the path and file where logs will be stored (e.g. terraformLogs.txt)
+
+  - PowerShell:
+  ```
+    $env:TF_LOG="TRACE"
+    $env:TF_LOG_PATH="terraformLogs.txt"
+  ```
+  - Bash:
+
+  ```
+    export TF_LOG="TRACE"
+    export TF_LOG_PATH="terraformLogs.txt"   
+  ```
 
 ### 12. Videos
 A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MjYa32lKkWc)

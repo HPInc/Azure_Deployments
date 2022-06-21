@@ -200,7 +200,7 @@ Before deploying, `terraform.tfvars` must be complete.
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
 7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
-   - To skip the need for this extra input, you can also use `terraform apply --auto-approve | tee -a installer.log`
+   - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
@@ -333,7 +333,7 @@ Connecting to virtual machines for investigative purposes:
 
   ```
     export TF_LOG="TRACE"
-    export TF_LOG_PATH="terraformLogs.txt"   
+    export TF_LOG_PATH="terraformLogs.txt"
   ```
 
 ### 12. Videos
