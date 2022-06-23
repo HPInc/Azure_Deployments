@@ -14,7 +14,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
     - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
     - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
   - Multi-Region Multi LB Deployment
-    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
     - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 
 # CAS Manager As A Service Deployments

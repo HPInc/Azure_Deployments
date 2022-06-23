@@ -1,6 +1,6 @@
 # CASM-Load Balancer-One-IP Deployment
 
-**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the CASM AADDS architecture with multiple Connectors using a Load Balancer on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 <p class="aligncenter">
 <img src="https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/png/CASM+LB1.png" width=50% height=50% class="center" alt="centered image">
 
@@ -24,7 +24,7 @@
 
 ### 1. CASM-Load Balancer-One-IP Architecture
 
-The Single-Connector deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
+The deployment creates a Virtual Network with 3 subnets in the same region. The subnets created are:
 - ```subnet-cac```: for the Connector
 - ```subnet-cas```: for the CASM
 - ```subnet-ws```: for the workstations
@@ -33,7 +33,7 @@ Network Security Rules are created to allow wide-open access within the Virtual 
 
 A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
-This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
+This deployment runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the following respective parameters:
 - ```workstations```: List of objects, where each object defines a workstation
@@ -41,7 +41,7 @@ Multiple domain-joined workstations and Cloud Access Connectors can be optionall
 
 The ```workstation_os``` property in the ```workstations``` parameter can be used to define the respective workstation's operating system (use 'linux' or 'windows'). 
 
-This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the CASM-AADDS document to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
+This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the [CASM-AADDS document](./README-azure-casm-aadds.md) to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
 
 As the deployment makes use of an internal keyvault and database for storage, key vault secret configuration is not available for this deployment.
 
@@ -55,7 +55,7 @@ Note: Please make sure that the following variables are synced from the previous
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
 - a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- An existing AADDS deployment (see the CASM-AADDS documentation).
+- An existing AADDS deployment (see the [CASM-AADDS documentation](./README-azure-casm-aadds.md)).
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
