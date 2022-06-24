@@ -1,6 +1,6 @@
 # Single-Connector Deployment
 
-**Objective**: The objective of this documentation is to deploy the single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the Single Connector architecture using CAS Manager SaaS on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 
 ## Table of Contents
@@ -175,7 +175,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
   - ```git clone https://github.com/teradici/Azure_Deployments```
 2. Change directory into: ```/terraform-deployments/deployments/single-connector```.
   - ```cd Azure_Deployments/terraform-deployments/deployments/single-connector```.
-2. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
+3. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables.
     - To copy: ```cp terraform.tfvars.sample terraform.tfvars```
     - To configure: ```code terraform.tfvars```
     - To include optional variables, uncomment the line by removing preceding ```#```.
@@ -198,16 +198,16 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```count```: Number of workstations to deploy under the specific settings.
         - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
-3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
+4. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
       - 1 UPPERCASE letter
       - 1 lowercase letter
       - 1 number
       - 1 special character. e.g.: ```!@#$%^&*(*))_+```
-4. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
-5. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
+5. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
+6. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
+7. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
 A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
