@@ -1,27 +1,9 @@
-# Load Balancer (Multi-connector) Deployment
+# Load Balancer (Multi-connector) Single IP Deployment
 
 **Objective**: The objective of this documentation is to deploy the load balancer architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). 
 
-For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
-- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
-  - **[Load Balancer Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)**
-  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
-  - [CASM (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-casm-single-connector.md)
-  - [CASM (One-IP LB Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
-  - [CASM (One-IP TF Deployment)](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Quickstart (Single-Connector) Deployment](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [CAS Manager (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
-  - [CAS Manager (Load Balancer Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip.md)
-  - [CAS Manager (Load Balancer NAT Single IP) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - [Local License (Server Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-  - [CAS Manager (Load Balancer) Deployment](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md)
-  - [Multi Region (Traffic Manager) Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
-- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
-- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
-
 ## Table of Contents
-1. [Load Balancer Architecture](#1-load-balancer-architecture)
+1. [Load Balancer Single IP Architecture](#1-load-balancer-architecture)
 2. [Requirements](#2-requirements)
 3. [Connect Azure to CAS Manager as a Service](#3-connect-azure-to-cas-manager-as-a-service)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
@@ -32,8 +14,14 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
 11. [Troubleshooting](#11-troubleshooting)
+12. [Appendix](#12-appendix)
 
-### 1. Load Balancer Architecture
+For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
+- [Azure Deployments](https://github.com/teradici/Azure_Deployments)
+- [AWS Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
+- [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
+
+### 1. Load Balancer Single IP Architecture
 
 The Load Balancer deployment distributes traffic between Cloud Access Connectors within the same region. These connectors can be in different virtual networks as long as they're in the same region. The client initiates a PCoIP session with the public IP of the Load balancer, and the Load Balancer selects one of the connectors to establish the connection. In-session PCoIP traffic goes through the selected Cloud Access Connector directly, bypassing the HTTPS Load Balancer. 
 
@@ -190,6 +178,8 @@ To upload a SSL certificate and SSL key onto ACS:
 
 Detailed instructions can be viewed [here](/terraform-deployments/docs/terraform-config-step-by-step.md).
 
+Note that the directory where this deployment, along with its corresponding `terraform.tfvars.sample` file, takes place is located under `Azure_Deployments/terraform-deployments/deployments/load-balancer-one-ip`.
+
 ### 7. Adding Workstations through CAS Manager
 To connect to workstations, they have to be added through the CAS Manager.
 1. Go to the CAS Manager admin console and ensure the correct deployment is selected. 
@@ -249,4 +239,38 @@ Information about connecting to virtual machines for investigative purposes:
     Password: <ad_admin_password from terraform.tfvars>
     ```
    3. The installation log path for Windows workstations and DC machines are located in ```C:/Teradici/provisioning.log```.
-   
+
+### 12. Appendix
+
+### Current VM sizes supported by PCoIP Graphics Agents
+
+[NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs / Expected network bandwidth (Mbps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NC4as_T4_v3**|4|28|180|1|16|8|2 / 8000|
+|**Standard_NC8as_T4_v3**|8|56|360|1|16|16|4 / 8000|
+|**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
+|**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
+
+[NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV6**|6|56|340|1|8|24|1|1|25|
+|**Standard_NV12**|12|112|680|2|16|48|2|2|50|
+|**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
+
+[NVv3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv3-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max uncached disk throughput: IOPS/MBps**|**Max NICs**|**Expected network bandwidth (Mbps)**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV12s_v3**|12|112|320|1|8|12|20000/200|4|6000|1|25|
+|**Standard_NV24s_v3**|24|224|640|2|16|24|40000/400|8|12000|2|50|
+|**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
+
+[NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
+Note that NVv4 virtual machines currently support only Windows guest operating systems.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
+|**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
+|**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
+|**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|

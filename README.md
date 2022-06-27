@@ -21,7 +21,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
   
   ### CAS-M SaaS with Local Domain Controller (CAS-M SaaS + DC)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
+  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer-one-ip.md)
   - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
   ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
