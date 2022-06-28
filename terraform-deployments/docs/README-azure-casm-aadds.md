@@ -8,8 +8,9 @@
 3. [Deploying the AADDS via Terraform](#3-deploying-the-aadds-via-terraform)
 4. [Configuring an existing AADDS](#4-configuring-an-existing-aadds)
 5. [Deleting the deployment](#5-deleting-the-deployment)
-6. [Troubleshooting](#6-troubleshooting)
+6. [Common Deployment Issues](#6-common-deployment-issues)
 7. [Videos](#7-videos)
+8. [Troubleshooting](#8-troubleshooting)
 
 For other Azure deployments, Amazon Web Services (AWS) deployments, and Google Cloud Platform (GCP) deployments:
 - [Azure Deployments](https://github.com/teradici/Azure_Deployments)
@@ -61,7 +62,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
     ```terraform.tfvars``` variables:
 ```
     AADDS configuration:
-        - ```Subscrpition ID```: ID of the subscription the AADDS will be deployed in. Found by searching "Subscriptions", going to the subscriptions page and copying the "Subscription ID"
+        - ```Subscription ID```: ID of the subscription the AADDS will be deployed in. Found by searching "Subscriptions", going to the subscriptions page and copying the "Subscription ID"
         - ```aadds_rg_name```: Name of the resource group that the AADDS will be deployed in. Limit 50 characters.
         - ```aadds_vnet_name```: Name of the VNet that the AADDS will be deployed in. Limit 50 characters.
         - ```aadds_domain_name```: Domain name of the AADDS. Must be either a domain that the user owns, or a *.onmicrosoft.com domain (e.g. teradici.onmicrosoft.com). *.onmicrosoft.com domains must be globally unique.
@@ -99,15 +100,13 @@ Make sure that the following 2 addresses point to the private addresses of the A
 necessary as the terraform deployment should be able to find one by default.
 
 After these rules have been configured, the AADDS should be ready for future workstation deployments.
+
 ### 5. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform.
 Terraform destroy will not work completely with this deployment as additional cleanup needs to happen on the Azure side for the destroy to finish. As terraform does not have formal support for the AADDS, terraform is unable to detect this. After running terraform destroy, the user will see a message some time later stating that some resources cannot be destroyed. Navigate to the AADDS resource and a message will appear on the top stating that the AADDS is being deleted. After this process is done, you can then destroy the resource group through Azure. Make sure to clean up the terraform state by typing ```rm *.tfstate*``` in ths directory before proceeding to re-deploy the AADDS.
 
-### 6. Common issues during deployment
-Here are some common issues that might pop up during or after the deployment. 
-
-### 7. Videos
-A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=UvL8LwhGnb8)
+### 6. Common Deployment Issues
+Here are some common issues that might pop up during or after the deployment.
 
 1. Forgetting to reset the password of your AAD service account during deployment - the deployment actually usually finishes and succeeds after a long time but nothing will be working correctly, but the bigger issue here is that since the deployment tries to log in with the credentials and fails, the user will be locked out of their account for a few hours or up to a day depending on the Azure AD settings from the failed login attempts. There is no way to fix this other than to create a new account or wait for the account to unlock.
 
@@ -115,7 +114,10 @@ A video of the deployment process for this terraform can be found on [Teradici's
 
 3. The PFX certificate which is set up for LDAPS communication can expire, causing issues in connecting to the AADDS. The PFX certificate is currently set to expire after a year (it can be configured to be longer), in order to refresh it, see the Secure LDAP section to generate a new certificate.
 
-### 7.. Troubleshooting
+### 7. Videos
+A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=UvL8LwhGnb8)
+
+### 8. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
 - If the user encounters permission issues during deployment, ensure that the users' account is correctly assigned all the necessary roles.
 
