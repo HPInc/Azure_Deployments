@@ -42,7 +42,7 @@ Multiple domain-joined workstations and Cloud Access Connectors can be optionall
 
 The ```workstation_os``` property in the ```workstations``` parameter can be used to define the respective workstation's operating system (use 'linux' or 'windows'). 
 
-This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the CASM-AADDS document to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
+This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the [CASM-AADDS document](./README-azure-casm-aadds.md) to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
 
 As the deployment makes use of an internal keyvault and database for storage, key vault secret configuration is not available for this deployment.
 
@@ -56,7 +56,7 @@ Note: Please make sure that the following variables are synced from the previous
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
 - a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- An existing AADDS deployment (see the [CASM-AADDS documentation](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/deployments/casm-aadds/README-azure-casm-aadds.md)).
+- An existing AADDS deployment (see the [CASM-AADDS documentation](https://github.com/teradici/Azure_Deployments/blob/master/terraform-deployments/docs/README-azure-casm-aadds.md)).
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)

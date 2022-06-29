@@ -13,21 +13,21 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - Load Balancer with Multi-Connector Deployment
     - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
     - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
-  - Multi Region multi LB Deployment
-    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+  - Multi-Region Multi LB Deployment
+    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
     - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 
 # CAS Manager As A Service Deployments
   
   ### CAS-M SaaS with Local Domain Controller (CAS-M SaaS + DC)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer.md)
-  - [Multi Region multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer-one-ip.md)
+  - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+
+  - [Step-by-Step SaaS Deployment: Terraform Variables](/terraform-deployments/docs/terraform-config-step-by-step.md)
 
   ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
-  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/deployments/quickstart-single-connector/quickstart-tutorial.md)
-  - [Steep by Step Quickstart Deployment](/terraform-deployments/docs/terraform-config-step-by-step.md)
- 
+  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/docs/quickstart-tutorial.md)
  
   ### FAQ: How to install AAD DS and Local License Server
   - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)

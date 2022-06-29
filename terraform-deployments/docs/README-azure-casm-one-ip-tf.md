@@ -1,4 +1,4 @@
-# Single-Connector Deployment
+# CASM Multi-Region Multi Load Balancer Traffic Manager Deployment
 
 **Objective**: The objective of this documentation is to deploy the Traffic Manager Single IP architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
@@ -33,7 +33,7 @@ Network Security Rules are created to allow wide-open access within the Virtual 
 
 A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
 
-This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
+This deployment runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment, which is also reached through the firewall. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. All resources in this deployment are created without a public IP attached and all external traffic is routed through the Azure Firewall both ways through the firewall NAT, whose rules are preconfigured. This architecture is shown in the diagram below:
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the following respective parameters:
 - ```workstations```: List of objects, where each object defines a workstation
@@ -43,7 +43,7 @@ The ```workstation_os``` property in the ```workstations``` parameter can be use
 
 The Traffic Manager distributes traffic between Cloud Access Connectors within the same region. The client initiates a PCoIP session with the domain name of the Traffic Manager, and the Traffic Manager selects one of the connectors in it's region to establish the connection. In-session PCoIP traffic goes through configured frontend IPs on a NAT Gateway which have rules set up to route into the selected Cloud Access Connector, bypassing the Traffic Manager.
 
-This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the CASM-AADDS document to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
+This deployment makes use of the AADDS as the active directory. Since only 1 AADDS can be deployed per tenant, refer to the [CASM-AADDS document](./README-azure-casm-aadds.md) to deploy/configure an AADDS before continuing with this deployment if an AADDS has not yet been configured.
 
 As the deployment makes use of an internal keyvault and database for storage, key vault secret configuration is not available for this deployment.
 
@@ -52,12 +52,13 @@ Each workstation can be configured with a graphics agent by using the ```isGFXHo
 These workstations are automatically domain-joined to the AADDS and have the PCoIP Agent installed.
 
 Note: Please make sure that the following variables are synced from the previous AADDS Deployment that the```location``` property in the ```workstations``` parameter is in sync with the ```aadds_location``` property defined in the AADDS deployment, or with the existing AADDS location. 
+
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
 - a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
-- An existing AADDS deployment (see the CASM-AADDS documentation).
+- An existing AADDS deployment (see the [CASM-AADDS documentation](./README-azure-casm-aadds.md)).
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
@@ -286,6 +287,7 @@ Information about connecting to virtual machines for investigative purposes:
     3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
 
 ## Appendix
+
 ### Current VM sizes supported by PCoIP Graphics Agents
 
 [NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
@@ -296,10 +298,25 @@ Information about connecting to virtual machines for investigative purposes:
 |**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
 |**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
 
-
 [NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
 |**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 |**Standard_NV6**|6|56|340|1|8|24|1|1|25|
 |**Standard_NV12**|12|112|680|2|16|48|2|2|50|
 |**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
+
+[NVv3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv3-series) powered by **NVIDIA Tesla M60 GPUs**.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max uncached disk throughput: IOPS/MBps**|**Max NICs**|**Expected network bandwidth (Mbps)**|**Virtual Workstations**|**Virtual Applications**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV12s_v3**|12|112|320|1|8|12|20000/200|4|6000|1|25|
+|**Standard_NV24s_v3**|24|224|640|2|16|24|40000/400|8|12000|2|50|
+|**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
+
+[NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
+Note that NVv4 virtual machines currently support only Windows guest operating systems.
+|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
+|**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
+|**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
+|**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|

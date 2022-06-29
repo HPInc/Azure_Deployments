@@ -1,9 +1,6 @@
 # CAS Manager (Single-Connector) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager single-connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/cas-mgr-single-connector
-
-
-![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
+**Objective**: The objective of this documentation is to deploy the CAS Manager Single-Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/cas-mgr-single-connector
 
 ## Table of Contents
 
@@ -50,6 +47,8 @@ Note: Since this is a single region deployment, please make sure that all `locat
 These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
 The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
+
+![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
 
 ### 2. Requirements
 
@@ -201,7 +200,7 @@ Before deploying, `terraform.tfvars` must be complete.
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
 7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
-   - To skip the need for this extra input, you can also use `terraform apply --auto-approve | tee -a installer.log`
+   - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
 A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
@@ -256,7 +255,7 @@ Determine the public IP address of CAS Manager Virtual Machine. This can be done
 - Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
 
 1. In a browser, go to `https://<cas-mgr-public-ip>`.
-2. Log in using the username `adminUser`, paired with the password specified in `terraform.tfvars`
+2. Log in using the username `adminUser`, paired with the `cas_mgr_admin_password` specified in `terraform.tfvars`
    - Do not use the username specified in your variable file labelled `ad_admin_username`; the provided `adminUser` is the only provisioned one by default on deployment
 3. Click **Workstations** on the left sidebar, click the blue **+** and select **Add existing remote workstation**.
 4. From the **Provider** dropdown, select **Private Cloud**.
@@ -270,7 +269,7 @@ Note that it may take a 5-10 minutes for the workstation to show up in the **Sel
 ### 8. Starting a PCoIP Session
 
 Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
-   - **Note**: If the `public_ip` of the `cac-public-ip` output does not show at the end of completion due to error it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
+   - **Note**: If you need to find the `public_ip` of the `cac-public-ip` output after it has gone away, it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**
@@ -304,22 +303,6 @@ Connecting to virtual machines for investigative purposes:
   1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
   2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
   3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
-  
-- If ACS times out and takes all the terrafrom logs with it, you can set it up before you deploy with `terraform apply`. Terraform depends on two environment variables being configured:
-   -  `TF_LOG` which is one of DEBUG, INFO, WARN, ERROR
-   -  `TF_LOG_PATH` sets the path and file where logs will be stored (e.g. terraformLogs.txt)
-
-  - PowerShell:
-  ```
-    $env:TF_LOG="TRACE"
-    $env:TF_LOG_PATH="terraformLogs.txt"
-  ```
-  - Bash:
-
-  ```
-    export TF_LOG="TRACE"
-    export TF_LOG_PATH="terraformLogs.txt"   
-  ```
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.
@@ -336,6 +319,22 @@ Connecting to virtual machines for investigative purposes:
   Password: <ad_admin_password from terraform.tfvars>
   ```
   3.  The installation log path for Windows workstations and DC machines are located in `C:/Teradici/provisioning.log`.
+  
+- If ACS times out and takes all the terraform logs with it, you can set it up before you deploy with `terraform apply`. Terraform depends on two environment variables being configured:
+   -  `TF_LOG` which is one of DEBUG, INFO, WARN, ERROR, TRACE
+   -  `TF_LOG_PATH` sets the path and file where logs will be stored (e.g. terraformLogs.txt)
+
+  - PowerShell:
+  ```
+    $env:TF_LOG="TRACE"
+    $env:TF_LOG_PATH="terraformLogs.txt"
+  ```
+  - Bash:
+
+  ```
+    export TF_LOG="TRACE"
+    export TF_LOG_PATH="terraformLogs.txt"
+  ```
 
 ### 12. Videos
 A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=GiAWP1KdvTc). Note that the process to add a role assignment to a subscription has changed slightly, as detailed in [section 3.9](#3-service-principal-authentication).
