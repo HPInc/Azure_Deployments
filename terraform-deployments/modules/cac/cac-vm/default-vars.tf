@@ -23,7 +23,7 @@ variable "location" {
 
 variable "machine_type" {
   description = "Machine type for the Cloud Access Connector"
-  default     = "Standard_B2ms"
+  default     = ["Standard_B2ms"]
 }
 
 variable "disk_size_gb" {

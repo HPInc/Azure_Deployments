@@ -11,7 +11,7 @@ resource "azurerm_windows_virtual_machine" "domain-controller" {
   name                = local.virtual_machine_name
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = var.dc_machine_type
+  size                = var.dc_machine_type[0]
   admin_username      = var.ad_admin_username
   admin_password      = local.ad_admin_password
   custom_data         = local.custom_data

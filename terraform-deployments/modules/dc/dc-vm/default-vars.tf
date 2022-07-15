@@ -13,7 +13,7 @@ variable "dc_vm_depends_on" {
 
 variable "dc_machine_type" {
   description = "Machine type for Domain Controller"
-  default     = "Standard_F2"
+  default     = ["Standard_F2"]
 }
 
 variable "key_vault_id" {
