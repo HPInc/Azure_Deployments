@@ -51,14 +51,14 @@ LOG_FILE = "sku_availability_check.log"
 VM_AVAILABILITY_FILE = "./current-sku-status.txt"
 
 # Locations to find intended VM sizes for architecture components
-DEFAULT_CAC_VM_SIZE_FILE = "./modules/cac/cac-vm/default-vars.tf"
-DEFAULT_CASM_VM_SIZE_FILE = "./modules/cas-mgr/vars.tf"
-DEFAULT_DC_VM_SIZE_FILE = "./modules/dc/dc-vm/default-vars.tf"
+DEFAULT_CAC_VM_SIZE_FILES = ["./modules/cac-regional/vars.tf", "./modules/cac-regional-private/vars.tf"]
+DEFAULT_CASM_VM_SIZE_FILES = ["./modules/cas-mgr/vars.tf"]
+DEFAULT_DC_VM_SIZE_FILES = ["./modules/dc/dc-vm/default-vars.tf"]
 
 # Locations to update if VM sizes are unavailable
-CAC_VM_SIZE_SET_FILE = "./modules/cac/cac-vm/main.tf"
-CASM_VM_SIZE_SET_FILE = "./modules/cas-mgr/main.tf"
-DC_VM_SIZE_SET_FILE = "./modules/dc/dc-vm/main.tf"
+CAC_VM_SIZE_SET_FILES = ["./modules/cac-regional/main.tf", "./modules/cac-regional-private/main.tf"]
+CASM_VM_SIZE_SET_FILES = ["./modules/cas-mgr/main.tf"]
+DC_VM_SIZE_SET_FILES = ["./modules/dc/dc-vm/main.tf"]
 
 # Priority list of possible SKU sizes for Windows/Linux Standard Workstations (NOTE: prepend selected terraform.tfvars size to this list when checking availability)
 STANDARD_SKUS_PRIORITY = ["Standard_B2s", "Standard_B2ms", "Standard_D2s_v3", "Standard_B4ms", "Standard_DS2_v2", "Standard_D4s_v3", "Standard_B8ms", "Standard_DS3_v2"]
@@ -158,7 +158,6 @@ def set_sku_size(set_file, idx):
     edit_file = open(set_file, "r+")
     replacement = ""
 
-    line_len = None
     for line in edit_file:
         changes = re.sub('var.machine_type\[[0-9]*\]', 'var.machine_type[' + str(idx) + ']', line)
         changes_cac = re.sub('var.cac_machine_type\[[0-9]*\]', 'var.cac_machine_type[' + str(idx) + ']', line)
@@ -178,16 +177,31 @@ def set_sku_size(set_file, idx):
 
     log("File edit complete. Changes may be verified in " + set_file)
 
+def check_workstations_for_deployment(deployment):
+    tfvars_file = open("./deployments/" + deployment + "/terraform.tfvars", "r")
+
+    tfvars_file.close()
+
 # TODO: set files to edit
 def assign_filenames(deployment):
+    global DEFAULT_CAC_VM_SIZE_FILES
+    global DEFAULT_CASM_VM_SIZE_FILES
+    global DEFAULT_DC_VM_SIZE_FILES
+
+    global CAC_VM_SIZE_SET_FILES
+    global CASM_VM_SIZE_SET_FILES
+    global DC_VM_SIZE_SET_FILES
+
     if deployment == "cas-mgr-single-connector":
-        # DEFAULT_CAC_VM_SIZE_FILE = "./modules/cac/cac-vm/default-vars.tf"
-        # DEFAULT_CASM_VM_SIZE_FILE = "./modules/cas-mgr/vars.tf"
-        # DEFAULT_DC_VM_SIZE_FILE = "./modules/dc/dc-vm/default-vars.tf"
-        # CAC_VM_SIZE_SET_FILE = "./modules/cac/cac-vm/main.tf"
-        # CASM_VM_SIZE_SET_FILE = "./modules/cas-mgr/main.tf"
-        # DC_VM_SIZE_SET_FILE = "./modules/dc/dc-vm/main.tf"
-        pass
+        # DEFAULT_CAC and CAC_VM should be checked
+        DEFAULT_CAC_VM_SIZE_FILES = ["./modules/cac-regional/vars.tf", "./modules/cac-regional-private/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = ["./modules/cac-regional/main.tf", "./modules/cac-regional-private/main.tf"]
+
+        DEFAULT_CASM_VM_SIZE_FILES = ["./modules/cas-mgr/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = ["./modules/cas-mgr/main.tf"]
+
+        DEFAULT_DC_VM_SIZE_FILES = ["./modules/dc/dc-vm/default-vars.tf"]
+        DC_VM_SIZE_SET_FILES = ["./modules/dc/dc-vm/main.tf"]
     if deployment == "cas-mgr-load-balancer-one-ip-nat":
         pass
     if deployment == "cas-mgr-one-ip-traffic-mgr":
@@ -224,7 +238,7 @@ def main():
     parser.add_argument("--no-casm-vm", default=False, dest="no_casm_vm", 
                         action='store_true', help="Flag for CAS Manager VM; True when using SaaS")
     parser.add_argument("--no-ldc", default=False, dest="no_ldc", action='store_true', help="Flag for DC VM; True when using AADDS")
-    parser.add_argument("-d", "--deployment", dest="deployment", metavar="BBB", choices=DEPLOYMENTS, help="Specific deployment option, overrides --no-casm-vm and --no-ldc")
+    parser.add_argument("-d", "--deployment", default="cas-mgr-single-connector", dest="deployment", metavar="BBB", choices=DEPLOYMENTS, help="Specific deployment option, overrides --no-casm-vm and --no-ldc")
     args = parser.parse_args()
 
     assign_filenames(args.deployment)
@@ -232,26 +246,30 @@ def main():
     open(VM_AVAILABILITY_FILE, "a+").close()
 
     log("Querying for SKU sizes in location \"" + args.location + "\"")
+    log("Selected deployment type: " + args.deployment)
+    
     # TODO: should be taking from cac/cac-vm/
     # ... this varies depending on the deployment type, should we add a param for deployment types
-    update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILE, CAC_VM_SIZE_SET_FILE)
+    for a in range(len(DEFAULT_CAC_VM_SIZE_FILES)):
+        update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILES[a], CAC_VM_SIZE_SET_FILES[a])
 
-    if not args.deployment:
+    if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr", 
+                           "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
         if not args.no_casm_vm:
             # TODO: should be going from modules/cas-mgr-* based on deployment
-            update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILE, CASM_VM_SIZE_SET_FILE)
-            
+            for b in range(len(DEFAULT_CASM_VM_SIZE_FILES)):
+                update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILES[b], CASM_VM_SIZE_SET_FILES[b])
 
+    if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr",
+                           "lls-single-connector", "load-balancer-one-ip", "multi-region-traffic-mgr-one-ip", "quickstart-single-connector",
+                           "single-connector"]:
         if not args.no_ldc:
-            update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILE, DC_VM_SIZE_SET_FILE)
+            for c in range(len(DEFAULT_DC_VM_SIZE_FILES)):
+                update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILES[c], DC_VM_SIZE_SET_FILES[c])
 
-    else:
-        # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
-        log("Selected deployment type: " + args.deployment)
-        log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
-        tfvars_file = open("./deployments/" + args.deployment + "/terraform.tfvars", "r")
-
-        tfvars_file.close()
+    # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
+    log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
+    check_workstations_for_deployment(args.deployment)
 
 
     subprocess.run(["rm", VM_AVAILABILITY_FILE])
