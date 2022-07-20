@@ -6,10 +6,13 @@
 # This script is meant to be run within the environment of the Azure Cloud Shell, and is not intended to be run
 # in a local environment.
 #
-# TODO: add more flexibiility to CAC and CAS Manager VM checks. Original creation of this script uses 
-# CAS Manager SaaS deployment var files.
+# By default, the program will check for the SKU sizes being selected pertaining to the 
+# CAS Manager Single Connector Standalone deployment.
+# Other deployment types can be specified on the command line when executing
 #
-# Last Updated: 07/18/2022
+# TODO: add more flexibiility to CAC and CAS Manager VM checks.
+#
+# Last Updated: 07/20/2022
 
 import subprocess
 import time
