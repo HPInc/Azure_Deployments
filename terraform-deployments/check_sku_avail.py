@@ -12,12 +12,15 @@
 #
 # TODO: add more flexibiility to CAC and CAS Manager VM checks.
 #
-# Last Updated: 07/20/2022
+# Last Updated: 07/21/2022
 
 import subprocess
 import time
 import re
 import argparse
+import pathlib
+
+PATH_TO_DIR = str(pathlib.Path(__file__).parent.resolve())
 
 # List of possible regions to search for VM sizes (all possibilities)
 REGIONS=["eastus", "eastus2", "southcentralus", "westus2", "westus3", "australiaeast",
@@ -48,20 +51,20 @@ DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
              "single-connector"]
 
 # General logging of process
-LOG_FILE = "sku_availability_check.log"
+LOG_FILE = PATH_TO_DIR + "sku_availability_check.log"
 
 # File to collect availability statuses from Azure Cloud Shell commands
-VM_AVAILABILITY_FILE = "./current-sku-status.txt"
+VM_AVAILABILITY_FILE = PATH_TO_DIR + "/current-sku-status.txt"
 
 # Locations to find intended VM sizes for architecture components
-DEFAULT_CAC_VM_SIZE_FILES = ["./modules/cac-regional/vars.tf", "./modules/cac-regional-private/vars.tf"]
-DEFAULT_CASM_VM_SIZE_FILES = ["./modules/cas-mgr/vars.tf"]
-DEFAULT_DC_VM_SIZE_FILES = ["./modules/dc/dc-vm/default-vars.tf"]
+DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private/vars.tf"]
+DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr/vars.tf"]
+DEFAULT_DC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/dc/dc-vm/default-vars.tf"]
 
 # Locations to update if VM sizes are unavailable
-CAC_VM_SIZE_SET_FILES = ["./modules/cac-regional/main.tf", "./modules/cac-regional-private/main.tf"]
-CASM_VM_SIZE_SET_FILES = ["./modules/cas-mgr/main.tf"]
-DC_VM_SIZE_SET_FILES = ["./modules/dc/dc-vm/main.tf"]
+CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private/main.tf"]
+CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr/main.tf"]
+DC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/dc/dc-vm/main.tf"]
 
 # Priority list of possible SKU sizes for Windows/Linux Standard Workstations (NOTE: prepend selected terraform.tfvars size to this list when checking availability)
 STANDARD_SKUS_PRIORITY = ["Standard_B2s", "Standard_B2ms", "Standard_D2s_v3", "Standard_B4ms", "Standard_DS2_v2", "Standard_D4s_v3", "Standard_B8ms", "Standard_DS3_v2"]
@@ -181,7 +184,7 @@ def set_sku_size(set_file, idx):
     log("File edit complete. Changes may be verified in " + set_file)
 
 def check_workstations_for_deployment(deployment):
-    tfvars_file = open("./deployments/" + deployment + "/terraform.tfvars", "r")
+    tfvars_file = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r")
 
     tfvars_file.close()
 
@@ -196,19 +199,24 @@ def assign_filenames(deployment):
     global DC_VM_SIZE_SET_FILES
 
     if deployment == "cas-mgr-single-connector":
-        # DEFAULT_CAC and CAC_VM should be checked
-        DEFAULT_CAC_VM_SIZE_FILES = ["./modules/cac-regional/vars.tf", "./modules/cac-regional-private/vars.tf"]
-        CAC_VM_SIZE_SET_FILES = ["./modules/cac-regional/main.tf", "./modules/cac-regional-private/main.tf"]
-
-        DEFAULT_CASM_VM_SIZE_FILES = ["./modules/cas-mgr/vars.tf"]
-        CASM_VM_SIZE_SET_FILES = ["./modules/cas-mgr/main.tf"]
-
-        DEFAULT_DC_VM_SIZE_FILES = ["./modules/dc/dc-vm/default-vars.tf"]
-        DC_VM_SIZE_SET_FILES = ["./modules/dc/dc-vm/main.tf"]
+       # Same as global variable initial values
+       pass
     if deployment == "cas-mgr-load-balancer-one-ip-nat":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/main.tf"]
+
+        DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
+
     if deployment == "cas-mgr-one-ip-traffic-mgr":
-        pass
+        
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/main.tf"]
+
+        DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
+
     if deployment == "casm-aadds":
         pass
     if deployment == "casm-aadds-one-ip-lb":
