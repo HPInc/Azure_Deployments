@@ -118,11 +118,6 @@ variable "locations" {
   type        = list(string)
 }
 
-variable "machine_type" {
-  description = "Machine type for the Cloud Access Connector"
-  default     = "Standard_B2ms"
-}
-
 variable "network_security_group_ids" {
   description = "List of network security group ids"
   type        = list(string)

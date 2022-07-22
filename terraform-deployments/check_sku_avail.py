@@ -12,7 +12,11 @@
 #
 # TODO: add more flexibiility to CAC and CAS Manager VM checks.
 #
-# Last Updated: 07/21/2022
+# Note that some areas within this script may be dependent on the structure of certain blocks of text within
+# certain files. Please ensure that as much as possible when making changes to variables or .tfvars files that
+# only necessary changes are made, and that whitespace structure is maintained before running this script.
+#
+# Last Updated: 07/22/2022
 
 import subprocess
 import time
@@ -40,7 +44,6 @@ REGIONS=["eastus", "eastus2", "southcentralus", "westus2", "westus3", "australia
 DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
              "cas-mgr-one-ip-traffic-mgr",
              "cas-mgr-single-connector",
-             "casm-aadds",
              "casm-aadds-one-ip-lb",
              "casm-aadds-one-ip-traffic-manager",
              "casm-aadds-single-connector",
@@ -118,7 +121,7 @@ def extract_default_sizes(vm_type, extract_file):
 
 
 def update_sku_selection(vm_type, location, extract_file, edit_file):
-    log("Finding default SKU sizes for " + vm_type + " VM...")
+    log("Finding default SKU sizes for " + vm_type + " VM in file " + extract_file)
     sizes = extract_default_sizes(vm_type, extract_file)
     log("Checking availability of default " + vm_type + " VM sizes...")
     check_sku_sizes(sizes, location)
@@ -183,10 +186,53 @@ def set_sku_size(set_file, idx):
 
     log("File edit complete. Changes may be verified in " + set_file)
 
-def check_workstations_for_deployment(deployment):
+def find_selected_workstations(deployment):
     tfvars_file = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r")
 
+    ret_dict = dict()
+    print(ret_dict)
+
+    in_block = False
+    in_workstation = False
+
+    temp_dict = dict()
+    temp_dict_num = 0
+    for line in tfvars_file:
+        if line.find("workstations = [") != -1:
+            in_block = True
+            continue
+        if in_block:
+            if in_workstation:
+                if line.find("}") != -1:
+                    in_workstation = False
+                    ret_dict[temp_dict_num] = temp_dict
+                    temp_dict = dict()
+                    temp_dict_num += 1
+                    continue
+                else:
+                    line_list = [a.strip().replace("\"", "").replace(",", "") for a in line.split("=")]
+                    temp_dict[line_list[0]] = line_list[1]
+                    print(line_list)
+            if line.find("{") != -1:
+                in_workstation = True
+                continue
+        if line.find("]") != -1:
+            break
+
     tfvars_file.close()
+
+    for i in range(len(ret_dict)):
+        if ret_dict[i]['count'] < 1:
+            ret_dict.pop(i)
+
+    return ret_dict
+
+
+# TODO: go through terraform.tfvars files, check each workstation type that has a count > 0, and append selected SKU size to STANDARD_SKUS_PRIORITY or GFX_SKUS_PRIORITY for checking
+def check_workstations_for_deployment(deployment):
+
+    workstations_dict = find_selected_workstations(deployment)
+
 
 # TODO: set files to edit
 def assign_filenames(deployment):
@@ -217,8 +263,6 @@ def assign_filenames(deployment):
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
 
-    if deployment == "casm-aadds":
-        pass
     if deployment == "casm-aadds-one-ip-lb":
         pass
     if deployment == "casm-aadds-one-ip-traffic-manager":
@@ -259,15 +303,12 @@ def main():
     log("Querying for SKU sizes in location \"" + args.location + "\"")
     log("Selected deployment type: " + args.deployment)
     
-    # TODO: should be taking from cac/cac-vm/
-    # ... this varies depending on the deployment type, should we add a param for deployment types
     for a in range(len(DEFAULT_CAC_VM_SIZE_FILES)):
         update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILES[a], CAC_VM_SIZE_SET_FILES[a])
 
     if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr", 
                            "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
         if not args.no_casm_vm:
-            # TODO: should be going from modules/cas-mgr-* based on deployment
             for b in range(len(DEFAULT_CASM_VM_SIZE_FILES)):
                 update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILES[b], CASM_VM_SIZE_SET_FILES[b])
 
@@ -281,7 +322,6 @@ def main():
     # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
     log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
     check_workstations_for_deployment(args.deployment)
-
 
     subprocess.run(["rm", VM_AVAILABILITY_FILE])
     log("SKU availability check completed.\n")
