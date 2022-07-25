@@ -10,8 +10,6 @@
 # CAS Manager Single Connector Standalone deployment.
 # Other deployment types can be specified on the command line when executing
 #
-# TODO: add more flexibiility to CAC and CAS Manager VM checks.
-#
 # Note that some areas within this script may be dependent on the structure of certain blocks of text within
 # certain files. Please ensure that as much as possible when making changes to variables or .tfvars files that
 # only necessary changes are made, and that whitespace structure is maintained before running this script.
@@ -71,7 +69,6 @@ DC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/dc/dc-vm/main.tf"]
 
 # Priority list of possible SKU sizes for Windows/Linux Standard Workstations (NOTE: prepend selected terraform.tfvars size to this list when checking availability)
 STANDARD_SKUS_PRIORITY = ["Standard_B2s", "Standard_B2ms", "Standard_D2s_v3", "Standard_B4ms", "Standard_DS2_v2", "Standard_D4s_v3", "Standard_B8ms", "Standard_DS3_v2"]
-# TODO: This list is my own guess, need to check with Bob again 
 GFX_SKUS_PRIORITY = ["Standard_NV4as_v4", "Standard_NV6"]
 
 class MissingLocationError(Exception):
@@ -82,6 +79,7 @@ class MissingDefaultSizesError(Exception):
 
 class InvalidSKUSizeError(Exception):
     pass
+
 
 def log(msg):
     temp = open(LOG_FILE, "a")
@@ -187,6 +185,7 @@ def set_sku_size(set_file, idx):
 
     log("File edit complete. Changes may be verified in " + set_file)
 
+
 def find_selected_workstations(deployment):
     tfvars_file = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r")
 
@@ -223,7 +222,6 @@ def find_selected_workstations(deployment):
     return ret_dict
 
 
-# TODO: go through terraform.tfvars files, check each workstation type that has a count > 0, and append selected SKU size to STANDARD_SKUS_PRIORITY or GFX_SKUS_PRIORITY for checking
 def check_workstations_for_deployment(deployment):
 
     final_sizes = []
@@ -256,7 +254,7 @@ def check_workstations_for_deployment(deployment):
 
     return final_sizes
 
-# TODO
+
 def update_workstations_for_deployment(deployment, sizes):
     tfvars = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r+")
 
@@ -338,37 +336,39 @@ def main():
     # - no_casm_vm          : whether or not the deployment will include CAS Manager as a separate VM; specify when indicating using CASM SaaS or other
     # - no_ldc              : whether or not the deployment will require a Local Domain Controller; specify when indicating using Azure AD Domain Services
     # - deployment          : the specific deployment type intended to be checked for future use; overrides no_casm_vm and no_ldc variables
+    # - all                 : includes checks for all architecture components (CAC, CASM, DC); will only check workstations in terraform.tfvars if not specified
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--location", metavar="AAA", choices=REGIONS, required=True, help="Region to check for VM sizes")
-    parser.add_argument("--no-casm-vm", default=False, dest="no_casm_vm", 
-                        action='store_true', help="Flag for CAS Manager VM; True when using SaaS")
+    parser.add_argument("-l", "--location", metavar="AAA", choices=REGIONS, help="Intended region for architecture VM deployment")
+    parser.add_argument("--no-casm-vm", default=False, dest="no_casm_vm", action='store_true', help="Flag for CAS Manager VM; True when using SaaS")
     parser.add_argument("--no-ldc", default=False, dest="no_ldc", action='store_true', help="Flag for DC VM; True when using AADDS")
-    parser.add_argument("-d", "--deployment", default="cas-mgr-single-connector", dest="deployment", metavar="BBB", choices=DEPLOYMENTS, help="Specific deployment option, overrides --no-casm-vm and --no-ldc")
+    parser.add_argument("-d", "--deployment", default="cas-mgr-single-connector", dest="deployment", metavar="BBB", choices=DEPLOYMENTS, help="Specific deployment option, may override --no-casm-vm and --no-ldc")
+    parser.add_argument("--all", default=False, action='store_true', help="Include checks for SKUs for all deployment components (CAC, CASM, DC); only workstations by default")
     args = parser.parse_args()
 
-    assign_filenames(args.deployment)
-
     open(VM_AVAILABILITY_FILE, "a+").close()
-
-    log("Querying for SKU sizes in location \"" + args.location + "\"")
-    log("Selected deployment type: " + args.deployment)
     
-    for a in range(len(DEFAULT_CAC_VM_SIZE_FILES)):
-        update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILES[a], CAC_VM_SIZE_SET_FILES[a])
+    if args.all:
+        assign_filenames(args.deployment)
 
-    if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr", 
-                           "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
-        if not args.no_casm_vm:
-            for b in range(len(DEFAULT_CASM_VM_SIZE_FILES)):
-                update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILES[b], CASM_VM_SIZE_SET_FILES[b])
+        log("Querying for SKU sizes in location \"" + args.location + "\"")
+        log("Selected deployment type: " + args.deployment)
+        
+        for a in range(len(DEFAULT_CAC_VM_SIZE_FILES)):
+            update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILES[a], CAC_VM_SIZE_SET_FILES[a])
 
-    if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr",
-                           "lls-single-connector", "load-balancer-one-ip", "multi-region-traffic-mgr-one-ip", "quickstart-single-connector",
-                           "single-connector"]:
-        if not args.no_ldc:
-            for c in range(len(DEFAULT_DC_VM_SIZE_FILES)):
-                update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILES[c], DC_VM_SIZE_SET_FILES[c])
+        if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr", 
+                            "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
+            if not args.no_casm_vm:
+                for b in range(len(DEFAULT_CASM_VM_SIZE_FILES)):
+                    update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILES[b], CASM_VM_SIZE_SET_FILES[b])
+
+        if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr",
+                            "lls-single-connector", "load-balancer-one-ip", "multi-region-traffic-mgr-one-ip", "quickstart-single-connector",
+                            "single-connector"]:
+            if not args.no_ldc:
+                for c in range(len(DEFAULT_DC_VM_SIZE_FILES)):
+                    update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILES[c], DC_VM_SIZE_SET_FILES[c])
 
     # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
     log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
