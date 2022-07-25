@@ -16,7 +16,7 @@
 # certain files. Please ensure that as much as possible when making changes to variables or .tfvars files that
 # only necessary changes are made, and that whitespace structure is maintained before running this script.
 #
-# Last Updated: 07/22/2022
+# Last Updated: 07/25/2022
 
 import subprocess
 import time
@@ -54,7 +54,7 @@ DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
              "single-connector"]
 
 # General logging of process
-LOG_FILE = PATH_TO_DIR + "sku_availability_check.log"
+LOG_FILE = PATH_TO_DIR + "/sku_availability_check.log"
 
 # File to collect availability statuses from Azure Cloud Shell commands
 VM_AVAILABILITY_FILE = PATH_TO_DIR + "/current-sku-status.txt"
@@ -71,6 +71,7 @@ DC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/dc/dc-vm/main.tf"]
 
 # Priority list of possible SKU sizes for Windows/Linux Standard Workstations (NOTE: prepend selected terraform.tfvars size to this list when checking availability)
 STANDARD_SKUS_PRIORITY = ["Standard_B2s", "Standard_B2ms", "Standard_D2s_v3", "Standard_B4ms", "Standard_DS2_v2", "Standard_D4s_v3", "Standard_B8ms", "Standard_DS3_v2"]
+# TODO: This list is my own guess, need to check with Bob again 
 GFX_SKUS_PRIORITY = ["Standard_NV4as_v4", "Standard_NV6"]
 
 class MissingLocationError(Exception):
@@ -125,7 +126,7 @@ def update_sku_selection(vm_type, location, extract_file, edit_file):
     sizes = extract_default_sizes(vm_type, extract_file)
     log("Checking availability of default " + vm_type + " VM sizes...")
     check_sku_sizes(sizes, location)
-    available_sku_idx = determine_sku_size(vm_type, sizes)
+    available_sku_idx, _ = determine_sku_size(vm_type, sizes)
     log("Setting VM size index for " + vm_type + " VM...")
     set_sku_size(edit_file, available_sku_idx)
 
@@ -156,7 +157,7 @@ def determine_sku_size(vm_type, vm_sizes):
                     break
                 sku_file.close()
                 log("SKU size " + vm_sizes[i] + " is highest priority for " + vm_type + " that is available")
-                return i
+                return i, vm_sizes[i]
     
     log("SKU sizes for " + vm_type + " did not return any information. Please check the list of sizes requested for this component or the region to search.")
     sku_file.close()
@@ -190,7 +191,6 @@ def find_selected_workstations(deployment):
     tfvars_file = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r")
 
     ret_dict = dict()
-    print(ret_dict)
 
     in_block = False
     in_workstation = False
@@ -212,18 +212,13 @@ def find_selected_workstations(deployment):
                 else:
                     line_list = [a.strip().replace("\"", "").replace(",", "") for a in line.split("=")]
                     temp_dict[line_list[0]] = line_list[1]
-                    print(line_list)
             if line.find("{") != -1:
                 in_workstation = True
                 continue
-        if line.find("]") != -1:
+        if line.find("]") != -1 and in_block:
             break
 
     tfvars_file.close()
-
-    for i in range(len(ret_dict)):
-        if ret_dict[i]['count'] < 1:
-            ret_dict.pop(i)
 
     return ret_dict
 
@@ -231,7 +226,63 @@ def find_selected_workstations(deployment):
 # TODO: go through terraform.tfvars files, check each workstation type that has a count > 0, and append selected SKU size to STANDARD_SKUS_PRIORITY or GFX_SKUS_PRIORITY for checking
 def check_workstations_for_deployment(deployment):
 
-    workstations_dict = find_selected_workstations(deployment)
+    final_sizes = []
+
+    log("Finding selected workstations from deployment .tfvars file...")
+    ws_dict = find_selected_workstations(deployment)
+    for i in range(len(ws_dict)):
+        size_to_use = ws_dict[i]['vm_size']
+        count = int(ws_dict[i]['count'])
+        ws_type = ws_dict[i]['workstation_os']
+        isGFXHost = ws_dict[i]['isGFXHost'] == 'true'
+
+        ws_sizes = [size_to_use]
+        if isGFXHost:
+            ws_type += " gfx"
+            ws_sizes += GFX_SKUS_PRIORITY
+        else:
+            ws_type += " std"
+            ws_sizes += STANDARD_SKUS_PRIORITY
+
+        if count < 1:
+            log("Skipping workstation type " + ws_type + " as no VMs of this type are selected to deploy.")
+            final_sizes.append(size_to_use)
+            continue
+
+        check_sku_sizes(ws_sizes, ws_dict[i]['location'])
+
+        _, size_to_use = determine_sku_size(ws_type, ws_sizes)
+        final_sizes.append(size_to_use)
+
+    return final_sizes
+
+# TODO
+def update_workstations_for_deployment(deployment, sizes):
+    tfvars = open(PATH_TO_DIR + "/deployments/" + deployment + "/terraform.tfvars", "r+")
+
+    replaced = 0
+    replacement = ""
+    for line in tfvars:
+        if line.find("workstations = [") != -1:
+            in_block = True
+            replacement += line
+            continue
+        if line.find("vm_size") != -1 and in_block:
+            replacement += re.sub(".*vm_size.*\".*\",", line[0:line.find("\"") + 1]
+                                                      + sizes[replaced]
+                                                      + line[line.find("\"", line.find("\"") + 1):len(line) - 1], line)
+            replaced += 1
+            continue
+        if line.find("]") != -1 and in_block:
+            replacement += line
+            break
+
+        replacement += line
+
+
+    tfvars.seek(0)
+    tfvars.write(replacement)
+    tfvars.close()
 
 
 # TODO: set files to edit
@@ -321,7 +372,8 @@ def main():
 
     # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
     log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
-    check_workstations_for_deployment(args.deployment)
+    updated_sizes = check_workstations_for_deployment(args.deployment)
+    update_workstations_for_deployment(args.deployment, updated_sizes)
 
     subprocess.run(["rm", VM_AVAILABILITY_FILE])
     log("SKU availability check completed.\n")
