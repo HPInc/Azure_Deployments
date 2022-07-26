@@ -51,7 +51,7 @@ variable "cas_mgr_deployment_sa_file" {
 variable "machine_type" {
   description = "Instance type for the CAS Manager (min 8 GB RAM, 4 vCPUs)"
   # default   = "Standard_F4s_v2"
-  default = "Standard_D2s_v3"
+  default = ["Standard_D2s_v3"]
 }
 
 variable "disk_size_gb" {
