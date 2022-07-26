@@ -14,7 +14,7 @@
 # certain files. Please ensure that as much as possible when making changes to variables or .tfvars files that
 # only necessary changes are made, and that whitespace structure is maintained before running this script.
 #
-# Last Updated: 07/25/2022
+# Last Updated: 07/26/2022
 
 import subprocess
 import time
@@ -131,14 +131,26 @@ def update_sku_selection(vm_type, location, extract_file, edit_file):
 
 def check_sku_sizes(vm_sizes, location):
     sku_file = open(VM_AVAILABILITY_FILE, "w")
+
+    valid_size_found = False
     for i in range(len(vm_sizes)):
         log("-- Checking availability of VM size " + vm_sizes[i])
-        sku_file.write(str(subprocess.check_output(["az", "vm", "list-skus", "--location", location, 
+        results = str(subprocess.check_output(["az", "vm", "list-skus", "--location", location, 
                                                                              "--size", vm_sizes[i], 
                                                                              "--all", 
-                                                                             "--output", "table"])).replace("\\n", '\n'))
+                                                                             "--output", "table"])).replace("\\n", '\n')
+        sku_file.write(results)
+        results_list = results.split('\n')
+        for r in results_list:
+            if r.find(vm_sizes[i]) != -1:
+                if r.find("NotAvailableForSubscription") == -1:
+                    valid_size_found = True
+                break
         # Separate the output of one command from the next
         sku_file.write('\n')
+
+        if valid_size_found:
+            break
     sku_file.close()
 
 
