@@ -313,11 +313,29 @@ def assign_filenames(deployment):
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
 
     if deployment == "casm-aadds-one-ip-lb":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/main.tf"]
+        
+        DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/main.tf"]
+
     if deployment == "casm-aadds-one-ip-traffic-manager":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/main.tf"]
+
+        DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/main.tf"]
+
     if deployment == "casm-aadds-single-connector":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private/vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac-regional/main.tf", PATH_TO_DIR + "/modules/cac-regional-private/main.tf"]
+
+        DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm/vars.tf"]
+        CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm/main.tf"]
+
     if deployment == "lls-single-connector":
         pass
     if deployment == "load-balancer-one-ip":
@@ -347,25 +365,26 @@ def main():
     args = parser.parse_args()
 
     open(VM_AVAILABILITY_FILE, "a+").close()
-    
+
+    log("Selected deployment type: " + args.deployment)
+
     if args.all:
         assign_filenames(args.deployment)
 
         log("Querying for SKU sizes in location \"" + args.location + "\"")
-        log("Selected deployment type: " + args.deployment)
         
         for a in range(len(DEFAULT_CAC_VM_SIZE_FILES)):
             update_sku_selection("CAC", args.location, DEFAULT_CAC_VM_SIZE_FILES[a], CAC_VM_SIZE_SET_FILES[a])
 
         if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr", 
-                            "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
+                               "casm-aadds-single-connector", "casm-aadds-one-ip-lb", "casm-aadds-one-ip-traffic-manager"]:
             if not args.no_casm_vm:
                 for b in range(len(DEFAULT_CASM_VM_SIZE_FILES)):
                     update_sku_selection("CAS Manager", args.location, DEFAULT_CASM_VM_SIZE_FILES[b], CASM_VM_SIZE_SET_FILES[b])
 
         if args.deployment in ["cas-mgr-single-connector", "cas-mgr-load-balancer-one-ip-nat", "cas-mgr-one-ip-traffic-mgr",
-                            "lls-single-connector", "load-balancer-one-ip", "multi-region-traffic-mgr-one-ip", "quickstart-single-connector",
-                            "single-connector"]:
+                               "lls-single-connector", "load-balancer-one-ip", "multi-region-traffic-mgr-one-ip", "quickstart-single-connector",
+                               "single-connector"]:
             if not args.no_ldc:
                 for c in range(len(DEFAULT_DC_VM_SIZE_FILES)):
                     update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILES[c], DC_VM_SIZE_SET_FILES[c])
