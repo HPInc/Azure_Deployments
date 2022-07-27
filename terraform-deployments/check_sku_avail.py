@@ -53,9 +53,6 @@ DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
 # General logging of process
 LOG_FILE = PATH_TO_DIR + "/sku_availability_check.log"
 
-# File to collect availability statuses from Azure Cloud Shell commands
-VM_AVAILABILITY_FILE = PATH_TO_DIR + "/current-sku-status.txt"
-
 # Locations to find intended VM sizes for architecture components
 DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private/vars.tf"]
 DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr/vars.tf"]
@@ -121,57 +118,35 @@ def extract_default_sizes(vm_type, extract_file):
 def update_sku_selection(vm_type, location, extract_file, edit_file):
     log("Finding default SKU sizes for " + vm_type + " VM in file " + extract_file)
     sizes = extract_default_sizes(vm_type, extract_file)
-    log("Checking availability of default " + vm_type + " VM sizes...")
-    check_sku_sizes(sizes, location)
-    available_sku_idx, _ = determine_sku_size(vm_type, sizes)
+    available_sku_idx, _ = check_sku_sizes(vm_type, sizes, location)
     log("Setting VM size index for " + vm_type + " VM...")
     set_sku_size(edit_file, available_sku_idx)
 
+def check_sku_sizes(vm_type, vm_sizes, location):
 
-def check_sku_sizes(vm_sizes, location):
-    sku_file = open(VM_AVAILABILITY_FILE, "w")
-
+    log("Determining available size for " + vm_type + " under current Azure subscription...")
     valid_size_found = False
     for i in range(len(vm_sizes)):
         log("-- Checking availability of VM size " + vm_sizes[i])
         results = str(subprocess.check_output(["az", "vm", "list-skus", "--location", location, 
                                                                              "--size", vm_sizes[i], 
                                                                              "--all", 
-                                                                             "--output", "table"])).replace("\\n", '\n')
-        sku_file.write(results)
-        results_list = results.split('\n')
-        for r in results_list:
-            if r.find(vm_sizes[i]) != -1:
+                                                                             "--output", "table"])).replace("\\n", '\n').split('\n')
+        for r in results:
+            # Ensure that the SKU size being looked at is not just a prefix for an unintended size
+            if r.find(" " + vm_sizes[i] + " ") != -1:
                 if r.find("NotAvailableForSubscription") == -1:
                     valid_size_found = True
+                    log("SKU size " + vm_sizes[i] + " is highest priority for " + vm_type + " that is available")
+                else:
+                    log("SKU size " + vm_sizes[i] + " is not available for this subscription in location " + location)
                 break
-        # Separate the output of one command from the next
-        sku_file.write('\n')
 
         if valid_size_found:
-            break
-    sku_file.close()
-
-
-def determine_sku_size(vm_type, vm_sizes):
-    sku_file = open(VM_AVAILABILITY_FILE, "r")
-
-    log("Determining available size for " + vm_type + " under current Azure subscription...")
-    for i in range(len(vm_sizes)):
-        sku_file.seek(0)
-        for line in sku_file:
-            if line.find(vm_sizes[i]) != -1:
-                if line.find("NotAvailableForSubscription") != -1:
-                    log("SKU size " + vm_sizes[i] + " is not available for this subscription in the current location")
-                    break
-                sku_file.close()
-                log("SKU size " + vm_sizes[i] + " is highest priority for " + vm_type + " that is available")
-                return i, vm_sizes[i]
+            return i, vm_sizes[i]
     
-    log("SKU sizes for " + vm_type + " did not return any information. Please check the list of sizes requested for this component or the region to search.")
-    sku_file.close()
+    log("SKU sizes for " + vm_type + " are not available. Please check the list of sizes requested for this component or the region to search.")
     raise InvalidSKUSizeError()
-
 
 def set_sku_size(set_file, idx):
     edit_file = open(set_file, "r+")
@@ -258,9 +233,8 @@ def check_workstations_for_deployment(deployment):
             final_sizes.append(size_to_use)
             continue
 
-        check_sku_sizes(ws_sizes, ws_dict[i]['location'])
+        _, size_to_use = check_sku_sizes(ws_type, ws_sizes, ws_dict[i]['location'])
 
-        _, size_to_use = determine_sku_size(ws_type, ws_sizes)
         final_sizes.append(size_to_use)
 
     return final_sizes
@@ -366,21 +340,20 @@ def assign_filenames(deployment):
 
 def main():
     # Define parameters
-    # - location (required) : the region in which to check for SKU sizes; this should be specified as the same as the desired workstations' region
+    # - location            : the region in which to check for SKU sizes; this should be specified as the same as the desired workstations' region or intended area for CAC, CASM, DC;
+    #                          required when using "--all"
     # - no_casm_vm          : whether or not the deployment will include CAS Manager as a separate VM; specify when indicating using CASM SaaS or other
     # - no_ldc              : whether or not the deployment will require a Local Domain Controller; specify when indicating using Azure AD Domain Services
-    # - deployment          : the specific deployment type intended to be checked for future use; overrides no_casm_vm and no_ldc variables
+    # - deployment          : the specific deployment type intended to be checked for future use; may override no_casm_vm and no_ldc variables
     # - all                 : includes checks for all architecture components (CAC, CASM, DC); will only check workstations in terraform.tfvars if not specified
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--location", metavar="AAA", choices=REGIONS, help="Intended region for architecture VM deployment")
+    parser.add_argument("-l", "--location", metavar="AAA", choices=REGIONS, help="Intended region for architecture VM deployment (used when option --all is present")
     parser.add_argument("--no-casm-vm", default=False, dest="no_casm_vm", action='store_true', help="Flag for CAS Manager VM; True when using SaaS")
     parser.add_argument("--no-ldc", default=False, dest="no_ldc", action='store_true', help="Flag for DC VM; True when using AADDS")
     parser.add_argument("-d", "--deployment", default="cas-mgr-single-connector", dest="deployment", metavar="BBB", choices=DEPLOYMENTS, help="Specific deployment option, may override --no-casm-vm and --no-ldc")
     parser.add_argument("--all", default=False, action='store_true', help="Include checks for SKUs for all deployment components (CAC, CASM, DC); only workstations by default")
     args = parser.parse_args()
-
-    open(VM_AVAILABILITY_FILE, "a+").close()
 
     log("Selected deployment type: " + args.deployment)
 
@@ -413,7 +386,6 @@ def main():
     updated_sizes = check_workstations_for_deployment(args.deployment)
     update_workstations_for_deployment(args.deployment, updated_sizes)
 
-    subprocess.run(["rm", VM_AVAILABILITY_FILE])
     log("SKU availability check completed.\n")
 
 if __name__ == "__main__":
