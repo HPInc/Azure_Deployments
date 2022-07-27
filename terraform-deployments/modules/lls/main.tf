@@ -53,7 +53,7 @@ resource "azurerm_linux_virtual_machine" "lls-vm" {
   admin_username                  = var.ad_service_account_username
   admin_password                  = local.lls_admin_password
   disable_password_authentication = false
-  size                            = var.machine_type
+  size                            = var.machine_type[0]
 
   network_interface_ids = [
     # azurerm_network_interface.lls-nic[each.key].id

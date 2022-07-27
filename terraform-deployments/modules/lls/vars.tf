@@ -22,7 +22,7 @@ variable "ad_service_account_password" {
 
 variable "machine_type" {
   description = "Azure virtual machine size."
-  default     = "Standard_B2ms"
+  default     = ["Standard_B2ms"]
 }
 
 variable "application_id" {

@@ -14,7 +14,7 @@
 # certain files. Please ensure that as much as possible when making changes to variables or .tfvars files that
 # only necessary changes are made, and that whitespace structure is maintained before running this script.
 #
-# Last Updated: 07/26/2022
+# Last Updated: 07/27/2022
 
 import subprocess
 import time
@@ -38,7 +38,7 @@ REGIONS=["eastus", "eastus2", "southcentralus", "westus2", "westus3", "australia
          "southindia", "westindia", "canadaeast", "francesouth", "germanynorth", "norwaywest", "switzerlandwest", "ukwest",
          "uaecentral", "brazilsoutheast"]
 
-# List of deployment offerings
+# List of deployment offerings (EXCLUDES CASM-AADDS and QUICKSTART)
 DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
              "cas-mgr-one-ip-traffic-mgr",
              "cas-mgr-single-connector",
@@ -48,7 +48,6 @@ DEPLOYMENTS=["cas-mgr-load-balancer-one-ip-nat",
              "lls-single-connector",
              "load-balancer-one-ip",
              "multi-region-traffic-mgr-one-ip",
-             "quickstart-single-connector",
              "single-connector"]
 
 # General logging of process
@@ -295,19 +294,15 @@ def update_workstations_for_deployment(deployment, sizes):
     tfvars.close()
 
 
-# TODO: set files to edit
 def assign_filenames(deployment):
     global DEFAULT_CAC_VM_SIZE_FILES
     global DEFAULT_CASM_VM_SIZE_FILES
-    global DEFAULT_DC_VM_SIZE_FILES
-
     global CAC_VM_SIZE_SET_FILES
     global CASM_VM_SIZE_SET_FILES
-    global DC_VM_SIZE_SET_FILES
 
     if deployment == "cas-mgr-single-connector":
        # Same as global variable initial values
-       pass
+       return
     if deployment == "cas-mgr-load-balancer-one-ip-nat":
 
         DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
@@ -315,7 +310,7 @@ def assign_filenames(deployment):
 
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
-
+        return
     if deployment == "cas-mgr-one-ip-traffic-mgr":
         
         DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
@@ -323,7 +318,7 @@ def assign_filenames(deployment):
 
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cas-mgr-lb-nat/main.tf"]
-
+        return
     if deployment == "casm-aadds-one-ip-lb":
 
         DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
@@ -331,7 +326,7 @@ def assign_filenames(deployment):
         
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/main.tf"]
-
+        return
     if deployment == "casm-aadds-one-ip-traffic-manager":
 
         DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private-lb-nat/vars.tf"]
@@ -339,7 +334,7 @@ def assign_filenames(deployment):
 
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm-lb-nat/main.tf"]
-
+        return
     if deployment == "casm-aadds-single-connector":
 
         DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac-regional/vars.tf", PATH_TO_DIR + "/modules/cac-regional-private/vars.tf"]
@@ -347,17 +342,26 @@ def assign_filenames(deployment):
 
         DEFAULT_CASM_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm/vars.tf"]
         CASM_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/casm/casm-vm/main.tf"]
-
+        return
     if deployment == "lls-single-connector":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm/default-vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm/main.tf"]
+        return
     if deployment == "load-balancer-one-ip":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm-lb-nat/default-vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm-lb-nat/main.tf"]
+        return
     if deployment == "multi-region-traffic-mgr-one-ip":
-        pass
-    if deployment == "quickstart-single-connector":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm-tm-nat/default-vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm-tm-nat/main.tf"]
+        return
     if deployment == "single-connector":
-        pass
+
+        DEFAULT_CAC_VM_SIZE_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm/default-vars.tf"]
+        CAC_VM_SIZE_SET_FILES = [PATH_TO_DIR + "/modules/cac/cac-vm/main.tf"]
 
 
 def main():
@@ -400,6 +404,9 @@ def main():
             if not args.no_ldc:
                 for c in range(len(DEFAULT_DC_VM_SIZE_FILES)):
                     update_sku_selection("DC", args.location, DEFAULT_DC_VM_SIZE_FILES[c], DC_VM_SIZE_SET_FILES[c])
+
+        if args.deployment == "lls-single-connector":
+            update_sku_selection("LLS", args.location, PATH_TO_DIR + "/modules/lls/vars.tf", PATH_TO_DIR + "/modules/lls/main.tf")
 
     # Time to check the terraform.tfvars of the deployment to check for workstation-selected SKUs
     log("Determining selected workstation SKUs for your deployment. Corresponding directory must contain a terraform.tfvars file and it should be renamed to remove the .sample extension.")
