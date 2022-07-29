@@ -15,11 +15,6 @@ variable "cac_admin_username" {
   default     = "cas_admin"
 }
 
-variable "cac_machine_type" {
-  description = "Machine type for the Cloud Access Connector"
-  default     = "Standard_D2s_v3"
-}
-
 variable "windows_admin_username" {
   description = "Name for the Windows Administrator of the Workstation"
   default     = "windows_admin"

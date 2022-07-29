@@ -70,7 +70,6 @@ module "cac-vm" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   nic_ids                     = module.cac-network[count.index].cac-network-interface-ids
-  machine_type                = var.cac_machine_type
   cac_admin_user              = var.cac_admin_username
   cac_admin_password          = var.ad_admin_password
   dns_zone_id                 = module.dc-cac-network.private-dns-zone-id
