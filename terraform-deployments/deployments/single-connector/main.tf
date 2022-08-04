@@ -84,7 +84,6 @@ module "active-directory-domain-vm" {
   ad_admin_password            = var.ad_admin_password
   ad_pass_secret_name          = var.ad_pass_secret_name
   key_vault_id                 = var.key_vault_id
-  dc_machine_type              = var.dc_machine_type
   nic_id                       = module.dc-cac-network.dc-network-interface-id
   prefix                       = var.prefix
   application_id               = var.application_id
@@ -148,7 +147,6 @@ module "cac-vm" {
   ad_service_account_username = var.ad_admin_username
   ad_service_account_password = var.ad_admin_password
   nic_ids                     = module.cac-network.cac-network-interface-ids
-  machine_type                = var.cac_machine_type
   cac_admin_user              = var.cac_admin_username
   cac_admin_password          = var.ad_admin_password
   dns_zone_id                 = module.dc-cac-network.private-dns-zone-id

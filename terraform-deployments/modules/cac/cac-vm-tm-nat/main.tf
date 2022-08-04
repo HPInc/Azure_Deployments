@@ -27,7 +27,7 @@ resource "azurerm_linux_virtual_machine" "cac" {
   name                            = "${local.prefix}cac-vm-${var.location}-${count.index}"
   location                        = var.location
   resource_group_name             = var.resource_group_name
-  size                            = var.machine_type
+  size                            = var.machine_type[0]
   admin_username                  = var.cac_admin_user
   admin_password                  = local.cac_admin_password
   computer_name                   = "${local.prefix}cac-vm"

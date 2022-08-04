@@ -45,11 +45,6 @@ variable "resource_group_name" {
   default     = ""
 }
 
-variable "cac_machine_type" {
-  description = "Machine type for the Cloud Access Connector"
-  default     = "Standard_D2s_v3"
-}
-
 variable "ssl_key" {
   description = "SSL private key for the Connector"
   default     = ""
@@ -58,11 +53,6 @@ variable "ssl_key" {
 variable "ssl_cert" {
   description = "SSL certificate for the Connector"
   default     = ""
-}
-
-variable "dc_machine_type" {
-  description = "Machine type for Domain Controller"
-  default     = "Standard_F2"
 }
 
 variable "ad_domain_users_list_file" {
