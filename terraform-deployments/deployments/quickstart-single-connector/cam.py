@@ -12,6 +12,20 @@ class CloudAccessManager:
         self.url = url
         self.header = {'authorization': auth_token}
 
+    # validate Anyware Manager API token
+    def auth_token_validate(self):
+        resp = requests.post(
+            self.url + '/api/v1/auth/verify',
+            headers = self.header
+        )
+        try:
+            resp.raise_for_status()
+            return True
+        except requests.models.HTTPError:
+            if resp.status_code == 401:
+                return False
+            raise
+
     def deployment_create(self, name, reg_code):
         deployment_details = {
             'deploymentName':   name,
@@ -44,7 +58,7 @@ class CloudAccessManager:
         }
 
         resp = requests.post(
-            self.url + '/api/v1/auth/users/cloudServiceAccount',
+            self.url + '/api/v1/deployments/'+ deployment['deploymentId'] + '/cloudServiceAccounts',
             headers=self.header,
             json=account_details,
         )
@@ -105,12 +119,11 @@ class CloudAccessManager:
     def entitlement_add(self, user, machine):
         entitlement_details = {
             'machineId': machine['machineId'],
-            'deploymentId': machine['deploymentId'],
             'userGuid': user['userGuid'],
         }
 
         resp = requests.post(
-            self.url + '/api/v1/machines/entitlements',
+            self.url + '/api/v1/deployments/' + machine['deploymentId'] + '/entitlements',
             headers=self.header,
             json=entitlement_details,
         )

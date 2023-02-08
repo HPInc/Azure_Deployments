@@ -15,6 +15,7 @@ output "app_application_id" {
 
 output "client_secret" {
   value = azuread_application_password.client-secret.value
+  sensitive = true
 }
 
 output "app_object_id" {

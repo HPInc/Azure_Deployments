@@ -67,6 +67,54 @@ The following diagram shows a single-connector deployment instance with multiple
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
 ### 3. Connect Azure to CAS Manager
+In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
+
+Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
+
+##### Option 1 (faster automated authentication):
+
+The bash deploy script will automate the creation of a service principal and assign all of the required roles for deployment. Users will not be required to login via the Azure Portal
+
+1. Upon completion of the deploy script, the Azure Cloud Shell will output the required Application ID and Client Secret which must be saved in the terraform.tfvars file
+ ```
+  {
+  "appId": "xxxxxxxxxx",
+  "displayName": "single_connector_lls",
+  "password": "xxxxxxxxxx",
+  "tenant": "xxxxxxxxxx"
+  }
+ ```
+2. Open the terraform.tfvars file via `code terraform.tfvars` seen in section 6, step 3
+3. Copy and paste the appId value into the application_id input field and the password value into the aad_client_secret input field
+```
+application_id                = "appId value here"
+aad_client_secret             = "password value here"
+```
+4. Login to CAS Manager admin console [here](https://cas.teradici.com).
+5. [Create](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+6. Click on **Cloud Service Accounts** and then **Azure**.
+7. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/#azure-cloud-credentials). 
+8. Click **Connectors** on the side bar and create a new connector. 
+9. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token) a token. Tokens will be used in the .tfvars file.  
+    - This token expires in 2 hours. 
+    - The value will be used inside ```terraform.tfvars``` like so: 
+    ```
+    cac_configuration : [
+            { 
+                cac_token: "vk315Gci2iJIdzLxT.. ", 
+                location: "westus2" 
+            }
+        ]
+    ```
+10. The remaining information to be filled out includes providing the PCoIP Registration Code and all other desired workstation configurations. Save the file and skip to the remaining steps of deployment in section 6
+**Note**: What if the Service Principal creation output values are lost or the Azure Cloud Shell times out?
+In the instance that the Azure Cloud Shell times out or the output values are lost, the deploy script can be re-run and the previously created app and service principal will be patched and reset with a new client secret that users should update with. 
+Otherwise, manual creation of the Service Principal and role assignments could be followed as seen by the steps in Option 2
+
+##### Option 2 (slower manual authentication):
+
+Running the deploy script will set the necessary environment variables for the User. Users are still able to manually authenticate via the Azure Portal using the following steps
+
 To interact directly with remote workstations, an Azure account must be connected to the CAS Manager.
 1. Login to the [Azure portal](http://portal.azure.com/)
 2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
@@ -313,35 +361,4 @@ Information about connecting to virtual machines for investigative purposes:
 
 ## Appendix
 
-### Current VM sizes supported by PCoIP Graphics Agents
-
-[NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs / Expected network bandwidth (Mbps)**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NC4as_T4_v3**|4|28|180|1|16|8|2 / 8000|
-|**Standard_NC8as_T4_v3**|8|56|360|1|16|16|4 / 8000|
-|**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
-|**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
-
-[NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NV6**|6|56|340|1|8|24|1|1|25|
-|**Standard_NV12**|12|112|680|2|16|48|2|2|50|
-|**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
-
-[NVv3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv3-series) powered by **NVIDIA Tesla M60 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max uncached disk throughput: IOPS/MBps**|**Max NICs**|**Expected network bandwidth (Mbps)**|**Virtual Workstations**|**Virtual Applications**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NV12s_v3**|12|112|320|1|8|12|20000/200|4|6000|1|25|
-|**Standard_NV24s_v3**|24|224|640|2|16|24|40000/400|8|12000|2|50|
-|**Standard_NV48s_v3**|48|448|1280|4|32|32|80000/800|8|24000|4|100|
-
-[NVv4-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nvv4-series) powered by **AMD Radeon Instinct MI25 GPUs**.
-Note that NVv4 virtual machines currently support only Windows guest operating systems.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Expected network bandwidth (MBps)**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NV4as_v4**|4|14|88|1/8|2|4|2|1000|
-|**Standard_NV8as_v4**|8|28|176|1/4|4|8|4|2000|
-|**Standard_NV16as_v4**|16|56|352|1/2|8|16|8|4000|
-|**Standard_NV32as_v4**|32|112|704|1|16|32|8|8000|
+[Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)

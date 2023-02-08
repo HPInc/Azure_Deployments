@@ -9,12 +9,16 @@ resource "random_id" "app-name" {
   byte_length = 3
 }
 
+data "azuread_client_config" "current" {}
+
 resource "azuread_application" "cam-application" {
   display_name = var.application_name
+  owners = [data.azuread_client_config.current.object_id]
 }
 
 resource "azuread_service_principal" "cam-service-principal" {
   application_id = azuread_application.cam-application.application_id
+  owners = [data.azuread_client_config.current.object_id]
 }
 
 resource "azurerm_role_assignment" "vm-contributor-role" {

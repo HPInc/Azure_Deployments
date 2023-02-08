@@ -6,7 +6,7 @@
 variable "aadds_rg_name" {
   description = "Name of the resource group the AADDS will belong in"
   type        = string
-  default     = "BY_AAD_DS_Teradici"
+  default     = "AAD_DS_Teradici"
 }
 
 variable "aadds_vnet_name" {

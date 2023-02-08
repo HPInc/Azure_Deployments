@@ -1,4 +1,4 @@
-# Teradici CAS Deployments on Azure
+# HP Teradici CAS Deployments on Azure
 Teradici is the creator of the PCoIP remoting protocol technology and Cloud Access Software. Teradici's Cloud Access Software enables highly-scalable and cost-effective deployments by managing cloud compute costs and brokering PCoIP connections to remote Windows or Linux workstations. The Cloud Access Manager solution is comprised of two main components – the CAS Manager service, which is a service offered by Teradici to manage Cloud Access Manager deployments, and the Cloud Access Connector, which is the portion of the Cloud Access Manager solution that resides in the customer environment.  To learn more about Cloud Access Manager (CAS-M), please visit https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/
 
 This repository contains a collection of Terraform scripts for demonstrating how to deploy Cloud Access Connectors in a user's Azure environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
@@ -25,7 +25,7 @@ This repository contains a collection of Terraform scripts for demonstrating how
   - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
   ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
-  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/docs/quickstart-tutorial.md)
+  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/docs/README-azure-quickstart-single-connector.md)
  
   ### FAQ: How to install AAD DS and Local License Server
   - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
@@ -33,6 +33,9 @@ This repository contains a collection of Terraform scripts for demonstrating how
 
   ### Reference
   - [Step-by-Step SaaS Deployment: Terraform Variables](/terraform-deployments/docs/terraform-config-step-by-step.md)
+
+  ### Appendix
+  - [Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)
 
 
 # AWS & GCP Deployments

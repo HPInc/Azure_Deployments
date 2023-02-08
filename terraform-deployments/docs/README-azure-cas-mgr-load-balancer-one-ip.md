@@ -69,6 +69,37 @@ This deployments runs the CAS Manager in a virtual machine which gives users ful
 
 ### 3. Service Principal Authentication
 In order for Terraform to deploy & manage resources on a user's behalf, they must authenticate through a service principal. 
+
+Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
+
+##### Option 1 (faster automated authentication):
+
+The bash deploy script will automate the creation of a service principal and assign all of the required roles for deployment. Users will not be required to login via the Azure Portal
+
+1. Upon completion of the deploy script, the Azure Cloud Shell will output the required Application ID and Client Secret which must be saved in the terraform.tfvars file
+ ```
+  {
+  "appId": "xxxxxxxxxx",
+  "displayName": "cas-mgr-load-balancer-one-ip",
+  "password": "xxxxxxxxxx",
+  "tenant": "xxxxxxxxxx"
+  }
+ ```
+2. Open the terraform.tfvars file via `code terraform.tfvars` seen in section 6, step 3
+3. Copy and paste the appId value into the application_id input field and the password value into the aad_client_secret input field
+```
+application_id                = "appId value here"
+aad_client_secret             = "password value here"
+```
+4. The remaining information to be filled out includes providing the PCoIP Registration Code and all other desired workstation configurations. Save the file and skip to the remaining steps of deployment in section 6
+**Note**: What if the Service Principal creation output values are lost or the Azure Cloud Shell times out?
+In the instance that the Azure Cloud Shell times out or the output values are lost, the deploy script can be re-run and the previously created app and service principal will be patched and reset with a new client secret that users should update with. 
+Otherwise, manual creation of the Service Principal and role assignments could be followed as seen by the steps in Option 2
+
+##### Option 2 (slower manual authentication):
+
+Running the deploy script will set the necessary environment variables for the User. Users are still able to manually authenticate via the Azure Portal using the following steps
+
 1. Login to the [Azure portal](http://portal.azure.com/)
 2. Click **Azure Active Directory** in the left sidebar and click **App registrations** inside the opened blade.
 3. Create a new application for the deployment by clicking **New registration**. If an application exists under **Owned applications**, this information can be reused. 
@@ -264,20 +295,5 @@ Information about connecting to virtual machines for investigative purposes:
 A video of the deployment process for this terraform can be found on [Teradici's Youtube channel](https://www.youtube.com/watch?v=MjYa32lKkWc)
 
 ## Appendix
-### Current VM sizes supported by PCoIP Graphics Agents
 
-[NCasT4_v3-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series) powered by **NVIDIA Tesla T4 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs / Expected network bandwidth (Mbps)**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NC4as_T4_v3**|4|28|180|1|16|8|2 / 8000|
-|**Standard_NC8as_T4_v3**|8|56|360|1|16|16|4 / 8000|
-|**Standard_NC16as_T4_v3**|16|110|360|1|16|32|8 / 8000|
-|**Standard_NC64as_T4_v3**|64|440|2880|4|64|32|8 / 32000|
-
-
-[NV-series VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) powered by **NVIDIA Tesla M60 GPUs**.
-|**Size**|**vCPU**|**Memory: GiB**|**Temp storage (SSD) GiB**|**GPU**|**GPU memory: GiB**|**Max data disks**|**Max NICs**|**Virtual Workstations**|**Virtual Applications**|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|**Standard_NV6**|6|56|340|1|8|24|1|1|25|
-|**Standard_NV12**|12|112|680|2|16|48|2|2|50|
-|**Standard_NV24**|24|224|1440|4|32|64|4|4|100|
+[Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)

@@ -14,8 +14,9 @@ import sys
 import time
 
 import cam
+import prompt
 
-CFG_FILE_PATH = 'azure-cloudshell-quickstart.cfg'
+#CFG_FILE_PATH = 'azure-cloudshell-quickstart.cfg'
 TERRAFORM_BIN_PATH = 'terraform'
 iso_time = datetime.datetime.utcnow().isoformat(
     timespec='seconds').replace(':', '').replace('-', '') + 'Z'
@@ -36,7 +37,6 @@ ENTITLE_USER = 'cas_admin'
 # Types of workstations
 WS_TYPES = ['scent', 'gcent', 'swin', 'gwin']
 
-
 def quickstart_config_read(cfg_file):
     cfg_data = {}
 
@@ -50,10 +50,9 @@ def quickstart_config_read(cfg_file):
 
     return cfg_data
 
-
 def terraform_deploy():
 
-    tf_cmd = f'{TERRAFORM_BIN_PATH} init'
+    tf_cmd = f'{TERRAFORM_BIN_PATH} init -upgrade'
     subprocess.run(tf_cmd.split(' '), check=True)
 
     tf_cmd = f'{TERRAFORM_BIN_PATH} apply -auto-approve'
@@ -212,7 +211,7 @@ if __name__ == '__main__':
         print()
         sys.exit(0)
 
-    cfg_data = quickstart_config_read(CFG_FILE_PATH)
+    cfg_data = prompt.configurations_get(WS_TYPES, ENTITLE_USER)
 
     tf_vars_create(TF_VARS_REF_PATH, TF_VARS_PATH, {
                    'location': cfg_data.get('region')})
@@ -222,10 +221,10 @@ if __name__ == '__main__':
     az_email_cmd = 'az ad signed-in-user show --query userPrincipalName -o tsv'
     az_email = az_credential_get(az_email_cmd)
 
-    user_object_id_cmd = f'az ad user show --id {az_email} --query objectId --out tsv'
+    user_object_id_cmd = f'az ad user show --id {az_email} --query id --out tsv'
     user_object_id = az_credential_get(user_object_id_cmd)
 
-    app_object_id_cmd = f'az ad sp list --display-name {az_app_outputs["application_name"]} --query [].objectId --out tsv'
+    app_object_id_cmd = f'az ad sp list --display-name {az_app_outputs["application_name"]} --query [].id --out tsv'
     app_object_id = az_credential_get(app_object_id_cmd)
 
     subscription_id = az_app_outputs['subscription_id']

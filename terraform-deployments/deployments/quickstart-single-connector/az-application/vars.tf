@@ -12,5 +12,5 @@ variable "location" {
 
 variable "application_name" {
   description = "Name of the Azure application"
-  default     = "quickstart-application"
+  default     = ""
 }

@@ -5,6 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+# module "myresource_tagging" {
+#   source  = "claranet/tagging/azurerm"
+#   version = "4.0.2"
+
+#   nb_resources = 1
+#   resource_ids = [azurerm_resource_group.main.id, azurerm_storage_account.storage.id, azurerm_storage_container.blob.id]
+#   behavior     = "merge" # Must be "merge" or "overwrite"
+
+#   tags     = "${local.default_tags}"
+# }
+
 module "workstation-map" {
   source       = "../../modules/workstation-map"
   workstations = var.workstations
@@ -109,6 +120,11 @@ module "cas-mgr" {
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
   cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
+
+  tag_name                  = var.tag_name
+  tag_prefix                = var.tag_prefix
+  tag_value                 = var.tag_value
+  tag_suffix                = var.tag_suffix
 }
 
 module "cac" {
