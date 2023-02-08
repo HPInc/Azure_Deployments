@@ -33,7 +33,7 @@ variable "minutes_cpu_polling_interval" {
 
 variable "nvidia_driver_url" {
   description = "URL of NVIDIA Grid driver"
-  default     = "https://download.microsoft.com/download/1/a/5/1a537cae-5b52-4348-acd2-2f210fc412b0/NVIDIA-Linux-x86_64-430.46-grid.run"
+  default     = "https://download.microsoft.com/download/6/2/5/625e22a0-34ea-4d03-8738-a639acebc15e/NVIDIA-Linux-x86_64-510.73.08-grid-azure.run"
 }
 
 variable "tenant_id" {
