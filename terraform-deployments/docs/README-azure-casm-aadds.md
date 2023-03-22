@@ -3,7 +3,7 @@
 **Objective**: The objective of this documentation is to deploy a Azure Active Directory Domain Services on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 ## Table of Contents
-1. [Single-Connector Architecture](#1-aadds-architecture)
+1. [AADDS Architecture](#1-aadds-architecture)
 2. [Requirements](#2-requirements)
 3. [Deploying the AADDS via Terraform](#3-deploying-the-aadds-via-terraform)
 4. [Configuring an existing AADDS](#4-configuring-an-existing-aadds)

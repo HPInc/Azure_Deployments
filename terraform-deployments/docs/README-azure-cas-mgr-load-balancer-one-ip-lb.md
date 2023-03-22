@@ -23,7 +23,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 
 ### 1. CAS Manager Load Balancer NAT Single IP Architecture
 
-The Cloud Access Software (CAS) Manager Load Balancer single IP deployment creates a Virtual Network with 5 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
+The Cloud Access Software (CAS) Manager Load Balancer single IP deployment creates a Virtual Network with 4 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
 - ```subnet-dc```: for the Domain Controller
 - ```subnet-cac```: for the Connector and Load Balancer
 - ```subnet-ws```: for the workstations
@@ -153,7 +153,7 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
     
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
   1. Go into the **Resource group** that contains ACS storage. By default, the name should look like: **cloud-shell-storage-[region]**
@@ -258,7 +258,7 @@ Note that it may take a 5-10 minutes for the workstation to show up in the **Sel
 ### 8. Starting a PCoIP Session
 
 Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
-   - **Note**: If you need to find the `public_ip` of the `cac-public-ip` output after it has gone away, it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
+   - **Note**: If you need to find the `public_ip` of the `cac-load-balancer-ip` output after it has gone away, it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the public IP address of the Cloud Access Connector (CAC) virtual machine and enter a name for this connection. Select **SAVE** and then **NEXT**

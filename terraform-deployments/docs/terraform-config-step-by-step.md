@@ -7,8 +7,8 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
 1. Clone the repository into your Azure Cloud Shell (ACS) environment. 
     -   ```git clone https://github.com/teradici/Azure_Deployments``` 
     ![clone repo in ACS](/terraform-deployments/docs/png/git-clone-repo.png)
-2. Change directory into: ```Azure_Deployments/terraform-deployments/deployments/load-balancer```.
-    - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer```
+2. Change directory into: ```Azure_Deployments/terraform-deployments/deployments/load-balancer-one-ip```.
+    - ```cd Azure_Deployments/terraform-deployments/deployments/load-balancer-one-ip```
     ![change directory](/terraform-deployments/docs/png/acs-change-directory.png)
 3. Save ```terraform.tfvars.sample``` as ```terraform.tfvars```, and fill out the required variables. Use one of the following:
     - ```cp terraform.tfvars.sample terraform.tfvars``` (this will create a copy under a new name)
@@ -65,10 +65,10 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
         -   e.g.: 'tera' will create the domain 'tera.dns.internal'
     
     9. SSL configuration (optional):
-        -   [Link to SSL instructions](/terraform-deployments/docs/README-azure-load-balancer.md#5-optional-assigning-a-ssl-certificate)
+        -   [Link to SSL instructions](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md#5-optional-assigning-a-ssl-certificate)
 
     10. Azure key vault secrets (optional):
-        -   [Link to Key Vault instructions](terraform-deployments/docs/README-azure-load-balancer.md#4-optional-storing-secrets-on-azure-key-vault)
+        -   [Link to Key Vault instructions](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md#4-optional-storing-secrets-on-azure-key-vault)
 
 5. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have at least **3** of the following requirements:
@@ -82,7 +82,7 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
     ![terraform apply prompt](/terraform-deployments/docs/png/terraform-apply-prompt.png)
 8. Answer ```yes``` to start provisioning the load balancer infrastructure.
     - To skip this extra step, you may also provide the additional option using the command ```terraform apply --auto-approve```.
-9. After completion, click [here](/terraform-deployments/docs/README-azure-load-balancer.md#7-adding-workstations-in-cas-manager) and start at section 7 for instructions to add workstations in the CAS Manager admin console. 
+9. After completion, click [here](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md#7-adding-workstations-in-cas-manager) and start at section 7 for instructions to add workstations in the CAS Manager admin console. 
 
 A typical deployment should take around 30-40 minutes. Upon a successful deployment, the output will display information such as important IP addresses and names. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may temporarily show as **Unhealthy**. 
 

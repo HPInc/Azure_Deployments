@@ -74,11 +74,11 @@ application_id                = "appId value here"
 aad_client_secret             = "password value here"
 ```
 4. Login to CAS Manager admin console [here](https://cas.teradici.com).
-5. [Create](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
-6. Click on **Cloud Service Accounts** and then **Azure**.
-7. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/#azure-cloud-credentials). 
-8. Click **Connectors** on the side bar and create a new connector. 
-9. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token) a token. Tokens will be used in the .tfvars file. 
+5. [Create](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 6 and 7 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+6. Click on **Provider Service Accounts** and then **Azure**.
+7. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/#azure-cloud-credentials).
+8. Click **Connectors** on the side bar and create a new connector.
+9. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
     - Multi region deployment requires at least **2** unique tokens for cloud access connectors (cac) and **2** unique regions. 
     - Tokens expire in 2 hours.
     - The value will be used inside ```terraform.tfvars``` like so: 
@@ -115,11 +115,11 @@ Running the deploy script will set the necessary environment variables for the U
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
 10. Login to CAS Manager admin console [here](https://cas.teradici.com).
-11. [Create](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
-12. Click on **Cloud Service Accounts** and then **Azure**.
-13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/admin_console/deployments/#azure-cloud-credentials). 
+11. [Create](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+12. Click on **Provider Service Accounts** and then **Azure**.
+13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
-15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/cloud_access_connector/cac_install/#2-obtaining-the-cloud-access-connector-token) a token. Tokens will be used in the .tfvars file. 
+15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
     - Multi region deployment requires at least **2** unique tokens for cloud access connectors (cac) and **2** unique regions. 
     - Tokens expire in 2 hours.
     - The value will be used inside ```terraform.tfvars``` like so: 
@@ -184,7 +184,7 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
   1. Go into the **Resource group** that contains ACS storage. By default, the name should look like: **cloud-shell-storage-[region]**
@@ -291,7 +291,7 @@ It is recommended to add your Azure Provider Credentials to the Anyware Manager 
 
 To connect to workstations, they have to be added through the CAS Manager. 
 1. Go to the CAS Manager admin console and ensure the correct deployment is selected. 
-2. Click Workstations on the right sidebar, click the blue **+** and select **Add existing remote workstation**. 
+2. Click Workstations on the left sidebar, click the blue **+** and select **Add existing remote workstation**. 
 3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of the resource group of the deployment.
 4. In the search box below, select Windows and CentOS workstations.
 5. At the bottom click the option **Individually select users** and select the users to assign to the workstations. 

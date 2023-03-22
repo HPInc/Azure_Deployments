@@ -1,6 +1,6 @@
 # CAS Manager (Single-Connector) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager Single-Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files here: https://github.com/teradici/Azure_Deployments/tree/master/terraform-deployments/deployments/cas-mgr-single-connector
+**Objective**: The objective of this documentation is to deploy the CAS Manager Single-Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files [here](/terraform-deployments/deployments/cas-mgr-single-connector).
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 
 ### 1. CAS Manager Single-Connector Architecture
 
-The Cloud Access Software (CAS) Manager Single-Connector deployment creates a Virtual Network with 3 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
+The Cloud Access Software (CAS) Manager Single-Connector deployment creates a Virtual Network with 4 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
 
 - `subnet-dc`: for the Domain Controller
 - `subnet-cac`: for the Connector
@@ -46,7 +46,7 @@ Note: Since this is a single region deployment, please make sure that all `locat
 
 These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
+The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
 
 ![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
 
@@ -166,7 +166,7 @@ ad_pass_secret_name           = "adPasswordID"
 
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/prerequisites/cac_certificate/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
 

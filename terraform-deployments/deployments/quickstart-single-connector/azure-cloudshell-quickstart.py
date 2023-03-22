@@ -168,7 +168,7 @@ def deployment_delete():
                 'No existing terraform deployment exists. Did you mean "python azure-cloudshell-quickstart.py"?')
             sys.exit(1)
 
-        app_kv_destroy_cmd = f'{TERRAFORM_BIN_PATH} destroy -force'
+        app_kv_destroy_cmd = f'{TERRAFORM_BIN_PATH} destroy -auto-approve'
         subprocess.run(app_kv_destroy_cmd.split(' '), check=True)
 
         os.chdir('../single-connector')

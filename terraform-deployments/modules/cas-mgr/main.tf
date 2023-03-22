@@ -10,7 +10,11 @@ locals {
   cas_mgr_provisioning_script = "cas-mgr-provisioning.sh"
   cas_mgr_setup_script        = "cas-mgr-setup.py"
   tenant_id                   = var.key_vault_id == "" ? "" : var.tenant_id
+  default_tags               = {
+    "${var.tag_name}" = "${var.tag_prefix} ${var.tag_value} ${var.tag_suffix}"
+  }
 }
+
 resource "time_offset" "start" {
   offset_days = -1
 }
@@ -77,6 +81,8 @@ resource "azurerm_network_interface" "cas-mgr-nic" {
     subnet_id                     = azurerm_subnet.cas-mgr.id
     public_ip_address_id          = azurerm_public_ip.cas-mgr-public-ip.id
   }
+
+  tags     = "${local.default_tags}"
 }
 
 resource "azurerm_storage_blob" "cas-mgr-setup-script" {
@@ -116,6 +122,8 @@ resource "azurerm_linux_virtual_machine" "cas-mgr-vm" {
     sku       = "8_3"
     version   = "latest"
   }
+
+  tags     = "${local.default_tags}"
 }
 
 resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
@@ -147,5 +155,7 @@ resource "azurerm_virtual_machine_extension" "cas-mgr-provisioning" {
 }"
     }
   SETTINGS
+
+  tags     = "${local.default_tags}"
 }
 

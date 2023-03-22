@@ -30,7 +30,7 @@ resource "azurerm_network_security_group" "nsg" {
 resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
   count = length(local.network_security_rule_prefixes)
 
-  name                       = "allow all vnet ${local.network_security_rule_prefixes[count.index][0]}-${local.network_security_rule_prefixes[count.index][1]}"
+  name                       = "allow-all-vnet-${local.network_security_rule_prefixes[count.index][0]}-${local.network_security_rule_prefixes[count.index][1]}"
   priority                   = count.index + 100
   direction                  = "Inbound"
   access                     = "Allow"
@@ -48,7 +48,7 @@ resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
 resource "azurerm_network_security_rule" "nsg_pcoip" {
   count = length(azurerm_virtual_network.network)
 
-  name                        = "allow pcoip"
+  name                        = "allow-pcoip"
   priority                    = 200
   direction                   = "Inbound"
   access                      = "Allow"
@@ -65,14 +65,14 @@ resource "azurerm_network_security_rule" "nsg_pcoip" {
 resource "azurerm_network_security_rule" "nsg_5985" {
   count = length(azurerm_virtual_network.network)
 
-  name                        = "winrm port 5985"
+  name                        = "winrm-port-5985"
   priority                    = 201
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "5985"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name
@@ -82,14 +82,14 @@ resource "azurerm_network_security_rule" "nsg_5985" {
 resource "azurerm_network_security_rule" "nsg_5986" {
   count = length(azurerm_virtual_network.network)
 
-  name                        = "winrm port 5986"
+  name                        = "winrm-port-5986"
   priority                    = 202
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "5986"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name
@@ -99,14 +99,14 @@ resource "azurerm_network_security_rule" "nsg_5986" {
 resource "azurerm_network_security_rule" "nsg_22" {
   count = length(azurerm_virtual_network.network)
 
-  name                        = "ssh port 22"
+  name                        = "ssh-port-22"
   priority                    = 203
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name
@@ -117,14 +117,14 @@ resource "azurerm_network_security_rule" "nsg_3389" {
   # Only open rdp port if we are creating public ip addresses
   count = var.create_debug_rdp_access == true ? length(azurerm_virtual_network.network) : 0
 
-  name                        = "debug rdp port 3389"
+  name                        = "debug-rdp-port-3389"
   priority                    = 204
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "*"
   source_port_range           = "*"
   destination_port_range      = "3389"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg[count.index].name

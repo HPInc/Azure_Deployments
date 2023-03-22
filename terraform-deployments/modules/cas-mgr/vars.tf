@@ -140,3 +140,27 @@ variable "blob_depends_on" {
   type        = any
   default     =  null
 }
+
+variable "tag_name" {
+  description = "Name of the artifact to be tagged with the resulting format value = tag_prefix + tag_value + tag_suffix"
+  type        = string
+  default     = "Type"
+}
+
+variable "tag_prefix" {
+  description = "Name of the prefix formatted tag value"
+  type        = string
+  default     = "AW"
+}
+
+variable "tag_value" {
+  description = "Name of the prefix formatted tag value"
+  type        = string
+  default     = "cas-mgr-single-connector"
+}
+
+variable "tag_suffix" {
+  description = "Name of the prefix formatted tag value"
+  type        = string
+  default     = "VM"
+}

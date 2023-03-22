@@ -150,7 +150,7 @@ resource "azurerm_firewall_nat_rule_collection" "cac-fw-nat" {
       name = "allow-cac-${rule.key}-ssh"
 
       source_addresses = [
-        chomp(data.http.myip.body)
+        chomp(data.http.myip.response_body)
       ]
 
       destination_ports = [

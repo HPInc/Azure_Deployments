@@ -59,7 +59,7 @@ $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
 $LOG_FILE = "C:\Teradici\provisioning.log"
 $NVIDIA_DIR = "C:\Program Files\NVIDIA Corporation\NVSMI"
 $TERADICI_DOWNLOAD_TOKEN = "yj39yHtgj68Uv2Qf"
-$PCOIP_AGENT_LOCATION_URL = "https://dl.teradici.com/${TERADICI_DOWNLOAD_TOKEN}/pcoip-agent/raw/names/pcoip-agent-standard-exe/versions/latest/"
+$PCOIP_AGENT_LOCATION_URL = "https://dl.teradici.com/${TERADICI_DOWNLOAD_TOKEN}/pcoip-agent/raw/names/pcoip-agent-graphics-exe/versions/latest/"
 
 $DATA = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $DATA.Add("pcoip_registration_code", "${pcoip_registration_code}")

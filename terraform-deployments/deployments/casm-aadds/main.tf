@@ -43,7 +43,7 @@ resource "azurerm_network_security_group" "nsg" {
 }
 
 resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
-  name                       = "allow all vnet"
+  name                       = "allow-all-vnet"
   priority                   = 100
   direction                  = "Inbound"
   access                     = "Allow"
@@ -58,14 +58,14 @@ resource "azurerm_network_security_rule" "nsg_allow_all_vnet" {
 
 # WinRM port used to upload scripts
 resource "azurerm_network_security_rule" "nsg_5985" {
-  name                        = "winrm port 5985"
+  name                        = "winrm-port-5985"
   priority                    = 201
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "5985"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.main.name
   network_security_group_name = azurerm_network_security_group.nsg.name
@@ -73,7 +73,7 @@ resource "azurerm_network_security_rule" "nsg_5985" {
 
 # AADDS Port
 resource "azurerm_network_security_rule" "nsg_5986" {
-  name                        = "winrm port 5986"
+  name                        = "winrm-port-5986"
   priority                    = 202
   direction                   = "Inbound"
   access                      = "Allow"
@@ -88,14 +88,14 @@ resource "azurerm_network_security_rule" "nsg_5986" {
 
 # SSH port used to upload scripts
 resource "azurerm_network_security_rule" "nsg_22" {
-  name                        = "ssh port 22"
+  name                        = "ssh-port-22"
   priority                    = 203
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = chomp(data.http.myip.body)
+  source_address_prefix       = chomp(data.http.myip.response_body)
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.main.name
   network_security_group_name = azurerm_network_security_group.nsg.name

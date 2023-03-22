@@ -311,6 +311,7 @@ function Join-Domain
 }
 
 Start-Transcript -path $LOG_FILE -append
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 "--> Script running as user '$(whoami)'."
 if ([string]::IsNullOrWhiteSpace("${tenant_id}")) {
@@ -320,8 +321,6 @@ else {
     Write-Output "Decrypting Key Vault Secrets .."
     Decrypt-Credentials
 }
-
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 PCoIP-Agent-Install
 

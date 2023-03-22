@@ -37,7 +37,7 @@ Running the deployment locally:
 1. Access the [Azure Cloud Shell](https://portal.azure.com/#cloudshell/).
 
 2. Clone the repository into your Azure Cloud Shell (ACS) environment.
-  - ```git clone https://github.azc.ext.hp.com/Anyware-Cloud-Solutions/Azure_Deployments_dev.git```
+  - ```git clone https://github.com/teradici/Azure_Deployments```
 
 3. Change directory into the quickstart-single-connector folder:
   - ```cd Azure_Deployments_dev/terraform-deployments/deployments/quickstart-single-connector```
