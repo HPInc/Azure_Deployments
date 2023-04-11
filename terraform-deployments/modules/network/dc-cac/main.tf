@@ -186,7 +186,6 @@ resource "azurerm_public_ip" "nat" {
   location                = var.locations[count.index]
   resource_group_name     = var.resource_group_name
   allocation_method       = "Static"
-  zones                   = ["1"]
   idle_timeout_in_minutes = 30
   sku                     = "Standard"
 }
@@ -198,7 +197,6 @@ resource "azurerm_public_ip_prefix" "nat" {
   location            = var.locations[count.index]
   resource_group_name = var.resource_group_name
   prefix_length       = 30
-  zones               = ["1"]
   sku                 = "Standard"
 }
 
@@ -209,7 +207,6 @@ resource "azurerm_nat_gateway" "nat" {
   location                = var.locations[count.index]
   resource_group_name     = var.resource_group_name
   idle_timeout_in_minutes = 10
-  zones                   = ["1"]
   sku_name                = "Standard"
 }
 
