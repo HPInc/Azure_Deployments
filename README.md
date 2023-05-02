@@ -1,34 +1,34 @@
-# HP Teradici CAS Deployments on Azure
-Teradici is the creator of the PCoIP remoting protocol technology and Cloud Access Software. Teradici's Cloud Access Software enables highly-scalable and cost-effective deployments by managing cloud compute costs and brokering PCoIP connections to remote Windows or Linux workstations. The Cloud Access Manager solution is comprised of two main components – the CAS Manager service, which is a service offered by Teradici to manage Cloud Access Manager deployments, and the Cloud Access Connector, which is the portion of the Cloud Access Manager solution that resides in the customer environment.  To learn more about Cloud Access Manager (CAS-M), please visit https://www.teradici.com/web-help/pcoip_cloud_access_manager/CACv2/
+# HP Anyware Deployments on Azure
+HP Teradici is the creator of the PCoIP remoting protocol technology and HP Anyware. HP Anyware enables highly-scalable and cost-effective deployments by managing cloud compute costs and brokering PCoIP connections to remote Windows or Linux workstations. The Anyware Manager solution is comprised of two main components – the Anyware Manager service, which is a service offered by HP Teradici to manage Anyware Manager deployments, and the Anyware Connector, which is the portion of the Anyware Manager solution that resides in the customer environment.  To learn more about Anyware Manager (AWM), please visit https://www.teradici.com/web-help/cas_manager_as_a_service/
 
-This repository contains a collection of Terraform scripts for demonstrating how to deploy Cloud Access Connectors in a user's Azure environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
+This repository contains a collection of Terraform scripts for demonstrating how to deploy Anyware Connectors in a user's Azure environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
 
-![single-connector diagram](/terraform-deployments/docs/png/CASMArchitecture.png)
+![single-connector diagram](/terraform-deployments/docs/png/HP-Anyware-architecture.png)
 
-# CAS-Manager Stand Alone Deployments 
+# Anyware-Manager Stand Alone Deployments 
 
   - Single Connector Deployment
-    - [CAS-M + CAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-single-connector.md)
-    - [CAS-M + CAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
+    - [AWM + AWC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-single-connector.md)
+    - [AWM + AWC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-single-connector.md)
   - Load Balancer with Multi-Connector Deployment
-    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
-    - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
+    - [AWM + nAWC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-lb.md)
+    - [AWM + nAWC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer-one-ip-lb.md)
   - Multi-Region Multi LB Deployment
-    - [CAS-M + nCAC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
-    - [CAS-M + nCAC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
+    - [AWM + nAWC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
+    - [AWM + nAWC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 
-# CAS Manager As A Service Deployments
+# Anyware Manager As A Service Deployments
   
-  ### CAS-M SaaS with Local Domain Controller (CAS-M SaaS + DC)
+  ### AWM SaaS with Local Domain Controller (AWM SaaS + DC)
   - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
   - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer-one-ip.md)
   - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
 
-  ### QuickStart for CAS-M SaaS (Python script for creating CAS-M SaaS + DC)
-  - [Quickstart Deployment CAS-M As A Service](/terraform-deployments/docs/README-azure-quickstart-single-connector.md)
+  ### QuickStart for AWM SaaS (Python script for creating AWM SaaS + DC)
+  - [Quickstart Deployment AWM As A Service](/terraform-deployments/docs/README-azure-quickstart-single-connector.md)
  
   ### FAQ: How to install AAD DS and Local License Server
-  - [CASM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
+  - [AWM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
   - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
 
   ### Reference
@@ -50,7 +50,7 @@ The top level terraform scripts that create specific deployments.
 Description and instructions for different deployments and architectures.
 
 ## modules/
-The building blocks of deployments, e.g. a Domain Controller, a Cloud Access
+The building blocks of deployments, e.g. a Domain Controller, an Anyware
 Connector, a Workstation, etc.
 
 ## tools/
