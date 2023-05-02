@@ -6,13 +6,13 @@
  */
 
 output "centos-std-vm-public-ips" {
-  value = [for item in azurerm_linux_virtual_machine.centos-std-vm : item.public_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-std-vm-im : item.public_ip_address] : [for item in azurerm_linux_virtual_machine.centos-std-vm-sp : item.public_ip_address]
 }
 
 output "centos-std-vm-names" {
-  value = [for item in azurerm_linux_virtual_machine.centos-std-vm : item.name]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-std-vm-im : item.name] : [for item in azurerm_linux_virtual_machine.centos-std-vm-sp : item.name]
 }
 
 output "centos-std-vm-private-ips" {
-  value = [for item in azurerm_linux_virtual_machine.centos-std-vm : item.private_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-std-vm-im : item.private_ip_address] : [for item in azurerm_linux_virtual_machine.centos-std-vm-sp : item.private_ip_address]
 }

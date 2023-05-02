@@ -10,18 +10,7 @@ import json
 import requests
 
 CAS_API_URL = "https://localhost/api/v1"
-TEMP_CRED_PATH = "/opt/teradici/casm/temp-creds.txt"
-
-
-def get_temp_creds(path=TEMP_CRED_PATH):
-    data = {}
-
-    with open(path, 'r') as f:
-        for line in f:
-            key, value = map(str.strip, line.split(":"))
-            data[key] = value
-
-    return data['username'], data['password']
+ADMIN_USER = "adminUser"
 
 
 def cas_login(username, password):
@@ -37,15 +26,6 @@ def cas_login(username, password):
 
     token = resp.json()['data']['token']
     session.headers.update({"Authorization": token})
-
-
-def password_change(new_password):
-    payload = {'password': new_password}
-    resp = session.post(
-        f"{CAS_API_URL}/auth/ad/adminPassword",
-        json=payload,
-    )
-    resp.raise_for_status()
 
 
 def deployment_create(name, reg_code):
@@ -147,16 +127,16 @@ def deployment_add_azure_account(self, key, deployment):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="This script updates the password for the CAS Manager Admin user.")
+        description="This script updates the password for the Anyware Manager Admin user.")
 
     parser.add_argument("--deployment_name", required=True,
-                        help="CAS Manager deployment to create")
+                        help="Anyware Manager deployment to create")
     parser.add_argument("--key_file", required=True,
                         help="path to write Deployment Service Account key JSON file")
     parser.add_argument("--key_name", required=True,
-                        help="name of CAS Manager Deployment Service Account key")
+                        help="name of Anyware Manager Deployment Service Account key")
     parser.add_argument("--password", required=True,
-                        help="new CAS Manager administrator password")
+                        help="new Anyware Manager administrator password")
     parser.add_argument("--reg_code", required=True,
                         help="PCoIP registration code")
     parser.add_argument(
@@ -168,13 +148,8 @@ if __name__ == '__main__':
     session = requests.Session()
     session.verify = False
 
-    print("Setting CAS Manager Administrator password...")
-    user, password = get_temp_creds()
-    cas_login(user, password)
-    password_change(args.password)
-
-    print("Creating CAS Manager deployment...")
-    cas_login(user, args.password)
+    print("Creating Anyware Manager deployment...")
+    cas_login(ADMIN_USER, args.password)
     deployment = deployment_create(args.deployment_name, args.reg_code)
     cas_deployment_key = deployment_key_create(deployment, args.key_name)
     deployment_key_write(cas_deployment_key, args.key_file)
@@ -182,12 +157,12 @@ if __name__ == '__main__':
     if args.azure_key:
         azure_sa_key = get_azure_sa_key(args.azure_key)
 
-        print("Validating Azure credentials with CAS Manager...")
+        print("Validating Azure credentials with Anyware Manager...")
         valid = validate_azure_sa(azure_sa_key)
 
         if valid:
-            print("Adding Azure credentials to CAS Manager deployment...")
+            print("Adding Azure credentials to Anyware Manager deployment...")
             deployment_add_azure_account(azure_sa_key, deployment)
         else:
             print(
-                "WARNING: Azure credentials validation failed. Skip adding Azure credentials to CAS Manager deployment.")
+                "WARNING: Azure credentials validation failed. Skip adding Azure credentials to Anyware Manager deployment.")

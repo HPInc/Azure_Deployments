@@ -88,6 +88,8 @@ module "active-directory-domain-vm" {
   prefix                       = var.prefix
   application_id               = var.application_id
   aad_client_secret            = var.aad_client_secret
+  managed_identity_id          = var.managed_identity_id
+  
 }
 
 module "active-directory-domain-service" {
@@ -155,6 +157,7 @@ module "cac-vm" {
   tenant_id                   = var.tenant_id
   key_vault_id                = var.key_vault_id
   ad_pass_secret_name         = var.ad_pass_secret_name
+  managed_identity_id         = var.managed_identity_id
 }
 
 module "cac-configuration" {
@@ -203,6 +206,7 @@ module "windows-std-vm" {
   application_id               = var.application_id
   tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
+  managed_identity_id          = var.managed_identity_id
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   storage_account_name         = azurerm_storage_account.windows-script-storage.name
@@ -234,6 +238,7 @@ module "windows-gfx-vm" {
   application_id               = var.application_id
   tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
+  managed_identity_id          = var.managed_identity_id
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   storage_account_name         = azurerm_storage_account.windows-script-storage.name
@@ -263,6 +268,7 @@ module "centos-std-vm" {
   application_id               = var.application_id
   tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
+  managed_identity_id          = var.managed_identity_id
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   domain_controller_ip         = module.dc-cac-network.dc-private-ip
@@ -292,6 +298,7 @@ module "centos-gfx-vm" {
   application_id               = var.application_id
   tenant_id                    = var.tenant_id
   aad_client_secret            = var.aad_client_secret
+  managed_identity_id          = var.managed_identity_id
   key_vault_id                 = var.key_vault_id
   ad_pass_secret_name          = var.ad_pass_secret_name
   domain_controller_ip         = module.dc-cac-network.dc-private-ip

@@ -1,6 +1,6 @@
 ## Terraform Configuration
 
-Before a deployment ```terraform.tfvars``` must be completed. This file contains different input variables for a deployment. In this example, we show the CAS Manager SaaS with Load Balancer.
+Before a deployment ```terraform.tfvars``` must be completed. This file contains different input variables for a deployment. In this example, we show the Anyware Manager SaaS with Load Balancer.
 
 **Note:** Uncommented lines show required variables, while commented lines show optional variables with their default or sample values.
 
@@ -35,11 +35,11 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
         - ```disk_type```: Type of storage for the workstation. 
             -   Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
         - ```count```: Number of workstations to deploy under the specific settings.
-        - ```isGFXHost```: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+        - ```isGFXHost```: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV12s_v3**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
 
     2. cac_configuration:
-        - ```cac_token```: token obtained from [CAS Manager](https://cas.teradici.com). This will be used when installing the Cloud Access Connector.
+        - ```cac_token```: token obtained from [Anyware Manager](https://cas.teradici.com). This will be used when installing the Cloud Access Connector.
         ![obtaining a token](/terraform-deployments/docs/png/obtaining-cac-token.png)
         - ```location```: location of the CAC. Ensure this is identical to the workstations' location.
 
@@ -82,9 +82,9 @@ Before a deployment ```terraform.tfvars``` must be completed. This file contains
     ![terraform apply prompt](/terraform-deployments/docs/png/terraform-apply-prompt.png)
 8. Answer ```yes``` to start provisioning the load balancer infrastructure.
     - To skip this extra step, you may also provide the additional option using the command ```terraform apply --auto-approve```.
-9. After completion, click [here](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md#7-adding-workstations-in-cas-manager) and start at section 7 for instructions to add workstations in the CAS Manager admin console. 
+9. After completion, click [here](/terraform-deployments/docs/README-azure-cas-mgr-load-balancer.md#7-adding-workstations-in-cas-manager) and start at section 7 for instructions to add workstations in the Anyware Manager admin console. 
 
-A typical deployment should take around 30-40 minutes. Upon a successful deployment, the output will display information such as important IP addresses and names. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may temporarily show as **Unhealthy**. 
+A typical deployment should take around 30-40 minutes. Upon a successful deployment, the output will display information such as important IP addresses and names. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with Anyware Manager so **Health** statuses may temporarily show as **Unhealthy**. 
 
 Completed deployment output:
 

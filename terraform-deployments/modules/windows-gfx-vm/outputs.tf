@@ -6,24 +6,24 @@
  */
 
 output "windows-gfx-vm-ids" {
-  value = [for item in azurerm_windows_virtual_machine.windows-gfx-vm : item.id]
+  value = var.managed_identity_id != "" ? [for item in azurerm_windows_virtual_machine.windows-gfx-vm-im : item.id] : [for item in azurerm_windows_virtual_machine.windows-gfx-vm-sp : item.id]
 }
 
 output "windows-gfx-vm-public-ips" {
-  value = [for item in azurerm_windows_virtual_machine.windows-gfx-vm : item.public_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_windows_virtual_machine.windows-gfx-vm-im : item.public_ip_address] : [for item in azurerm_windows_virtual_machine.windows-gfx-vm-sp : item.public_ip_address]
 }
 
 output "windows-gfx-vm-private-ips" {
-  value = [for item in azurerm_windows_virtual_machine.windows-gfx-vm : item.private_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_windows_virtual_machine.windows-gfx-vm-im : item.private_ip_address] : [for item in azurerm_windows_virtual_machine.windows-gfx-vm-sp : item.private_ip_address]
 }
 
 output "windows-gfx-vm-names" {
-  value = [for item in azurerm_windows_virtual_machine.windows-gfx-vm : item.name]
+  value = var.managed_identity_id != "" ? [for item in azurerm_windows_virtual_machine.windows-gfx-vm-im : item.name]: [for item in azurerm_windows_virtual_machine.windows-gfx-vm-sp : item.name]
 }
 
 output "windows-gfx-vm-size" {
   description = "The size of the vitual machine"
-  value       = [for item in azurerm_windows_virtual_machine.windows-gfx-vm : item.size]
+  value       = var.managed_identity_id != "" ? [for item in azurerm_windows_virtual_machine.windows-gfx-vm-im : item.size] : [for item in azurerm_windows_virtual_machine.windows-gfx-vm-sp : item.size]
 }
 
 output "resource-group-name" {

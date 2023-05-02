@@ -1,15 +1,15 @@
-# CAS Manager (Multi Region Traffic Manager) Deployment
+# Anyware Manager (Multi Region Traffic Manager) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager Multi-Region Traffic Manager architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
+**Objective**: The objective of this documentation is to deploy the Anyware Manager Multi-Region Traffic Manager architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
 ## Table of Contents
-1. [CAS Manager Multi Region Traffic Manager Architecture](#1-cas-manager-multi-region-traffic-manager-architecture)
+1. [Anyware Manager Multi Region Traffic Manager Architecture](#1-anyware-manager-multi-region-traffic-manager-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying via Terraform](#6-deploying-via-terraform)
-7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
+7. [Adding Workstations in Anyware Manager](#7-adding-workstations-in-anyware-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
@@ -21,23 +21,23 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 
-### 1. CAS Manager Multi Region Traffic Manager Architecture
+### 1. Anyware Manager Multi Region Traffic Manager Architecture
 
-The Cloud Access Software (CAS) Manager Multi Region Traffic Manager deployment creates a Virtual Network with 4 subnets in the same region. The subnets created are:
+The Anyware Manager Multi Region Traffic Manager deployment creates a Virtual Network with 4 subnets in the same region. The subnets created are:
 - ```subnet-dc```: for the Domain Controller
 - ```subnet-cac```: for the Connector
 - ```subnet-ws```: for the workstations
-- ```subnet-cas-mgr```: for the CAS Manager
+- ```subnet-cas-mgr```: for the Anyware Manager
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes. Additional virtual networks will be created for each unique region.
 
 A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a ```domain_users_list``` CSV file is specified. The Domain Controller is given a static IP.
 
-Cloud Access Connectors are created and register themselves with the CAS Manager.
+Cloud Access Connectors are created and register themselves with the Anyware Manager.
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the ```workstations``` variable. This is a list of objects where each object defines a workstation. These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-The Traffic Manager is a global load balancer which distributes traffic between Cloud Access Connectors across regions. The client initiates a PCoIP session with the domain name of the Traffic Manager and selects one of the connectors to establish the connection. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is resonsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager. 
+The Traffic Manager is a global load balancer which distributes traffic between Cloud Access Connectors across regions. The client initiates a PCoIP session with the domain name of the Traffic Manager and selects one of the connectors to establish the connection. This deployments runs the Anyware Manager in a virtual machine which gives users full control of the Anyware deployment. The Anyware deployment will not have to reach out to the internet for Anyware management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running Anyware Manager.
 
 The following diagram shows a deployment instance with one Cloud Access Connector and two workstations in each of the two regions: 
 
@@ -106,7 +106,7 @@ Running the deploy script will set the necessary environment variables for the U
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, CAS Manager admin password, and PCoIP registration key in terraform.tfvars.
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, Anyware Manager admin password, and PCoIP registration key in terraform.tfvars.
 
 As a security method to help protect the values listed above, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
@@ -153,7 +153,7 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
     
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/anyware_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com//web-help/anyware_manager/current/cloud_access_connector/cas_connector_update/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
   1. Go into the **Resource group** that contains ACS storage. By default, the name should look like: **cloud-shell-storage-[region]**
@@ -194,7 +194,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```disk_type```: Type of storage for the workstation. 
             -   Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
         - ```count```: Number of workstations to deploy under the specific settings.
-        - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+        - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV12s_v3**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
 4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
@@ -205,10 +205,10 @@ Before deploying, ```terraform.tfvars``` must be complete.
 5. Run `terraform init` to initialize a working directory containing Terraform configuration files
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
+7. Answer `yes` to start provisioning the Anyware-M Multi-Region Traffic Manager infrastructure
    - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
-A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
+A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
@@ -239,11 +239,11 @@ windows-std-internal-ip = {
 }
 ```
     
-### 7. Adding Workstations in CAS Manager
+### 7. Adding Workstations in Anyware Manager
 
-To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
+To connect to workstations, the authorized users must be added to the machines, done through the Anyware Manager GUI.
 
-Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+Determine the public IP address of Anyware Manager Virtual Machine. This can be done by multiple methods including
 - Through the output variables of a successful deployment
 - Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
 
@@ -260,7 +260,7 @@ Determine the public IP address of CAS Manager Virtual Machine. This can be done
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the domain name of the traffic manager: ```traffic-manager-domain-name```. 
+Once the workstations have been added by Anyware Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the domain name of the traffic manager: ```traffic-manager-domain-name```. 
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the domain name of the traffic manager and enter a name for this connection. 
@@ -277,7 +277,7 @@ Run ```terraform destroy -force``` to remove all resources created by Terraform.
 
 ### 11. Troubleshooting
 - If the console is frozen, try pressing Enter to unfreeze it. If freezing persists, a fresh deployment must be performed.
-- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
+- If no machines are showing up on Anyware Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
 - If trying to run a fresh deployment and have been running into errors, delete ```terraform.tfstate```. This file stores the state of the current infrastructure and configuration. Remember to also delete the previous deployment on the [Azure Portal](http://portal.azure.com/) if it's no longer being used.
 - If for any reason there are no outputs displaying on ACS, the domain name of the traffic manager can be found by going onto the [Azure Portal](http://portal.azure.com/). Go into the deployment's resource group, select the traffic manager, and the **DNS name** will be shown on the top right.
 

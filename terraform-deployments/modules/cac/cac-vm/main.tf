@@ -17,12 +17,12 @@ data "azurerm_key_vault_secret" "ad-pass" {
   key_vault_id = var.key_vault_id
 }
 
-resource "azurerm_linux_virtual_machine" "cac" {
+resource "azurerm_linux_virtual_machine" "cac-sp" {
   depends_on = [
     var.cac_depends_on
   ]
 
-  count = length(var.cac_configuration)
+  count = var.managed_identity_id == "" ? length(var.cac_configuration) : 0
 
   name                            = "${local.prefix}cac-vm-${count.index}"
   location                        = var.cac_configuration[count.index].location
@@ -56,20 +56,66 @@ resource "azurerm_linux_virtual_machine" "cac" {
   }
 }
 
+resource "azurerm_linux_virtual_machine" "cac-im" {
+  depends_on = [
+    var.cac_depends_on
+  ]
+
+  count = var.managed_identity_id != "" ? length(var.cac_configuration) : 0
+
+  name                            = "${local.prefix}cac-vm-${count.index}"
+  location                        = var.cac_configuration[count.index].location
+  resource_group_name             = var.resource_group_name
+  size                            = var.machine_type[0]
+  admin_username                  = var.cac_admin_user
+  admin_password                  = local.cac_admin_password
+  computer_name                   = "${local.prefix}cac-vm"
+  disable_password_authentication = false
+  network_interface_ids = [
+    var.nic_ids[count.index]
+  ]
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+
+  os_disk {
+    name                 = "${local.prefix}cac-vm-osdisk-${count.index}"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = var.disk_size_gb
+  }
+
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [
+      var.managed_identity_id
+      ]
+  }
+}
+
 resource "azurerm_resource_group_template_deployment" "shutdown_schedule_template" {
   depends_on = [
-    azurerm_linux_virtual_machine.cac
+    azurerm_linux_virtual_machine.cac-im, azurerm_linux_virtual_machine.cac-sp
   ]
 
   count = length(var.cac_configuration)
 
-  name                = "${azurerm_linux_virtual_machine.cac[count.index].name}-shutdown-schedule-template"
+  name                = var.managed_identity_id != "" ? "${azurerm_linux_virtual_machine.cac-im[count.index].name}-shutdown-schedule-template" : "${azurerm_linux_virtual_machine.cac-sp[count.index].name}-shutdown-schedule-template"
   resource_group_name = var.resource_group_name
   deployment_mode     = "Incremental"
 
   parameters_content = jsonencode({
     "location"                       = {value = var.cac_configuration[count.index].location}
-    "virtualMachineName"             = {value = azurerm_linux_virtual_machine.cac[count.index].name}
+    "virtualMachineName"             = var.managed_identity_id != "" ? {value = azurerm_linux_virtual_machine.cac-im[count.index].name} : {value = azurerm_linux_virtual_machine.cac-sp[count.index].name}
     "autoShutdownStatus"             = {value = "Enabled"}
     "autoShutdownTime"               = {value = "18:00"}
     "autoShutdownTimeZone"           = {value = "Pacific Standard Time"}

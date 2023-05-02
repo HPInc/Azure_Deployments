@@ -119,3 +119,9 @@ variable "cas_mgr_url" {
   description = "CAS Manager URL"
   default     = "https://cas.teradici.com"
 }
+
+variable "managed_identity_id" {
+  description = "The id of managed identity"
+  type        = string
+  default     = ""
+}

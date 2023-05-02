@@ -13,3 +13,7 @@ aadds_location = "westus2"
 
 # Password of the PFX certificate created for LDAPS communication. Must be at least 4 characters.
 pfx_cert_password = "Password!234"
+
+# Service Principal Authentication
+application_id     = "<from section 3>"
+aad_client_secret  = "<from section 3>"

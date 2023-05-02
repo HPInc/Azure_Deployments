@@ -5,11 +5,11 @@
 ## Table of Contents
 1. [Multi Region Architecture](#1-multi-region-architecture)
 2. [Requirements](#2-requirements)
-3. [Connect Azure to CAS Manager](#3-connect-azure-to-cas-manager)
+3. [Connect Azure to Anyware Manager](#3-connect-azure-to-anyware-manager)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying via Terraform](#6-deploying-via-terraform)
-7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
+7. [Adding Workstations in Anyware Manager](#7-adding-workstations-in-anyware-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
@@ -40,15 +40,15 @@ The following diagram shows a multiple-connector deployment instance with multip
 ### 2. Requirements
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
+- an Anyware Manager Deployment Service Account. Anyware Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
 - [PCoIP Client](https://docs.teradici.com/find/product/software-and-mobile-clients)
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/)
 
-### 3. Connect Azure to CAS Manager
-To interact directly with remote workstations, an Azure account must be connected to the CAS Manager.
+### 3. Connect Azure to Anyware Manager
+To interact directly with remote workstations, an Azure account must be connected to the Anyware Manager.
 
 In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
 
@@ -73,12 +73,12 @@ The bash deploy script will automate the creation of a service principal and ass
 application_id                = "appId value here"
 aad_client_secret             = "password value here"
 ```
-4. Login to CAS Manager admin console [here](https://cas.teradici.com).
-5. [Create](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 6 and 7 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+4. Login to Anyware Manager admin console [here](https://cas.teradici.com).
+5. [Create](https://www.teradici.com/web-help/anyware_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 6 and 7 are optional. It allows for admins to turn on & off workstations from the Anyware Manager admin console.
 6. Click on **Provider Service Accounts** and then **Azure**.
-7. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/#azure-cloud-credentials).
+7. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/anyware_manager/current/admin_console/deployments/#azure-cloud-credentials).
 8. Click **Connectors** on the side bar and create a new connector.
-9. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
+9. Input a connector name to [generate](https://www.teradici.com/web-help/anyware_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
     - Multi region deployment requires at least **2** unique tokens for cloud access connectors (cac) and **2** unique regions. 
     - Tokens expire in 2 hours.
     - The value will be used inside ```terraform.tfvars``` like so: 
@@ -114,12 +114,12 @@ Running the deploy script will set the necessary environment variables for the U
     2. Leave **Assign access to** as **User, group, or service principal**
     3. Under **Select** search for the application name from step 4 and click **Save**.
     4. Repeat steps i - iii for the role **Virtual Machine Contributor** and **Contributor**.
-10. Login to CAS Manager admin console [here](https://cas.teradici.com).
-11. [Create](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the CAS Manager admin console.
+10. Login to Anyware Manager admin console [here](https://cas.teradici.com).
+11. [Create](https://www.teradici.com/web-help/anyware_manager/current/admin_console/deployments/) a new deployment. **Note:** Steps 12 and 13 are optional. It allows for admins to turn on & off workstations from the Anyware Manager admin console.
 12. Click on **Provider Service Accounts** and then **Azure**.
-13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/cas_manager/current/admin_console/deployments/#azure-cloud-credentials). 
+13. Submit the credentials into the [Azure form](https://www.teradici.com/web-help/anyware_manager/current/admin_console/deployments/#azure-cloud-credentials). 
 14. Click **Connectors** on the side bar and create a new connector. 
-15. Input a connector name to [generate](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
+15. Input a connector name to [generate](https://www.teradici.com/web-help/anyware_manager/current/cloud_access_connector/cas_connector_install/#generating-a-connector-token) a token. Tokens will be used in the .tfvars file. 
     - Multi region deployment requires at least **2** unique tokens for cloud access connectors (cac) and **2** unique regions. 
     - Tokens expire in 2 hours.
     - The value will be used inside ```terraform.tfvars``` like so: 
@@ -142,7 +142,7 @@ As a security method to help protect the AD safe mode admin password, AD admin p
     3. Click **+ Add Access Policy**.
         1. Under **Configure from template** select **Secret Management**.
         2. Under **Select principal** click on **None selected**.
-        3. Find the application from [section 3](#3-connect-azure-to-cas-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
+        3. Find the application from [section 3](#3-connect-azure-to-anyware-manager) and click **Select**. The ID underneath should match the Client ID/Application ID saved from earlier.
         4. Click **Review + create** and then **Create**.
 2. Click on the key vault that was created and click on **Secrets** inside the rightmost blade.
 3. To create **AD safe mode admin password**, **AD admin password**, **PCoIP registration key**, and **connector token** as secrets follow these steps for each value:
@@ -177,14 +177,14 @@ aad_client_secret             = "J492L_1KR2plr1SQdgndGc~gE~pQ.eR3F."
 # ad_pass_secret_name           = "adPasswordID"
 ```
 - Tips for finding these variables:
-    1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-cas-manager) step 4.
-    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-cas-manager). If this secret is no longer saved, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
+    1. ```application_id``` and ```tenant_id``` are from [section 3](#3-connect-azure-to-anyware-manager) step 4.
+    2. ```aad_client_secret```: This is the same secret from [section 3](#3-connect-azure-to-anyware-manager). If this secret is no longer saved, follow section 3 from step 1-3 & 5-6 to obtain a new client secret.
     3. ```key_vault_id```: Go to the key vault containing the secrets on the Portal and click on **Properties** inside the opened blade. Copy the **Resource ID**.
     4. ```ad_pass_secret_name```: This is the name used for the ad pass secret. The name can be seen after```/secrets/``` from the variable ```ad_admin_password```.
 
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/anyware_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com//web-help/anyware_manager/current/cloud_access_connector/cas_connector_update/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
   1. Go into the **Resource group** that contains ACS storage. By default, the name should look like: **cloud-shell-storage-[region]**
@@ -225,7 +225,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
         - ```disk_type```: Type of storage for the workstation. 
             -   Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
         - ```count```: Number of workstations to deploy under the specific settings.
-        - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+        - ```isGFXHost```: Determines if a Grahpics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV12s_v3**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
             -   Possible values: **true** or **false**
 3. **(Optional)** To add domain users save ```domain_users_list.csv.sample``` as ```domain_users_list.csv``` and edit this file accordingly.
     - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
@@ -238,7 +238,7 @@ Before deploying, ```terraform.tfvars``` must be complete.
     - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
 6. Answer ```yes``` to start provisioning the single-connector infrastructure. 
 
-A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with CAS Manager so **Health** statuses may show as **Unhealthy** temporarily. 
+A typical deployment should take around 30-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily. 
 
 Example output:
 ```
@@ -286,11 +286,11 @@ windows-graphics-workstations = [
 ]
 ```
 
-### 7. Adding Workstations in CAS Manager
+### 7. Adding Workstations in Anyware Manager
 It is recommended to add your Azure Provider Credentials to the Anyware Manager as to allow service interactions between them. This allows actions such as powering a remote workstation on or off. This can be done on the Anyware Manager dashboard, select **Add provider credentials**, select the **Provider Service Accounts** tab, and fill out the account credentials under Azure.
 
-To connect to workstations, they have to be added through the CAS Manager. 
-1. Go to the CAS Manager admin console and ensure the correct deployment is selected. 
+To connect to workstations, they have to be added through the Anyware Manager. 
+1. Go to the Anyware Manager admin console and ensure the correct deployment is selected. 
 2. Click Workstations on the left sidebar, click the blue **+** and select **Add existing remote workstation**. 
 3. From the **Provider** dropdown, select **Private Cloud** or **Azure**. If **Azure** is selected, select the name of the resource group of the deployment.
 4. In the search box below, select Windows and CentOS workstations.
@@ -301,28 +301,28 @@ To connect to workstations, they have to be added through the CAS Manager.
 Note that it may take a 5-10 minutes for the workstation to show up in the **Select Remote Workstations** drop-down box.
 
 ### 8. Starting a PCoIP Session
-Once the workstations have been added to be managed by CAS Manager and assigned to Active Directory users, users can connect through the PCoIP client using the domain name of the traffic manager.
+Once the workstations have been added to be managed by Anyware Manager and assigned to Active Directory users, users can connect through the PCoIP client using the domain name of the traffic manager.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
 2. Enter the domain name of the **Traffic Manager**. Using the example output above, **teradici.trafficmanager.net** would be entered. To connect to a specific CAC VM, enter the public IP address of the VM.
     - **Note**: If the ```traffic-manager-domain``` output does not show at the end of completion due to error or script timeout it can be found on the Portal. Go into the **traffic-manager** resource and the **DNS name** will be there.
-3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** on CAS Manager.
+3. Input the credentials from the account that was assigned under **User Entitlements for Workstations** on Anyware Manager.
 4. Click on a machine to start a PCoIP session.
 5. To connect to different workstations, close the PCoIP client and repeat steps 1-4.
 
 ### 9. Changing the deployment
 Terraform is a declarative language to describe the desired state of resources. A user can modify terraform.tfvars and run ```terraform apply``` again. Terraform will try to only apply the changes needed to acheive the new state.
 
-Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the CAS Manager admin console. Create a new connector to obtain a new token.
+Note that changes involving creating or recreating Cloud Access Connectors requires a new connector token from the Anyware Manager admin console. Create a new connector to obtain a new token.
 
 ### 10. Deleting the deployment
 Run ```terraform destroy -force``` to remove all resources created by Terraform. If this command doesn't delete everything entirely due to error, another alternative is to delete the resource group itself from the **Resource groups** page in Azure. 
 
 ### 11. Troubleshooting
 - If the console looks frozen, try pressing Enter to unfreeze it.
-- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
+- If no machines are showing up on Anyware Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry. 
 - If trying to run a fresh deployment and have been running into errors, delete all files containing  ```.tfstate```. .tfstate files store the state of the current infrastructure and configuration. 
-- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
+- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to Anyware Manager.
     - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, go into the **traffic-manager** resource and the **DNS name** will be there.
 
 Information about connecting to virtual machines for investigative purposes:

@@ -111,7 +111,7 @@ def workstations_config_get(region, ws_count):
                 prefix           = "",
                 location         = "{region}",
                 workstation_os   = "linux",
-                vm_size          = "Standard_NV6",
+                vm_size          = "Standard_NV12s_v3",
                 disk_type        = "Standard_LRS",
                 disk_size        = 128,
                 count            = {ws_count[1]},
@@ -131,7 +131,7 @@ def workstations_config_get(region, ws_count):
                 prefix           = "",
                 location         = "{region}",
                 workstation_os   = "windows",
-                vm_size          = "Standard_NV6",
+                vm_size          = "Standard_NV12s_v3",
                 disk_type        = "Standard_LRS",
                 disk_size        = 128,
                 count            = {ws_count[3]},
@@ -168,16 +168,12 @@ def deployment_delete():
                 'No existing terraform deployment exists. Did you mean "python azure-cloudshell-quickstart.py"?')
             sys.exit(1)
 
-        app_kv_destroy_cmd = f'{TERRAFORM_BIN_PATH} destroy -auto-approve'
-        subprocess.run(app_kv_destroy_cmd.split(' '), check=True)
-
         os.chdir('../single-connector')
         resource_group_name = deployment_outputs_get('resource_group')
 
         print(f'Deleting resource group {resource_group_name}..')
-        tf_destroy_cmd = f'az group delete -n {resource_group_name} --no-wait -y'
-        subprocess.run(tf_destroy_cmd.split(' '), check=True)
-
+        rg_destroy_cmd = f'az group delete -n {resource_group_name} --no-wait -y'
+        subprocess.run(rg_destroy_cmd.split(' '), check=True)
         for filename in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
             try:
                 os.remove(filename)
@@ -185,6 +181,18 @@ def deployment_delete():
                 pass
 
         os.chdir('../quickstart-single-connector')
+        tf_destroy_cmd = f'{TERRAFORM_BIN_PATH} destroy -auto-approve'
+        os.chdir(AZ_KEY_VAULT_DIR)
+        if os.path.isfile(TF_VARS_PATH):
+            subprocess.run(tf_destroy_cmd.split(' '), check=True)
+            for filename in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
+                try:
+                    os.remove(filename)
+                except OSError:
+                    pass
+                
+        os.chdir('..')
+        subprocess.run(tf_destroy_cmd.split(' '), check=True)
         for filename in [TF_VARS_PATH, TF_STATE_PATH, TF_STATE_BACKUP_PATH]:
             try:
                 os.remove(filename)
@@ -214,18 +222,20 @@ if __name__ == '__main__':
     cfg_data = prompt.configurations_get(WS_TYPES, ENTITLE_USER)
 
     tf_vars_create(TF_VARS_REF_PATH, TF_VARS_PATH, {
-                   'location': cfg_data.get('region')})
+                   'location': cfg_data.get('region'),
+                   'auth_method': cfg_data.get('auth_method')})
     terraform_deploy()
     az_app_outputs = deployment_outputs_get('ids')
 
-    az_email_cmd = 'az ad signed-in-user show --query userPrincipalName -o tsv'
-    az_email = az_credential_get(az_email_cmd)
+    if cfg_data['auth_method'] == 'Service_Principal':
+        az_email_cmd = 'az ad signed-in-user show --query userPrincipalName -o tsv'
+        az_email = az_credential_get(az_email_cmd)
 
-    user_object_id_cmd = f'az ad user show --id {az_email} --query id --out tsv'
-    user_object_id = az_credential_get(user_object_id_cmd)
+        user_object_id_cmd = f'az ad user show --id {az_email} --query id --out tsv'
+        user_object_id = az_credential_get(user_object_id_cmd)
 
-    app_object_id_cmd = f'az ad sp list --display-name {az_app_outputs["application_name"]} --query [].id --out tsv'
-    app_object_id = az_credential_get(app_object_id_cmd)
+        app_object_id_cmd = f'az ad sp list --display-name {az_app_outputs["application_name"]} --query [].id --out tsv'
+        app_object_id = az_credential_get(app_object_id_cmd)
 
     subscription_id = az_app_outputs['subscription_id']
 
@@ -235,35 +245,37 @@ if __name__ == '__main__':
     deployment = my_cam.deployment_create(
         DEPLOYMENT_NAME, cfg_data.get('pcoip_registration_code'))
 
-    print('Adding cloud service account...')
-    my_cam.deployment_add_azure_account(az_app_outputs, deployment)
+    if cfg_data.get('auth_method') == 'Service_Principal':
+        print('Adding cloud service account...')
+        my_cam.deployment_add_azure_account(az_app_outputs, deployment)
 
     print('Creating connector token...')
     cac_token = my_cam.connector_create(CONNECTOR_NAME, deployment)['token']
 
-    workstations_count = [cfg_data.get('scent'), cfg_data.get(
-        'gcent'), cfg_data.get('swin'), cfg_data.get('gwin')]
+    workstations_count = [cfg_data.get('scent'), cfg_data.get('gcent'), cfg_data.get('swin'), cfg_data.get('gwin')]
 
-    # Azure key vault deployment
+    # Azure key vault deployment only if authentication method is service principal
     os.chdir(AZ_KEY_VAULT_DIR)
-    az_key_vault_settings = {
-        'object_id':                    user_object_id,
-        'app_object_id':                app_object_id,
-        'resource_group_name':          az_app_outputs['resource_group_name'],
-        'application_name':             az_app_outputs['application_name'],
-        'pcoip_registration_code':      cfg_data.get('pcoip_registration_code'),
-        'ad_admin_password':            cfg_data.get('ad_admin_password'),
-        'safe_mode_admin_password':     cfg_data.get('safe_mode_admin_password'),
-        'cac_token':                    cac_token
-    }
+    if cfg_data['auth_method'] == 'Service_Principal':
+        az_key_vault_settings = {
+            'object_id':                    user_object_id,
+            'app_object_id':                app_object_id,
+            'resource_group_name':          az_app_outputs['resource_group_name'],
+            'application_name':             az_app_outputs['application_name'],
+            'pcoip_registration_code':      cfg_data.get('pcoip_registration_code'),
+            'ad_admin_password':            cfg_data.get('ad_admin_password'),
+            'safe_mode_admin_password':     cfg_data.get('safe_mode_admin_password'),
+            'cac_token':                    cac_token
+        }
 
-    tf_vars_create(TF_VARS_REF_PATH, TF_VARS_PATH, az_key_vault_settings)
-    terraform_deploy()
+        tf_vars_create(TF_VARS_REF_PATH, TF_VARS_PATH, az_key_vault_settings)
+        terraform_deploy()
 
-    az_vault_outputs = deployment_outputs_get('key-vault-secrets')
+        az_vault_outputs = deployment_outputs_get('key-vault-secrets')
 
     os.chdir(SINGLE_CONNECTOR_DIR)
-    single_connector_settings = {
+    if cfg_data['auth_method'] == 'Service_Principal':
+        single_connector_settings = {
         'workstations':                 workstations_config_get(cfg_data.get('region'), workstations_count),
         'cac_configuration':            cac_connector_config_get(az_vault_outputs['cac_token'], cfg_data.get('region')),
         'resource_group_name':          "single_connector_deployment_%s" % (az_app_outputs['random_hex_id']),
@@ -275,10 +287,24 @@ if __name__ == '__main__':
         'application_id':               az_app_outputs['application_id'],
         'aad_client_secret':            az_app_outputs['client_secret'],
         'tenant_id':                    az_app_outputs['tenant_id']
-    }
+        }
 
-    tf_vars_create('../quickstart-single-connector/single_connector_terraform.tfvars.sample',
+        tf_vars_create('../quickstart-single-connector/single_connector_terraform_SP.tfvars.sample',
                    TF_VARS_PATH, single_connector_settings)
+    else:
+        single_connector_settings = {
+            'workstations':                 workstations_config_get(cfg_data.get('region'), workstations_count),
+            'cac_configuration':            cac_connector_config_get(cac_token, cfg_data.get('region')),
+            'resource_group_name':          "single_connector_deployment_%s" % (az_app_outputs['random_hex_id']),
+            'pcoip_registration_code':      cfg_data.get('pcoip_registration_code'),
+            'ad_admin_password':            cfg_data.get('ad_admin_password'),
+            'safe_mode_admin_password':     cfg_data.get('safe_mode_admin_password'),
+            'managed_identity_id':          az_app_outputs['managed_identity_id'],
+            'application_id':               "",
+            'aad_client_secret':            "",
+        }
+        tf_vars_create('../quickstart-single-connector/single_connector_terraform_IM.tfvars.sample',
+                    TF_VARS_PATH, single_connector_settings)
 
     terraform_deploy()
 
@@ -293,12 +319,18 @@ if __name__ == '__main__':
             hostname = f'{t}-{i}'
             print(f'Adding "{hostname}" to Cloud Access Manager...')
             try:
-                my_cam.machine_add_existing(
-                    hostname,
-                    az_app_outputs['subscription_id'],
-                    resource_group_name,
-                    deployment
-                )
+                if cfg_data.get('auth_method') == 'Service_Principal':
+                    my_cam.machine_add_existing(
+                        hostname,
+                        az_app_outputs['subscription_id'],
+                        resource_group_name,
+                        deployment
+                    )
+                else:
+                    my_cam.machine_add_existing_on_prem(
+                        hostname,
+                        deployment
+                    )
             except:
                 print(
                     f'Error adding "{hostname}" to CAM. You will need to manually add workstations & users.')

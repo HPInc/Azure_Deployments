@@ -57,7 +57,7 @@ param(
 
 $AgentLocation = 'C:\Program Files\Teradici\PCoIP Agent\'
 $LOG_FILE = "C:\Teradici\provisioning.log"
-$NVIDIA_DIR = "C:\Program Files\NVIDIA Corporation\NVSMI"
+$NVIDIA_DIR = "C:\Program Files\NVIDIA Corporation"
 $TERADICI_DOWNLOAD_TOKEN = "yj39yHtgj68Uv2Qf"
 $PCOIP_AGENT_LOCATION_URL = "https://dl.teradici.com/${TERADICI_DOWNLOAD_TOKEN}/pcoip-agent/raw/names/pcoip-agent-graphics-exe/versions/latest/"
 
@@ -125,12 +125,9 @@ Function Decrypt-Credentials {
 function Nvidia-is-Installed {
     if (!(test-path $NVIDIA_DIR)) {
         return $false
+    } else {
+        return $true
     }
-
-    cd $NVIDIA_DIR
-    & .\nvidia-smi.exe
-    return $?
-    return $false
 }
 
 function Nvidia-Install {

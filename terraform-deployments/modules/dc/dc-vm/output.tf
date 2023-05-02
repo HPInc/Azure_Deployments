@@ -7,12 +7,12 @@
 
 output "domain-controller-id" {
   description = "The id of the domain controller instance"
-  value = azurerm_windows_virtual_machine.domain-controller.id
+  value = var.managed_identity_id != "" ? azurerm_windows_virtual_machine.domain-controller-im[0].id : azurerm_windows_virtual_machine.domain-controller-sp[0].id
 }
 
 output "domain-controller-name" {
   description = "The name of the domain controller instance"
-  value = azurerm_windows_virtual_machine.domain-controller.name
+  value = var.managed_identity_id != "" ? azurerm_windows_virtual_machine.domain-controller-im[0].name : azurerm_windows_virtual_machine.domain-controller-sp[0].name
 }
 
 output "dc-machine-type" {

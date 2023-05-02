@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-resource "azurerm_windows_virtual_machine" "domain-controller" {
+resource "azurerm_windows_virtual_machine" "domain-controller-sp" {
+  count = var.managed_identity_id == "" ? 1 : 0
   depends_on = [var.dc_vm_depends_on]
 
   name                = local.virtual_machine_name
@@ -44,14 +45,61 @@ resource "azurerm_windows_virtual_machine" "domain-controller" {
   }
 }
 
+resource "azurerm_windows_virtual_machine" "domain-controller-im" {
+  count = var.managed_identity_id != "" ? 1 : 0
+  depends_on = [var.dc_vm_depends_on]
+
+  name                = local.virtual_machine_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  size                = var.dc_machine_type[0]
+  admin_username      = var.ad_admin_username
+  admin_password      = local.ad_admin_password
+  custom_data         = local.custom_data
+
+  network_interface_ids = [
+    var.nic_id,
+  ]
+
+  os_disk {
+    name                 = "dc-vm-osdisk"
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2016-Datacenter"
+    version   = "latest"
+  }
+
+  additional_unattend_content {
+    content = local.auto_logon_data
+    setting = "AutoLogon"
+  }
+
+  additional_unattend_content {
+    content = local.first_logon_data
+    setting = "FirstLogonCommands"
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [
+      var.managed_identity_id
+      ]
+  }
+}
+
 resource "azurerm_resource_group_template_deployment" "shutdown_schedule_template" {
-  name                = "${azurerm_windows_virtual_machine.domain-controller.name}-shutdown-schedule-template"
+  name                = var.managed_identity_id != "" ? "${azurerm_windows_virtual_machine.domain-controller-im[0].name}-shutdown-schedule-template" : "${azurerm_windows_virtual_machine.domain-controller-sp[0].name}-shutdown-schedule-template"
   resource_group_name = var.resource_group_name
   deployment_mode     = "Incremental"
 
   parameters_content = jsonencode({
     "location"                       = {value = var.location}
-    "virtualMachineName"             = {value = azurerm_windows_virtual_machine.domain-controller.name}
+    "virtualMachineName"             = var.managed_identity_id != "" ? {value = azurerm_windows_virtual_machine.domain-controller-im[0].name} : {value = azurerm_windows_virtual_machine.domain-controller-sp[0].name}
     "autoShutdownStatus"             = {value = "Enabled"}
     "autoShutdownTime"               = {value = "18:00"}
     "autoShutdownTimeZone"           = {value = "Pacific Standard Time"}

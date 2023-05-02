@@ -7,30 +7,30 @@
 
 output "cac-vm-ids" {
   description = "The id of the cac vitual machine"
-  value       = [for item in azurerm_linux_virtual_machine.cac : item.id]
+  value       = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.id] : [for item in azurerm_linux_virtual_machine.cac-sp : item.id]
 }
 
 output "cac-vm-public-ips" {
-  value = [for item in azurerm_linux_virtual_machine.cac : item.public_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.public_ip_address] : [for item in azurerm_linux_virtual_machine.cac-sp : item.public_ip_address]
 }
 
 output "cac-vm-private-ips" {
-  value = [for item in azurerm_linux_virtual_machine.cac : item.private_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.private_ip_address] : [for item in azurerm_linux_virtual_machine.cac-sp : item.private_ip_address]
 }
 
 output "cac-vm-names" {
   description = "The name of the cac virtual machine"
-  value       = [for item in azurerm_linux_virtual_machine.cac : item.name]
+  value       = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.name] : [for item in azurerm_linux_virtual_machine.cac-sp : item.name]
 }
 
 output "cac-vm-locations" {
   description = "The location of the cac vitual machine"
-  value       = [for item in azurerm_linux_virtual_machine.cac : item.location]
+  value       = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.location] : [for item in azurerm_linux_virtual_machine.cac-sp : item.location]
 }
 
 output "cac-vm-size" {
   description = "The size of the cac vitual machine"
-  value       = [for item in azurerm_linux_virtual_machine.cac : item.size]
+  value       = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.cac-im : item.size] : [for item in azurerm_linux_virtual_machine.cac-sp : item.size]
 }
 
 output "machine-type" {

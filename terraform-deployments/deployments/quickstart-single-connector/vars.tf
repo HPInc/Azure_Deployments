@@ -6,5 +6,9 @@
  */
 
 variable "location" {
-    description = "Location for resources. e.g.: 'westus2'"
+  description = "Location for resources. e.g.: 'westus2'"
+}
+
+variable "auth_method" {
+  description = "Authentication method either managed identity or service principal"
 }

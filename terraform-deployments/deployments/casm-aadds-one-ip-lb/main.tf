@@ -69,7 +69,7 @@ module "casm" {
   storage_connection_string = azurerm_storage_account.storage.primary_connection_string
   private_container_name    = azurerm_storage_container.private-container.name
   aadds_resource_group      = var.resource_group_name
-  cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/cas-manager/cfg/setup/bash.rpm.sh"
+  cas_mgr_add_repo_script   = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/anyware-manager/cfg/setup/bash.rpm.sh"
   cas_mgr_public_ip         = module.load-balancer.cas-public
   lb_id                     = module.load-balancer.load-balancer-ids[0]
 }

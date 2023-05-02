@@ -33,11 +33,17 @@ variable "minutes_cpu_polling_interval" {
 
 variable "nvidia_driver_url" {
   description = "URL of NVIDIA Grid driver"
-  default     = "https://download.microsoft.com/download/6/2/5/625e22a0-34ea-4d03-8738-a639acebc15e/NVIDIA-Linux-x86_64-510.73.08-grid-azure.run"
+  default     = "https://download.microsoft.com/download/c/e/9/ce913061-ccf1-4c88-94ff-294e48c55439/NVIDIA-Linux-x86_64-525.85.05-grid-azure.run"
 }
 
 variable "tenant_id" {
   description = "The directory (tenant) ID of your app registration in AAD"
   type        = string
   default = ""
+}
+
+variable "managed_identity_id" {
+  description = "The id of managed identity"
+  type        = string
+  default     = ""
 }

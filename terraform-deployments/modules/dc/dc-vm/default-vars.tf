@@ -38,3 +38,9 @@ locals {
   custom_data_params   = "Param($RemoteHostName = \"${local.virtual_machine_fqdn}\", $ComputerName = \"${local.virtual_machine_name}\")"
   custom_data          = base64encode(join(" ", [local.custom_data_params, file("${path.module}/files/winrm.ps1")]))
 }
+
+variable "managed_identity_id" {
+  description = "The id of managed identity"
+  type        = string
+  default     = ""
+}

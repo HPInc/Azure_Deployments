@@ -14,7 +14,7 @@ The Bash script will set the required environment variables in the Azure Cloud S
 Running the deployment via Azure Cloud Shell:
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
+- an Anyware Manager Deployment Service Account. Anyware Manager can be accessed [here](https://cas.teradici.com/)
 - A basic understanding of Azure, Terraform and using a command-line interpreter (Bash or PowerShell)
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html)
 - [Azure Cloud Shell](https://shell.azure.com) access.
@@ -24,7 +24,7 @@ Running the deployment via Azure Cloud Shell:
 Running the deployment locally:
 - Access to a subscription on Azure. 
 - a PCoIP Registration Code. Contact sales [here](https://www.teradici.com/compare-plans) to purchase a subscription.
-- a CAS Manager Deployment Service Account. CAS Manager can be accessed [here](https://cas.teradici.com/)
+- an Anyware Manager Deployment Service Account. Anyware Manager can be accessed [here](https://cas.teradici.com/)
 - [Terraform v0.13.5](https://www.terraform.io/downloads.html) or later
 - Python 3.+
 - PowerShell 5.+
@@ -60,6 +60,7 @@ scent | Standard CentOS 7 Workstation
 gcent | CentOS 7 with NVIDIA Tesla T4 Virtual Workstation GPU
 swin | Windows Server 2016 Workstation
 gwin | Windows Server 2016 NVIDIA Tesla T4 Virtual Workstation GPU
+  - **Authentication method**: Authentication methods on Azure, default is ```managed identity```. Use ```managed identity``` when `y` is entered. Otherwise, ```Service Principal``` is used and client secret will be stored in Azure Key Vault.
   - Confirmation of desired configuration settings, allows user to proceed or make further changes prior to provisioning.
   - **ad_admin_password** & **safe_mode_admin_password** must have atleast 3 of the following requirements:
     - 1 UPPERCASE letter
@@ -96,9 +97,9 @@ A video of the deployment process for this script can be found on [Teradici's Yo
   3. Click on the resource group that was created. It should look like ```single_connector_deployment_<timestamp>```.
   4. Click on the virtual machine ```cac-vm-0```.
   5. Under **Public IP address** is the value that will be entered in the PCoIP client.
-- If the script stops at **'Adding cloud service account...'**, repeat the process of getting a new API token from [CAS Manager](https://cam.teradici.com) and replace it in ```azure-cloudshell-quickstart.cfg```.
-- If the script stops at **'Adding "[machine-name]-0" to Cloud Access Manager...'**, you will need to [manually add machines](/terraform-deployments/docs/README-azure-single-connector.md#7-adding-workstations-in-cas-manager) on [CAS Manager](https://cam.teradici.com).
-- The QuickStart script should add Azure Provider Subscriptions and Credentials to the Anyware Manager for deployment, in the case it is not already added users should fill in their Azure Credentials. The provider service account credentials are used where the Anyware Manager as a Service interacts directly with the cloud environment to perform actions such as powering a remote workstation on and off.
+- If the script stops at **'Adding cloud service account...'**, repeat the process of getting a new API token from [Anyware Manager](https://cam.teradici.com) and replace it in ```azure-cloudshell-quickstart.cfg```.
+- If the script stops at **'Adding "[machine-name]-0" to Cloud Access Manager...'**, you will need to [manually add machines](/terraform-deployments/docs/README-azure-single-connector.md#7-adding-workstations-in-anyware-manager) on [Anyware Manager](https://cam.teradici.com).
+- The QuickStart script should add Azure Provider Subscriptions and Credentials to the Anyware Manager for deployment, in the case it is not already added, users should fill in their Azure Credentials. The provider service account credentials are used where the Anyware Manager as a Service interacts directly with the cloud environment to perform actions such as powering a remote workstation on and off.
 
 ## Appendix
 

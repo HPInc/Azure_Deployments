@@ -31,3 +31,8 @@ variable "disk_size_gb" {
   default     = "50"
 }
 
+variable "managed_identity_id" {
+  description = "The id of managed identity"
+  type        = string
+  default     = ""
+}

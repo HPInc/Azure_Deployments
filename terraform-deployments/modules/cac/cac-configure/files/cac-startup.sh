@@ -204,8 +204,8 @@ install_cac() {
 
     if [ "${cas_mgr_insecure}" ]
     then
-        log "  --cam-insecure"
-        args=$args"--cam-insecure "
+        log "  --manager-insecure"
+        args=$args"--manager-insecure "
     fi
 
     if [ "${lls_ip}" ]
@@ -227,7 +227,7 @@ install_cac() {
             --domain ${domain_name} \
             --retrieve-agent-state true \
             --sync-interval 5 \
-            --cam-url ${cas_mgr_url} \
+            --manager-url ${cas_mgr_url} \
             --external-pcoip-ip $external_ip \
             $args \
             2>&1 | tee -a $CAC_INSTALL_LOG

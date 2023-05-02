@@ -24,5 +24,14 @@ resource "random_id" "quickstart-name" {
 
 module "azuread_application" {
   source           = ".//az-application"
+  count            = var.auth_method == "Service_Principal" ? 1 : 0
   application_name = local.resource_group_name
+}
+
+module "azure_managed_identity" {
+  source                = ".//az-managed-identity"
+  count                 = var.auth_method == "Managed_Identity" ? 1 : 0
+  managed_identity_name = "single_connector_im_${random_id.quickstart-name.hex}"
+  resource_group_name   = azurerm_resource_group.primary.name
+  location              = var.location
 }

@@ -140,6 +140,13 @@ def configurations_get(ws_types, username):
         regions_list = [("1. West US","westus"), ("2. West US 2","westus2"), ("3. West US 3","westus3"), ("4. East US","eastus"), ("5. East US 2","eastus2"), ("6. North Central US", "northcentralus"), ("7. South Central US", "southcentralus"), ("8. West Central US","westcentralus")]
         print(f"    {order_number}. Please enter the region to deploy in.")
         return number_option_get(regions_list, "Azure_region")
+    
+    def authentication_get(order_number):
+        if answer_is_yes(f"\n{order_number}. Would you like to authenticate with using your account (Managed Identity) (y/n)? \n Otherwise, Service Principal will be created "):
+            auth_method = "Managed_Identity"
+        else:
+            auth_method = "Service_Principal"
+        return auth_method   
         
     while True:
         cfg_data = {}
@@ -169,6 +176,8 @@ def configurations_get(ws_types, username):
             print("")
             cfg_data[machine] = numberof_ws_get(machine)
 
+        cfg_data['auth_method'] = authentication_get("5")
+        print("\n")
 
         print("#######################################")
         print("# Please review your selections below #")

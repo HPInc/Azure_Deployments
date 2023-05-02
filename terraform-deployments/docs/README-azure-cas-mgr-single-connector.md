@@ -1,16 +1,16 @@
-# CAS Manager (Single-Connector) Deployment
+# Anyware Manager (Single-Connector) Deployment
 
-**Objective**: The objective of this documentation is to deploy the CAS Manager Single-Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files [here](/terraform-deployments/deployments/cas-mgr-single-connector).
+**Objective**: The objective of this documentation is to deploy the Anyware Manager Single-Connector architecture on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS). Please find deployment files [here](/terraform-deployments/deployments/cas-mgr-single-connector).
 
 ## Table of Contents
 
-1. [CAS Manager Single-Connector Architecture](#1-cas-manager-single-connector-architecture)
+1. [Anyware Manager Single-Connector Architecture](#1-anyware-manager-single-connector-architecture)
 2. [Requirements](#2-requirements)
 3. [Service Principal Authentication](#3-service-principal-authentication)
 4. [Storing Secrets on Azure Key Vault](#4-optional-storing-secrets-on-azure-key-vault)
 5. [Assigning a SSL Certificate](#5-optional-assigning-a-ssl-certificate)
 6. [Deploying via Terraform](#6-deploying-via-terraform)
-7. [Adding Workstations in CAS Manager](#7-adding-workstations-in-cas-manager)
+7. [Adding Workstations in Anyware Manager](#7-adding-workstations-in-anyware-manager)
 8. [Starting a PCoIP Session](#8-starting-a-pcoip-session)
 9. [Changing the deployment](#9-changing-the-deployment)
 10. [Deleting the deployment](#10-deleting-the-deployment)
@@ -25,20 +25,20 @@ For other Azure deployments, Amazon Web Services (AWS) deployments, and Google C
 - [GCP Deployments](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
 
-### 1. CAS Manager Single-Connector Architecture
+### 1. Anyware Manager Single-Connector Architecture
 
-The Cloud Access Software (CAS) Manager Single-Connector deployment creates a Virtual Network with 4 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
+The Anyware Manager Single-Connector deployment creates a Virtual Network with 4 subnets in the same region, provided that the workstations defined in terraform.tfvars do not have distinct locations. The subnets created are:
 
 - `subnet-dc`: for the Domain Controller
 - `subnet-cac`: for the Connector
 - `subnet-ws`: for the workstations
-- `subnet-cas-mgr`: for the CAS Manager
+- `subnet-cas-mgr`: for the Anyware Manager
 
 Network Security Rules are created to allow wide-open access within the Virtual Network, and selected ports are open to the public for operation and for debug purposes.
 
 A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a `domain_users_list` CSV file is specified. The Domain Controller is given a static IP (configurable).
 
-A Cloud Access Connector is created and registers itself with the CAS Manager service with the given token and PCoIP registration code.
+A Cloud Access Connector is created and registers itself with the Anyware Manager service with the given token and PCoIP registration code.
 
 Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the `workstations` variable. This is a list of objects where each object defines a workstation.
 
@@ -46,7 +46,7 @@ Note: Since this is a single region deployment, please make sure that all `locat
 
 These workstations are automatically domain-joined and have the PCoIP Agent installed.
 
-The following diagram shows a CAS Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the CAS Manager in a virtual machine which gives users full control of the CAS deployment. The CAS deployment will not have to reach out to the internet for CAS management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running CAS Manager.
+The following diagram shows a Anyware Manager single-connector deployment instance with multiple workstations and a single Cloud Access Connector deployed in the same region specified by the user. This deployments runs the Anyware Manager in a virtual machine which gives users full control of the Anyware deployment. The Anyware deployment will not have to reach out to the internet for Anyware management features, but the user is responsible for costs, security, updates, high availability and maintenance of the virtual machine running Anyware Manager.
 
 ![single-connector diagram](/terraform-deployments/docs/png/CASMSingleConnectorDC.png)
 
@@ -116,7 +116,7 @@ Running the deploy script will set the necessary environment variables for the U
 
 ### 4. (Optional) Storing Secrets on Azure Key Vault
 
-**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, CAS Manager admin password, and PCoIP registration key in terraform.tfvars.
+**Note**: This is optional. Users may skip this section and enter plaintext for the AD admin password, safe mode admin password, Anyware Manager admin password, and PCoIP registration key in terraform.tfvars.
 
 As a security method to help protect the values listed above, users can store them as secrets in an Azure Key Vault. Secrets will be decrypted in the configuration scripts.
 
@@ -166,7 +166,7 @@ ad_pass_secret_name           = "adPasswordID"
 
 ### 5. (Optional) Assigning a SSL Certificate
 
-**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/cas_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com/web-help/review/cam_cac_v2/installation/updating_cac/#updating-ssl-certificates).
+**Note**: This is optional. Assigning a SSL certificate will prevent the PCoIP client from reporting an insecure connection when establishing a PCoIP session though users may still connect. Read more [here](https://www.teradici.com/web-help/anyware_manager/current/cloud_access_connector/certificate_cas_connector/). It is also an option to assign an SSL certificate **after** the completion of the script. More information can be found [here](https://www.teradici.com//web-help/anyware_manager/current/cloud_access_connector/cas_connector_update/#updating-ssl-certificates).
 
 To upload a SSL certificate and SSL key onto ACS:
 
@@ -215,7 +215,7 @@ Before deploying, `terraform.tfvars` must be complete.
       - `disk_type`: Type of storage for the workstation.
         - Possible values: **Standard_LRS**, **StandardSSD_LRS** or **Premium_LRS**
       - `count`: Number of workstations to deploy under the specific settings.
-      - `isGFXHost`: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV6**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
+      - `isGFXHost`: Determines if a Graphics Agent will be installed. Graphics agents require [**NV-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nv-series) or [**NCasT4_v3-series VMs**](https://docs.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series). The default size in .tfvars is **Standard_NV12s_v3**. Additional VM sizes can be seen in the [**Appendix**](#appendix)
         - Possible values: **true** or **false**
 
    The remaining variables have their descriptions included in the provided sample file.
@@ -229,10 +229,10 @@ Before deploying, `terraform.tfvars` must be complete.
 5. Run `terraform init` to initialize a working directory containing Terraform configuration files
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-7. Answer `yes` to start provisioning the CAS-M Single Connector infrastructure
+7. Answer `yes` to start provisioning the Anyware-M Load Balancer with Multi-Connector infrastructure
    - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
-A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the CAS Manager so **Health** statuses may show as **Unhealthy** temporarily.
+A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily.
 
 Example output:
 
@@ -276,11 +276,11 @@ windows-graphics-workstations = [
 ]
 ```
 
-### 7. Adding Workstations in CAS Manager
+### 7. Adding Workstations in Anyware Manager
 
-To connect to workstations, the authorized users must be added to the machines, done through the CAS Manager GUI.
+To connect to workstations, the authorized users must be added to the machines, done through the Anyware Manager GUI.
 
-Determine the public IP address of CAS Manager Virtual Machine. This can be done by multiple methods including
+Determine the public IP address of Anyware Manager Virtual Machine. This can be done by multiple methods including
 - Through the output variables of a successful deployment
 - Under the newly created resource group, opening the resource containing `cas-mgr-public-ip`, and inspecting the "IP address" field in the overview
 
@@ -298,7 +298,7 @@ Note that it may take a 5-10 minutes for the workstation to show up in the **Sel
 
 ### 8. Starting a PCoIP Session
 
-Once the workstations have been added by CAS Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
+Once the workstations have been added by Anyware Manager and assigned to Active Directory users, a user can connect through the PCoIP client using the public IP of the Cloud Access Connector. This can be found through the end of deployment outputs on success.
    - **Note**: If you need to find the `public_ip` of the `cac-public-ip` output after it has gone away, it can be found on the Azure Portal. Select the machine `[prefix]-cac-vm-0` and the **Public IP address** will be shown.
 
 1. Open the Teradici PCoIP Client and click on **NEW CONNECTION**.
@@ -318,14 +318,13 @@ Run `terraform destroy -force` to remove all resources created by Terraform. If 
 ### 11. Troubleshooting
 
 - If the console looks frozen, try pressing Enter to unfreeze it.
-- If no machines are showing up on CAS Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
+- If no machines are showing up on Anyware Manager or get errors when connecting via PCoIP client, wait 2 minutes and retry.
 - If you are trying to create a fresh deployment and have been running into errors, delete all files containing `.tfstate`. These files store the state of the current infrastructure and configuration
-- If no machines are showing up on CAS Manager or you get errors when connecting via PCoIP client, wait 2 minutes and retry
 
-- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to CAS Manager.
+- If there is a timeout error regarding **centos-gfx** machine(s) at the end of the deployment, this is because script extensions time out after 30 minutes. This happens sometimes but users can still add VMs to Anyware Manager.
   - As a result of this, there will be no outputs displaying on ACS. The IP address of the cac machine can be found by going into the deployment's resource group, selecting the machine `[prefix]-cac-vm-0`, and the **Public IP address** will be shown on the top right.
 
-- When logging into the CAS Manager web UI, if you come across a message stating **Ad configuration not found**, be sure to log in using the default username `adminUser`
+- When logging into the Anyware Manager web UI, if you come across a message stating **Ad configuration not found**, be sure to log in using the default username `adminUser`
 
 Connecting to virtual machines for investigative purposes:
 

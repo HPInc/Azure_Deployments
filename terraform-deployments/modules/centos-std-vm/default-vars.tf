@@ -36,3 +36,9 @@ variable "tenant_id" {
   type        = string
   default     = ""
 }
+
+variable "managed_identity_id" {
+  description = "The id of managed identity"
+  type        = string
+  default     = ""
+}

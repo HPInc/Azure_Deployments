@@ -6,13 +6,13 @@
  */
 
 output "centos-gfx-vm-public-ips" {
-  value = [for item in azurerm_linux_virtual_machine.centos-gfx-vm : item.public_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-gfx-vm-im : item.public_ip_address] : [for item in azurerm_linux_virtual_machine.centos-gfx-vm-sp : item.public_ip_address]
 }
 
 output "centos-gfx-vm-private-ips" {
-  value = [for item in azurerm_linux_virtual_machine.centos-gfx-vm : item.private_ip_address]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-gfx-vm-im : item.private_ip_address] : [for item in azurerm_linux_virtual_machine.centos-gfx-vm-sp : item.private_ip_address]
 }
 
 output "centos-gfx-vm-names" {
-  value = [for item in azurerm_linux_virtual_machine.centos-gfx-vm : item.name]
+  value = var.managed_identity_id != "" ? [for item in azurerm_linux_virtual_machine.centos-gfx-vm-im : item.name] : [for item in azurerm_linux_virtual_machine.centos-gfx-vm-sp : item.name]
 }

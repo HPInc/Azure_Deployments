@@ -44,8 +44,46 @@ resource "azurerm_storage_blob" "windows-gfx-script" {
   source                 = "${path.module}/${local.windows_gfx_provisioning_script}"
 }
 
-resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
-  for_each = var.workstations
+resource "azurerm_windows_virtual_machine" "windows-gfx-vm-im" {
+  for_each = var.managed_identity_id != "" ? var.workstations : {}
+
+  depends_on = [var.windows_host_vm_depends_on]
+
+  name                = each.value.prefix == "" ? "gwin-${each.value.index}" : "${each.value.prefix}-gwin-${each.value.index}"
+  resource_group_name = var.resource_group_name
+  location            = each.value.location
+  admin_username      = var.admin_name
+  admin_password      = local.windows_admin_password
+  size                = each.value.vm_size
+
+  network_interface_ids = [
+    azurerm_network_interface.windows-gfx-nic[each.key].id
+  ]
+
+  os_disk {
+    name                 = each.value.prefix == "" ? "gwin-vm-osdisk-${each.value.index}" : "${each.value.prefix}-gwin-vm-osdisk-${each.value.index}"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = each.value.disk_size
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2016-Datacenter"
+    version   = "latest"
+  }
+  
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [
+      var.managed_identity_id
+      ]
+  }
+}
+
+resource "azurerm_windows_virtual_machine" "windows-gfx-vm-sp" {
+  for_each = var.managed_identity_id == "" ? var.workstations : {}
 
   depends_on = [var.windows_host_vm_depends_on]
 
@@ -77,12 +115,12 @@ resource "azurerm_windows_virtual_machine" "windows-gfx-vm" {
 
 resource "null_resource" "windows-gfx-script-download" {
 
-  depends_on = [azurerm_windows_virtual_machine.windows-gfx-vm]
+  depends_on = [azurerm_windows_virtual_machine.windows-gfx-vm-im, azurerm_windows_virtual_machine.windows-gfx-vm-sp]
 
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm[each.key].name} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-gfx-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} -Verbose\""
+    command     = var.managed_identity_id != "" ? "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-im[each.key].name} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-gfx-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} -Verbose\"" : "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-sp[each.key].name} -g ${var.resource_group_name} --scripts \"mkdir -p ${local.deploy_temp_dir};Invoke-WebRequest -UseBasicParsing ${azurerm_storage_blob.windows-gfx-script.url} -OutFile ${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} -Verbose\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }
@@ -94,7 +132,7 @@ resource "null_resource" "windows-gfx-driver-installation" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
+    command     = var.managed_identity_id != "" ? "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-im[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\"" : "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-sp[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }
@@ -106,7 +144,7 @@ resource "null_resource" "windows-gfx-pcoip-installation" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
+    command     = var.managed_identity_id != "" ? "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-im[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\"" : "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-sp[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }
@@ -118,7 +156,7 @@ resource "null_resource" "windows-gfx-restart" {
   for_each = var.workstations
 
   provisioner "local-exec" {
-    command     = "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
+    command     = var.managed_identity_id != "" ? "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-im[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\"" : "az vm run-command invoke --command-id RunPowerShellScript --name ${azurerm_windows_virtual_machine.windows-gfx-vm-sp[each.key].name} -g ${var.resource_group_name} --scripts \"${local.deploy_temp_dir}/${local.windows_gfx_provisioning_script} ${local.windows_gfx_provisioning_script_params}\""
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
   }
 }

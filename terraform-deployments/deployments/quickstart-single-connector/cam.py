@@ -116,6 +116,24 @@ class CloudAccessManager:
 
         return resp.json()['data']
 
+    def machine_add_existing_on_prem(self, name, deployment):
+        machine_details = {
+            'provider':    'onprem',
+            'machineName':  name,
+            'deploymentId': deployment['deploymentId'],
+            'active':       True,
+            'managed':      True,
+        }
+
+        resp = requests.post(
+            self.url + '/api/v1/machines',
+            headers=self.header,
+            json=machine_details,
+        )
+        resp.raise_for_status()
+
+        return resp.json()['data']
+    
     def entitlement_add(self, user, machine):
         entitlement_details = {
             'machineId': machine['machineId'],

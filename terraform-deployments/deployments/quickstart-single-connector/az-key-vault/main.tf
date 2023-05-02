@@ -30,6 +30,7 @@ resource "azurerm_key_vault_access_policy" "object-id" {
     "Recover",
     "Backup",
     "Restore",
+    "Purge"
   ]
 }
 
@@ -46,6 +47,7 @@ resource "azurerm_key_vault_access_policy" "app-object-id" {
     "Recover",
     "Backup",
     "Restore",
+    "Purge"
   ]
   
 }

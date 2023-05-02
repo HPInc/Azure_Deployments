@@ -83,7 +83,7 @@ check_required_vars() {
 
     if [[ -z "${cas_mgr_admin_password}" ]]
     then
-        log "--> ERROR: Missing CAS Manager GUI Administrator Password."
+        log "--> ERROR: Missing Anyware Manager GUI Administrator Password."
         missing_vars="true"
     fi
     set -x
@@ -96,28 +96,28 @@ check_required_vars() {
 }
 
 add_cas_mgr_repo() {
-    log "--> Adding CAS Manager repo..."
-    curl -1sLf '${cas_mgr_add_repo_script}' | sudo -E distro=el codename=7 bash
+    log "--> Adding Anyware Manager repo..."
+    curl -1sLf '${cas_mgr_add_repo_script}' | sudo -E distro=el codename=8 bash
 }
 
 config_selinux() {
     log "--> Configuring SE Linux..."
     yum install -y selinux-policy-base container-selinux
-    yum install -y https://github.com/k3s-io/k3s-selinux/releases/download/v0.2.stable.1/k3s-selinux-0.2-1.el7_8.noarch.rpm
-    yum install -y cas-manager-selinux
+    yum install -y https://github.com/k3s-io/k3s-selinux/releases/download/v1.1.stable.1/k3s-selinux-1.1-1.el8.noarch.rpm
+    yum install -y anyware-manager-selinux
 }
 
 install_cas_mgr() {
-    log "--> Installing CAS Manager..."
+    log "--> Installing Anyware Manager..."
     # TODO: figure out the /dev/tty error
-    yum install -y cas-manager 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
+    yum install -y anyware-manager 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
 
     # Install manually
-    /usr/local/bin/cas-manager install --preview --accept-policies --self-signed --manifest /tmp/jsonnet-stable.tar.gz --debug 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
+    /usr/local/bin/anyware-manager install --manager-admin-password $CAS_MGR_ADMIN_PASSWORD --accept-policies --self-signed --debug 2>&1 | tee -a $CAS_MGR_INSTALL_LOG
 
     if [ $? -ne 0 ]
     then
-        log "--> ERROR: Failed to install CAS Manager..."
+        log "--> ERROR: Failed to install Anyware Manager..."
         exit 1
     fi
 }
@@ -147,7 +147,7 @@ mongo_kv_setup() {
     mkdir -p /var/lib/mongodb 
     mongod --config /etc/mongod.conf
     mongo < $INSTALL_DIR/dbconf.mongo
-    /usr/local/bin/cas-manager configure --config-file $INSTALL_DIR/casm.conf
+    /usr/local/bin/anyware-manager configure --config-file $INSTALL_DIR/casm.conf
 }
 
 cas_mgr_setup() {
@@ -155,12 +155,12 @@ cas_mgr_setup() {
 
     wget -O $INSTALL_DIR/${cas_mgr_setup_script} ${cas_mgr_setup_script_url}
 
-    log "--> Running CAS Manager setup script..."
+    log "--> Running Anyware Manager setup script..."
 
     dos2unix $INSTALL_DIR/${cas_mgr_setup_script}
     chmod +x $INSTALL_DIR/${cas_mgr_setup_script}
 
-    log "--> Running CAS Manager setup script with the following options:"
+    log "--> Running Anyware Manager setup script with the following options:"
     log "  --deployment_name $CAS_MGR_DEPLOYMENT_NAME"
     log "  --key_file $INSTALL_DIR/${cas_mgr_deployment_sa_file}"
     log "  --key_name $CAS_MGR_DEPLOYMENT_KEY_NAME"
@@ -181,13 +181,13 @@ cas_mgr_setup() {
 
     if [ $? -ne 0 ]
     then
-        log "--> ERROR: Failed to run CAS Manager setup script. Exiting provisioning script..."
+        log "--> ERROR: Failed to run Anyware Manager setup script. Exiting provisioning script..."
         exit 1
     fi
 
     if [ ! -f "$INSTALL_DIR/${cas_mgr_deployment_sa_file}" ]
     then
-        log "--> ERROR: CAS Manager Deployment service account key not created. Exiting provisioning script..."
+        log "--> ERROR: Anyware Manager Deployment service account key not created. Exiting provisioning script..."
         exit 1
     fi
 }

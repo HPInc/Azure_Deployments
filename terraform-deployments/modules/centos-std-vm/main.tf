@@ -47,11 +47,51 @@ resource "azurerm_network_interface" "centos-std-nic" {
   }
 }
 
-resource "azurerm_linux_virtual_machine" "centos-std-vm" {
+resource "azurerm_linux_virtual_machine" "centos-std-vm-im" {
   depends_on = [
     var.centos_std_depends_on
   ]
-  for_each = var.workstations
+  for_each = var.managed_identity_id != "" ? var.workstations : {}
+
+  name                            = each.value.prefix == "" ? "scent-${each.value.index}" : "${each.value.prefix}-scent-${each.value.index}"
+  resource_group_name             = var.resource_group_name
+  location                        = each.value.location
+  admin_username                  = var.admin_name
+  admin_password                  = local.centos_admin_password
+  disable_password_authentication = false
+  size                            = each.value.vm_size
+
+  network_interface_ids = [
+    azurerm_network_interface.centos-std-nic[each.key].id
+  ]
+
+  os_disk {
+    name                 = each.value.prefix == "" ? "scent-vm-osdisk-${each.value.index}" : "${each.value.prefix}-scent-vm-osdisk-${each.value.index}"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = each.value.disk_size
+  }
+
+  source_image_reference {
+    publisher = "OpenLogic"
+    offer     = "CentOS"
+    sku       = "7_8"
+    version   = "latest"
+  }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [
+      var.managed_identity_id
+      ]
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "centos-std-vm-sp" {
+  depends_on = [
+    var.centos_std_depends_on
+  ]
+  for_each = var.managed_identity_id == "" ? var.workstations : {}
 
   name                            = each.value.prefix == "" ? "scent-${each.value.index}" : "${each.value.prefix}-scent-${each.value.index}"
   resource_group_name             = var.resource_group_name
@@ -82,11 +122,11 @@ resource "azurerm_linux_virtual_machine" "centos-std-vm" {
 
 resource "azurerm_virtual_machine_extension" "centos-std-provisioning" {
 
-  depends_on = [azurerm_linux_virtual_machine.centos-std-vm]
+  depends_on = [azurerm_linux_virtual_machine.centos-std-vm-im, azurerm_linux_virtual_machine.centos-std-vm-sp]
 
   for_each             = var.workstations
   name                 = each.value.prefix == "" ? "scent-${each.value.index}" : "${each.value.prefix}-scent-${each.value.index}"
-  virtual_machine_id   = azurerm_linux_virtual_machine.centos-std-vm[each.key].id
+  virtual_machine_id   = var.managed_identity_id != "" ? azurerm_linux_virtual_machine.centos-std-vm-im[each.key].id : azurerm_linux_virtual_machine.centos-std-vm-sp[each.key].id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
