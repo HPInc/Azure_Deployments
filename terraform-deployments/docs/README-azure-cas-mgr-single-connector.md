@@ -38,9 +38,11 @@ Network Security Rules are created to allow wide-open access within the Virtual 
 
 A Domain Controller is created with Active Directory, DNS and LDAP-S configured. Domain Users are also created if a `domain_users_list` CSV file is specified. The Domain Controller is given a static IP (configurable).
 
-A Cloud Access Connector is created and registers itself with the Anyware Manager service with the given token and PCoIP registration code.
+The Connector currently runs on an Ubuntu server, we are adding the support to run on Rocky Linux 8 or RHEL 8 starting from Connector version 22.04.0. The Cloud Access Connector is installed and configured on Ubuntu server, while the Anyware Connector is installed and configured on Rocky Linux 8 server.
 
-Multiple domain-joined workstations and Cloud Access Connectors can be optionally created, specified by the the `workstations` variable. This is a list of objects where each object defines a workstation.
+A Cloud Access Connector\Anyware Connector is created and registers itself with the Anyware Manager service with the given token and PCoIP registration code.
+
+Multiple domain-joined workstations and Cloud Access Connectors\Anyware Connector can be optionally created, specified by the the `workstations` variable. This is a list of objects where each object defines a workstation.
 
 Note: Since this is a single region deployment, please make sure that all `location` values in the `workstations` parameter are all identical.
 
@@ -66,7 +68,14 @@ The following diagram shows a Anyware Manager single-connector deployment instan
 
 In order for Terraform to deploy and manage resources on a user's behalf, it must authenticate through a service principal.
 
-Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
+Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables. **Note**: The deploy script could be found at `/Azure_Deployments/terraform-deployments/deployments/'Your-target-architecture'`
+
+**Note**: The user only needs to perform this step once to obtain a service principal. However, if the user already has a valid service principal but has forgotten the credential secret associated with it, they will need to delete the existing service principal and repeat this step again.  
+After the service principal is created:
+  1. If the user keep remaining in the current ACS session, please continue with the remaining steps.
+  2. If the user manually or accidentally exits the current ACS session before the architecture is successfully deployed, they need to manually execute the following commands when a new ACS session starts:
+     - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+     - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
 
 ##### Option 1 (faster automated authentication):
 
@@ -189,9 +198,10 @@ Before deploying, `terraform.tfvars` must be complete.
 
 - `git clone https://github.com/teradici/Azure_Deployments`
 
-2. Change directory into: `/terraform-deployments/deployments/cas-mgr-single-connector`.
+2. Change directory into:
 
-- `cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector`
+- Ubuntu server as Connector: `cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector`
+- Rocky Linux 8 server as Connector: `cd Azure_Deployments/terraform-deployments/deployments/cas-mgr-single-connector-rocky`
 
 3. Save / rename `terraform.tfvars.sample` as `terraform.tfvars`, and fill out the required variables.
 
@@ -221,6 +231,8 @@ Before deploying, `terraform.tfvars` must be complete.
    The remaining variables have their descriptions included in the provided sample file.
 
 4. **(Optional)** To add domain users save `domain_users_list.csv.sample` as `domain_users_list.csv` and edit this file accordingly.
+
+   Uncomment line#74 in "terraform.tfvars". The user must ensure the full path to the domain users list .csv file is correct. Otherwise, the provisioning script is not able to complete.
    - **Note:** To add users successfully, passwords must have atleast **3** of the following requirements:
      - 1 UPPERCASE letter
      - 1 lowercase letter
@@ -229,12 +241,16 @@ Before deploying, `terraform.tfvars` must be complete.
 5. Run `terraform init` to initialize a working directory containing Terraform configuration files
 6. Run `terraform apply | tee -a installer.log` to display resources that will be created by Terraform
    - **Note:** Users can also do `terraform apply` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. `| tee -a installer.log` stores a local log of the script output which can be referred to later to help diagnose problems.
-7. Answer `yes` to start provisioning the Anyware-M Load Balancer with Multi-Connector infrastructure
+7. Answer `yes` to start provisioning the infrastructure. 
    - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
 
-A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily.
+A typical deployment should take around 35-40 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily.  
 
-Example output:
+**Note:** During the deployment, if you don't interact with the Azure portal (for example click around), the Azure Cloud Shell (ACS) session may **time out**. In such cases, the deployment process will not continue once you reconnect to the ACS. You will need to delete the created resource group manually from the Azure portal and reconnect to ACS. Then, you must manually run the following two commands before applying the Terraform script again from the beginning to initiate a fresh deployment:
+   - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+   - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
+
+Example output of successful deployment:
 
 ```
 Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
@@ -331,7 +347,9 @@ Connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstation use the Connector (cac-vm) as a bastion host.
   1. SSH into the Connector. `ssh <ad_admin_username>@<cac-public-ip>` e.g.: `cas_admin@52.128.90.145`
   2. From inside the Connector, SSH into the CentOS workstation. `ssh centos_admin@<centos-internal-ip>` e.g.: `ssh centos_admin@10.0.4.5`
-  3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.
+  3. The installation log path for CentOS workstations are located in `/var/log/teradici/agent/install.log`. CAC logs are located in `/var/log/teradici/cac-install.log`.  
+
+  **Note**: SSH access is only allowed for your current ACS IP. if you exit the current ACS session and open another session, you won't be able to SSH into the connector because the IP of ACS changes each time the session is reconnected. In this case, you may need to manually add an inbound rule to your network security group (NSG) to allow traffic to port 22 from your IP (this is only for debug purpose). Please remember to delete your customized rule after debugging.
 
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host.
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.

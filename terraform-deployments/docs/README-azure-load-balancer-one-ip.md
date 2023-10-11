@@ -66,6 +66,13 @@ In order for Terraform to deploy and manage resources on a user's behalf, it mus
 
 Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
 
+**Note**: The user only needs to perform this step once to obtain a service principal. However, if the user already has a valid service principal but has forgotten the credential secret associated with it, they will need to delete the existing service principal and repeat this step again.  
+After the service principal is created:
+  1. If the user keep remaining in the current ACS session, please continue with the remaining steps.
+  2. If the user manually or accidentally exits the current ACS session before the architecture is successfully deployed, they need to manually execute the following commands when a new ACS session starts:
+     - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+     - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
+
 ##### Option 1 (faster automated authentication):
 
 The bash deploy script will automate the creation of a service principal and assign all of the required roles for deployment. Users will not be required to login via the Azure Portal
@@ -234,7 +241,11 @@ To upload a SSL certificate and SSL key onto ACS:
 
 Detailed instructions can be viewed [here](/terraform-deployments/docs/terraform-config-step-by-step.md).
 
-Note that the directory where this deployment, along with its corresponding `terraform.tfvars.sample` file, takes place is located under `Azure_Deployments/terraform-deployments/deployments/load-balancer-one-ip`.
+Note that the directory where this deployment, along with its corresponding `terraform.tfvars.sample` file, takes place is located under `Azure_Deployments/terraform-deployments/deployments/load-balancer-one-ip`.  
+
+**Note:** During the deployment, if you don't interact with the Azure portal (for example click around), the Azure Cloud Shell (ACS) session may **time out**. In such cases, the deployment process will not continue once you reconnect to the ACS. You will need to delete the created resource group manually from the Azure portal and reconnect to ACS. Then, you must manually run the following two commands before applying the Terraform script again from the beginning to initiate a fresh deployment:
+   - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+   - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
 
 ### 7. Adding Workstations through Anyware Manager
 It is recommended to add your Azure Provider Credentials to the Anyware Manager as to allow service interactions between them. This allows actions such as powering a remote workstation on or off. This can be done on the Anyware Manager dashboard, select **Add provider credentials**, select the **Provider Service Accounts** tab, and fill out the account credentials under Azure.
@@ -278,7 +289,9 @@ Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
-    3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
+    3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.  
+
+  **Note**: SSH access is only allowed for your current ACS IP. If you exit the current ACS session and open another session, you won't be able to SSH into the connector because the IP of ACS changes each time the session is reconnected. In this case, you may need to manually add an inbound rule to your network security group (NSG) to allow traffic to port 22 from your IP (this is only for debug purpose). Please remember to delete your customized rule after debugging.
     
 - To connect to a **Windows** workstations use the Domain Controller (dc-vm) as a bastion host. 
 - **Note**: By default RDP is disabled for security purposes. Before running a deployment switch the **false** flag to **true** for the **create_debug_rdp_access** variable in **terraform.tfvars**. If there is already a deployment present go into the **Networking** settings for the dc-vm and click **Add inbound port rule**. Input **3389** in the **Destination port ranges** and click **Add**. Users should now be able to connect via RDP.

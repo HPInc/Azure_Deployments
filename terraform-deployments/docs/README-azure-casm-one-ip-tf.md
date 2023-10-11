@@ -69,6 +69,13 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
 
 Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
 
+**Note**: The user only needs to perform this step once to obtain a service principal. However, if the user already has a valid service principal but has forgotten the credential secret associated with it, they will need to delete the existing service principal and repeat this step again.  
+After the service principal is created:
+  1. If the user keep remaining in the current ACS session, please continue with the remaining steps.
+  2. If the user manually or accidentally exits the current ACS session before the architecture is successfully deployed, they need to manually execute the following commands when a new ACS session starts:
+     - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+     - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
+
 ##### Option 1 (faster automated authentication):
 
 The bash deploy script will automate the creation of a service principal and assign all of the required roles for deployment.
@@ -235,11 +242,16 @@ Before deploying, ```terraform.tfvars``` must be complete and an AADDS Deploymen
       2. Run ```terraform init``` to initialize a working directory containing Terraform configuration files.
       3. Run ```terraform apply | tee -a installer.log``` to display resources that will be created by Terraform. 
           - **Note:** Users can also do ```terraform apply``` but often ACS will time out or there are scrolling limitations which prevents users from viewing all of the script output. ```| tee -a installer.log``` stores a local log of the script output which can be referred to later to help diagnose problems.
-      4. Answer ```yes``` to start provisioning the load balancer infrastructure. 
+      4. Answer ```yes``` to start provisioning the infrastructure. 
+          - To skip the need for this extra input, you can also initially use `terraform apply --auto-approve | tee -a installer.log`
+          
+A typical deployment should take around 40-50 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily.  
 
-A typical deployment should take around 40-50 minutes. When finished, the scripts will display VM information such as IP addresses. At the end of the deployment, the resources may still take a few minutes to start up completely. It takes a few minutes for a connector to sync with the Anyware Manager so **Health** statuses may show as **Unhealthy** temporarily. 
+**Note:** During the deployment, if you don't interact with the Azure portal (for example click around), the Azure Cloud Shell (ACS) session may **time out**. In such cases, the deployment process will not continue once you reconnect to the ACS. You will need to delete the created resource group manually from the Azure portal and reconnect to ACS. Then, you must manually run the following two commands before applying the Terraform script again from the beginning to initiate a fresh deployment:
+   - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+   - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
 
-Example output:
+Example output of successful deployment:
 ```
 Apply complete! Resources: 67 added, 0 changed, 0 destroyed.
 
@@ -317,7 +329,9 @@ Information about connecting to virtual machines for investigative purposes:
 - CentOS and Windows VMs do not have public IPs. To connect to a **CentOS** workstations use the Connector (cac-vm) as a bastion host.
     1. SSH into the Connector. ```ssh <ad_admin_username>@<cac-public-ip>``` e.g.: ```cas_admin@52.128.90.145```
     2. From inside the Connector, SSH into the CentOS workstation. ```ssh centos_admin@<centos-internal-ip>``` e.g.: ```ssh centos_admin@10.0.4.5```
-    3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.
+    3. The installation log path for CentOS workstations are located in ```/var/log/teradici/agent/install.log```. CAC logs are located in ```/var/log/teradici/cac-install.log```.  
+
+  **Note**: SSH access is only allowed for your current ACS IP. if you exit the current ACS session and open another session, you won't be able to SSH into the connector because the IP of ACS changes each time the session is reconnected. In this case, you may need to manually add an inbound rule to your network security group (NSG) to allow traffic to port 22 from your IP (this is only for debug purpose). Please remember to delete your customized rule after debugging.
 
 ## Appendix
 

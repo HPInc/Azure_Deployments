@@ -43,6 +43,13 @@ In order for Terraform to deploy & manage resources on a user's behalf, they mus
 
 Run the deploy script via `. deploy.sh` in the Azure Cloud Shell, this will provide and set the required users Subscription and Tenant ID environment variables
 
+**Note**: The user only needs to perform this step once to obtain a service principal. However, if the user already has a valid service principal but has forgotten the credential secret associated with it, they will need to delete the existing service principal and repeat this step again.
+  After the service principal is created:
+  1. If the user keep remaining in the current ACS session, please continue with the remaining steps.
+  2. If the user manually or accidentally exits the current ACS session before the architecture is successfully deployed, they need to manually execute the following commands when a new ACS session starts:
+     - export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+     - export ARM_TENANT_ID=$(az account show --query homeTenantId --output tsv) 
+
 ##### Option 1 (faster automated authentication):
 
 The bash deploy script will automate the creation of a service principal and assign all of the required roles for deployment.
