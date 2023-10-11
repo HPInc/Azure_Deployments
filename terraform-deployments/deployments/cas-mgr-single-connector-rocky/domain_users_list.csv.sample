@@ -1,0 +1,4 @@
+# passwords must have atleast **3** of the requirements: UPPERCASE letter; lowercase letter; number; special character
+firstname,lastname,username,password,isadmin
+Demo,User,demouser,Securepw123!,true
+Demo,User2,demouser2,Securepw123!

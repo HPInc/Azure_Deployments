@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2021 Teradici Corporation
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ # List of workstations to deploy.
+ # For workstation prefixes, max 5 characters to avoid name cropping.
+ # The example below deploys 1 standard CentOS VM, 1 standard Windows VM, 1 graphics CentOS VM and 1 graphics Windows VM.
+ 
+ workstations = [
+    {
+        prefix           = "",
+        location         = "westus2",
+        workstation_os   = "linux",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_B2ms",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = false
+    },
+    {
+        prefix           = "",
+        location         = "westus2",
+        workstation_os   = "linux",
+        vm_size          = "Standard_NV12s_v3",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = true
+    },
+    {
+        prefix           = "",
+        location         = "westus2",
+        workstation_os   = "windows",
+        vm_size          = "Standard_NV12s_v3",
+        disk_type        = "Standard_LRS",
+        disk_size        = 128,
+        count            = 1,
+        isGFXHost        = true
+    }
+]
+
+# Cloud access connector configuration.
+cac_configuration = [
+    {
+        cac_token = "cac token obtained from https://cam.teradici.com/app/connectors",
+        location  = "westus2",
+    }
+]
+
+# Name of resource group the deployment will be placed in.
+# Must be unique and does not currently exist. 
+# Leaving this commented will result in the name 'single_connector_deployment_[random_id]'
+# resource_group_name           = ""
+
+# Prefix for DC and CAC machines.
+# prefix                        = ""
+
+# Debug flag to RDP into the DC VM.
+# create_debug_rdp_access       = false
+
+# Path to the domain users list .csv file.
+# ad_domain_users_list_file     = "~/Azure_Deployments/terraform-deployments/deployments/single-connector/domain_users_list.csv"
+
+# Active Directory Service account name to be created
+# ad_admin_username       = "cas_admin"
+
+# Active Directory NetBIOS name
+# e.g: "tera" will create the domain name "tera.dns.internal"
+# active_directory_netbios_name = "tera"
+
+# (Optional) Specify TLS certificate for Connector
+# tls_key  = "~/clouddrive/privkey.pem"
+# tls_cert = "~/clouddrive/fullchain.pem"
+
+# (Encryption is optional) Following 3 values and cac_token from cac_configuration can be encrypted. 
+# To encrypt, follow section 4 of the documentation.
+ad_admin_password             = "Password!234"
+safe_mode_admin_password      = "Password!234"
+pcoip_registration_code       = "ABCDEFGHIJKL@0123-4567-89AB-CDEF"
+
+# Examples & tips for the following 5 variables are in section 4 of the documentation.
+# Used for authentication and allows Terraform to manage resources.
+application_id                = "<from section 3 step 4>"
+aad_client_secret             = "<from section 3 step 5-6>"
+
+# Only fill the following when using Azure Key Vault secrets.
+# tenant_id                     = "<from section 3 step 4>"
+# key_vault_id                  = "<found in key vault properties under Resource ID>"
+# ad_pass_secret_name           = "<variable name used for ad pass secret>"

@@ -1,0 +1,4 @@
+firstname,lastname,username,password,isadmin
+Demo,User,demouser,Password!234,true
+Demo,User2,demouser2,Password!234
+Demo,User3,demouser3,Password!234
