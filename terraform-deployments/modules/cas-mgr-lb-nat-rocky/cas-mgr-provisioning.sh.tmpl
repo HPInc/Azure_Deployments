@@ -19,10 +19,10 @@ log() {
     local message="$1"
     echo "[$(date)] $message"
 }
-
+ 
 install_prereqs() {
     log "--> updating dnf..."
-    dnf -y update
+    dnf update -y --exclude=WALinuxAgent --nobest
     log "--> Installing dos2unix, python3..."
     dnf install -y dos2unix python3 firewalld wget
 
@@ -239,7 +239,6 @@ exec &>>$LOG_FILE
 install_prereqs
 get_credentials
 check_required_vars
-configure_firewall
 add_cas_mgr_repo
 config_selinux
 install_cas_mgr

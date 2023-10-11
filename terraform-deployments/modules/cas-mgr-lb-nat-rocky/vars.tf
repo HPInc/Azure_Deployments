@@ -47,9 +47,9 @@ variable "cas_mgr_subnet_depends_on" {
 }
 
 variable "machine_type" {
-  description = "Instance type for the CAS Manager (min 16 GB RAM, 4 vCPUs)"
+  description = "Instance type for the CAS Manager (min 8 GB RAM, 4 vCPUs)"
   # default   = "Standard_F4s_v2"
-  default = ["Standard_D4s_v3"]
+  default = ["Standard_D2s_v3"]
 }
 
 variable "disk_size_gb" {
@@ -141,26 +141,18 @@ variable "blob_depends_on" {
   default     =  null
 }
 
-variable "tag_name" {
-  description = "Name of the artifact to be tagged with the resulting format value = tag_prefix + tag_value + tag_suffix"
-  type        = string
-  default     = "Type"
+variable "cas_mgr_public_ip" {
+  description = "Public IP of the CAS manager which will be used in the Firewall NAT"
+  type = any
 }
 
-variable "tag_prefix" {
-  description = "Name of the prefix formatted tag value"
-  type        = string
-  default     = "AW"
+variable "lb_id" {
+  description = "ID of the load balancer"
+  type = string
 }
 
-variable "tag_value" {
-  description = "Name of the prefix formatted tag value"
-  type        = string
-  default     = "cas-mgr-single-connector"
+variable "cas_nat_depends_on" {
+  type        = any
+  default     =  null
 }
 
-variable "tag_suffix" {
-  description = "Name of the prefix formatted tag value"
-  type        = string
-  default     = "VM"
-}

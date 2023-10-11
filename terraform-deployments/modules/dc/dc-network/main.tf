@@ -12,7 +12,7 @@ resource "azurerm_virtual_network" "network" {
   location            = var.location
   address_space       = ["10.0.0.0/16"]
   resource_group_name = var.resource_group_name
-  dns_servers         = ["${var.dc_private_ip}", "168.63.129.16"]
+  dns_servers         = ["${var.dc_private_ip}"]
 }
 
 resource "azurerm_subnet" "dc" {
