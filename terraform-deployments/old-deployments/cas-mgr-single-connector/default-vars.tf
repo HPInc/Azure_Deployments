@@ -37,7 +37,7 @@ variable "cas_mgr_url" {
 
 variable "pcoip_agent_location" {
   description = "URL of Teradici PCoIP Standard Agent"
-  default     = "https://downloads.teradici.com/win/stable/"
+  default     = "https://dl.teradici.com/yj39yHtgj68Uv2Qf/pcoip-agent/raw/names/pcoip-agent-standard-exe/versions/latest/"
 }
 
 variable "active_directory_netbios_name" {
