@@ -90,6 +90,25 @@ Completed deployment output:
 
 ![completed deployment](/terraform-deployments/docs/png/completed-deployment.png)
 
+# Directory structure
+## deployments/
+The top level terraform scripts that create specific deployments.
+
+## docs/
+Description and instructions for different deployments and architectures.
+
+## modules/
+The building blocks of deployments, e.g. a Domain Controller, an Anyware
+Connector, a Workstation, etc.
+
+## tools/
+Various scripts to help with Terraform deployments.  e.g. a Python script to
+generate random users for an Active Directory in a CSV file.
+
+# Maintainer
+If any security issues or bugs are found, or if there are feature requests, please contact support at support@teradici.com
+
+
 ## Appendix
 
 [Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)

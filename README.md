@@ -3,9 +3,27 @@ HP Teradici is the creator of the PCoIP remoting protocol technology and HP Anyw
 
 This repository contains a collection of Terraform scripts for demonstrating how to deploy Anyware Connectors in a user's Azure environments. __Note: These scripts are suitable for creating reference deployments for demonstration, evaluation, or development purposes. The infrastructure created may not meet the reliability, availability, or security requirements of your organization.__
 
-![single-connector diagram](/terraform-deployments/docs/png/HP-Anyware-architecture.png)
+<img src="/terraform-deployments/docs/png/HP-Anyware-architecture.png" width="90%" height="90%" title="Single Connector Terraform Deployment">
 
-# Anyware-Manager Stand Alone Deployments 
+# HP Anyware Manager as a Service (AWM SaaS) Deployments
+  
+  ### AWM SaaS with Local Domain Controller (AWM SaaS + DC)
+  - Single-Connector AWM SaaS + DC Deployment  
+      - [Terrafrom script for Single Connector](/terraform-deployments/docs/README-azure-single-connector.md)  
+      - [Quickstart Python script for Single Connector](/terraform-deployments/docs/README-azure-quickstart-single-connector.md)  
+  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer-one-ip.md)
+  - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
+     
+  ### How to Start...
+  - [HP Anyware Onboarding Documentation](/terraform-deployments/docs/README-azure-HP-anyware-onboard.md)
+  - [How to setup Terraform variables for AWM SaaS](/terraform-deployments/docs/terraform-config-step-by-step.md)
+  
+  ### Reference 
+  - [How to install AWM SaaS + AAD DS](/terraform-deployments/docs/README-azure-casm-aadds.md)
+  - [How to install Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
+  - [Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)
+  
+# HP Anyware Manager Stand Alone Deployments
 
   - Single Connector Deployment
     - [AWM + AWC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-single-connector.md)
@@ -17,45 +35,10 @@ This repository contains a collection of Terraform scripts for demonstrating how
     - [AWM + nAWC + AAD Domain Services](/terraform-deployments/docs/README-azure-casm-one-ip-tf.md)
     - [AWM + nAWC + Local Domain Controller](/terraform-deployments/docs/README-azure-cas-mgr-multi-region-traffic-manager.md)
 
-# Anyware Manager As A Service Deployments
-  
-  ### AWM SaaS with Local Domain Controller (AWM SaaS + DC)
-  - [Single-Connector Deployment](/terraform-deployments/docs/README-azure-single-connector.md)
-  - [Load Balancer with Multi-Connector Deployment](/terraform-deployments/docs/README-azure-load-balancer-one-ip.md)
-  - [Multi Region Multi LB Deployment](/terraform-deployments/docs/README-azure-multi-region-traffic-manager.md)
-
-  ### QuickStart for AWM SaaS (Python script for creating AWM SaaS + DC)
-  - [Quickstart Deployment AWM As A Service](/terraform-deployments/docs/README-azure-quickstart-single-connector.md)
- 
-  ### FAQ: How to install AAD DS and Local License Server
-  - [AWM (AADDS) Deployment](/terraform-deployments/docs/README-azure-casm-aadds.md)
-  - [Local License Server (Single-Connector) Deployment](/terraform-deployments/docs/README-azure-lls-single-connector.md)
-
-  ### Reference
-  - [Step-by-Step SaaS Deployment: Terraform Variables](/terraform-deployments/docs/terraform-config-step-by-step.md)
-
-  ### Appendix
-  - [Current VM sizes supported by PCoIP Graphics Agents](/terraform-deployments/docs/README-azure-vm-appendix.md)
 
 
 # AWS & GCP Deployments
 - [Amazon Web Services](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/aws/README.md)
 - [Google Cloud Platform](https://github.com/teradici/cloud_deployment_scripts/blob/master/docs/gcp/README.md)
 
-# Directory structure
-## deployments/
-The top level terraform scripts that create specific deployments.
 
-## docs/
-Description and instructions for different deployments and architectures.
-
-## modules/
-The building blocks of deployments, e.g. a Domain Controller, an Anyware
-Connector, a Workstation, etc.
-
-## tools/
-Various scripts to help with Terraform deployments.  e.g. a Python script to
-generate random users for an Active Directory in a CSV file.
-
-# Maintainer
-If any security issues or bugs are found, or if there are feature requests, please contact support at support@teradici.com

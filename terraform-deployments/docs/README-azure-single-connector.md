@@ -1,7 +1,8 @@
-# Single-Connector Deployment
+# Single-Connector Terraform Deployment
 
 **Objective**: The objective of this documentation is to deploy the Single Connector architecture using Anyware Manager SaaS on Azure using [**Azure Cloud Shell**](https://portal.azure.com/#cloudshell/) (ACS).
 
+<img src="/terraform-deployments/docs/png/HPAnyWareArch1.png" title="single-connector diagram" width="70%" height="70%">
 
 ## Table of Contents
 1. [Single-Connector Architecture](#1-single-connector-architecture)
